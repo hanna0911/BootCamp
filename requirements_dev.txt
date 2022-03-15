@@ -1,7 +1,12 @@
 -r requirements.txt
 
 coverage
-pytest
-
+pytest~=6.2.4
+pytest-html
+pytest-xdist
+pytest-ordering
+pytest-rerunfailures
+allure-pytest
+pyyaml~=5.4.1
 pycodestyle
 pylint
