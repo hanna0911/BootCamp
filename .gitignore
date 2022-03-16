@@ -21,3 +21,5 @@ xunit-reports/
 **/.DS_Store
 .idea
 
+*.sqlite3
+
