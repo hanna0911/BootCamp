@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'test',  # 数据库名称
         'USER': 'root',  # 数据库登录用户名
         'PASSWORD': 'ohph8iew5uiseiSeeQuuufee4Wai7thi',  # 密码
-        'HOST': 'data.WeWriteBugs.secoder.net',  # 数据库主机IP，如保持默认，则为127.0.0.1
+        'HOST': 'data.WeWriteBugs.secoder.local',  # 数据库主机IP，如保持默认，则为127.0.0.1
         'PORT': 3306,  # 数据库端口号，如保持默认，则为3306
     }
 }
