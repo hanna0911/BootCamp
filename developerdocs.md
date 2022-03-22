@@ -48,4 +48,4 @@ pip install -r requirements_dev.txt
 ## 注意事项
 
 1. 项目对风格检查有严格要求, 在每次push前, 都要使用如下两个命令确定代码风格正确`pycodestyle api`, `pylint api`;其中api是项目文件夹, 在未来项目扩展时, 这些参数应当相应扩增。
-2. 
+2. 项目设置采用部署和开发分离的方式构建的, 在本地开发情况下, 使用的setting文件是`backend.setting.py`, 在部署环境下, 使用的setting文件是`backend.deploy.py`,在修改设置时需要注意。

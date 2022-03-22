@@ -6,7 +6,13 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+    # 如果是开发环境,用开发环境的设置文件
+    if os.environ.get("DEPLOY"):
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.deploy')
+    else:
+        # 如果是本地开发,用本地的设置文件
+        os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'backend.settings')
+
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
