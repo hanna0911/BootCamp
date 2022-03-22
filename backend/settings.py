@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'api'
 ]
 
 MIDDLEWARE = [
@@ -70,10 +71,21 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 DATABASES = {
+    # 方法一
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
+        'NAME': 'test',  # 数据库名称
+        'USER': 'root',  # 数据库登录用户名
+        'PASSWORD': 'ohph8iew5uiseiSeeQuuufee4Wai7thi',  # 密码
+        'HOST': 'data.WeWriteBugs.secoder.net',  # 数据库主机IP，如保持默认，则为127.0.0.1
+        'PORT': 3306,  # 数据库端口号，如保持默认，则为3306
     }
 }
 
