@@ -1,13 +1,28 @@
-# from django.shortcuts import render
 """
 暂行的一部分接口文件,之后开始写接口后按接口分类进行文件划分
 目前接口：Login登录，Join注册
 """
+# from django.shortcuts import render
+from django.http import HttpRequest, HttpResponse, JsonResponse
+from .models import User
+import json
+
+
 # Create your views here.
 
+def test(request: HttpRequest):
+    """
+    for test
+    :param request:
+    :return:
+    """
+    if request.method == "GET":
+        print("hello")
+    user = User(name="hello")
+    user.save()
+    out = User.objects.all().first()
+    return HttpResponse("ok,"+out.name)
 
-from django.http import JsonResponse
-import json
 
 def gen_response(code: int, data: str):
     return JsonResponse({

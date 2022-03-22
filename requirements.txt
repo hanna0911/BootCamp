@@ -4,3 +4,4 @@ requests~=2.25.1
 jsonpath~=0.82
 openpyxl~=3.0.7
 pymysql==1.0.2
+mysqlclient
