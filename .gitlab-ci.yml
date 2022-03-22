@@ -41,9 +41,9 @@ style-test:
   before_script:
     - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements_dev.txt
   script:
-    - pycodestyle api
+    - pycodestyle api/*.py
     - PYCODESTYLE_RET=$?
-    - pylint api
+    - pylint api/*.py
     - PYLINT_RET=$?
     - if [ $PYCODESTYLE_RET \> 0 ]; then exit $PYCODESTYLE_RET; fi;
     - exit $PYLINT_RET

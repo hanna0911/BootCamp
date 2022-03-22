@@ -14,6 +14,9 @@ def test(request: HttpRequest):
     :param request:
     :return:
     """
+    if request.method == "GET":
+        print("hello")
     user = User(name="hello")
     user.save()
-    return HttpResponse("ok")
+    out = User.objects.all().first()
+    return HttpResponse("ok,"+out.name)

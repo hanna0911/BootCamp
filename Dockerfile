@@ -10,7 +10,7 @@ RUN pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements.txt
 COPY . $HOME
 
 EXPOSE 80
-
 ENV PYTHONUNBUFFERED=true
+ENV DEPLOY=1
 
 CMD ["/bin/sh", "config/run.sh"]
