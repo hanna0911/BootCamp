@@ -20,6 +20,5 @@ from api import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("test/", views.test),
     path('', include("api.urls")),  # 暂时全部用api存储接口，后续请按照功能的不同类进行分类
 ]

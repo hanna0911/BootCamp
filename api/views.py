@@ -5,26 +5,13 @@
 # from django.shortcuts import render
 import json
 from django.http import HttpRequest, HttpResponse, JsonResponse
-from .models import User
+from .models import PrivateInfo
 
 
 # Create your views here.
 
-def test(request: HttpRequest):
-    """
-    for test
-    :param request:
-    :return:
-    """
-    if request.method == "GET":
-        print("hello")
-    user = User(name="hello")
-    user.save()
-    out = User.objects.all().first()
-    return HttpResponse("ok,"+out.name)
 
-
-def gen_response(code: int, data: str):
+def gen_response(code: int, data):
     '''
     for generating JsonResponse
     :param code, data
@@ -36,22 +23,28 @@ def gen_response(code: int, data: str):
     }, status=code)
 
 
-def login(request):  # 登录
+def login(request: HttpRequest):  # 登录
     '''
     recieve post '/login' from frontend
     request.body: username, password
     '''
     try:
         data = json.loads(request.body)
+        print(data)
     except Exception:
         return gen_response(400, 'Load json request faile')
 
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    print(username, password)  # 加密后的username和password
-    return_message = {"result": "success", "message": "login successful"}
-    return gen_response(200, return_message)  # 先暂时全部返回True
+    if len(PrivateInfo.objects.all().filter(userid__exact=username)) == 0:
+        return gen_response(400, {"result": "failure", "message": "user not found"})
+    elif PrivateInfo.objects.all().filter(userid__exact=username).first().password != password:
+        return gen_response(400, {"result": "failure", "message": "wrong password"})
+    else:
+        print(username, password)  # 加密后的username和password
+        return_message = {"result": "success", "message": "login successful"}
+        return gen_response(200, return_message)  # 先暂时全部返回True
 
 
 def join(request):  # 注册
@@ -69,5 +62,11 @@ def join(request):  # 注册
     password = data.get('password')
     personal_info = data.get('personal_info')
     print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
+    # 检查用户名重复
+    if len(PrivateInfo.objects.all().filter(userid__exact=username)) > 0:
+        return gen_response(400, {"result": "failure", "message": "duplicate username"})
+    new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
+                             city=personal_info["city"], password=password, userid=username)
+    new_person.save()
     return_message = {"result": "success", "message": "registration successful"}
     return gen_response(200, return_message)  # 先暂时全部返回True

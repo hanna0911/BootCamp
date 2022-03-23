@@ -17,6 +17,7 @@ venv.bak/
 .pytest_cache/
 coverage-reports/
 xunit-reports/
+htmlcov/
 
 **/.DS_Store
 .idea
