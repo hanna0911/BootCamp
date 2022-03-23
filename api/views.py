@@ -37,9 +37,9 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    if len(PrivateInfo.objects.all().filter(userid__exact=username)) == 0:
+    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {"result": "failure", "message": "user not found"})
-    elif PrivateInfo.objects.all().filter(userid__exact=username).first().password != password:
+    elif PrivateInfo.objects.all().filter(username__exact=username).first().password != password:
         return gen_response(400, {"result": "failure", "message": "wrong password"})
     else:
         print(username, password)  # 加密后的username和password
@@ -63,10 +63,10 @@ def join(request):  # 注册
     personal_info = data.get('personal_info')
     print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
     # 检查用户名重复
-    if len(PrivateInfo.objects.all().filter(userid__exact=username)) > 0:
+    if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
         return gen_response(400, {"result": "failure", "message": "duplicate username"})
     new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
-                             city=personal_info["city"], password=password, userid=username)
+                             city=personal_info["city"], password=password, username=username)
     new_person.save()
     return_message = {"result": "success", "message": "registration successful"}
     return gen_response(200, return_message)  # 先暂时全部返回True
