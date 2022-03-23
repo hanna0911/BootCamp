@@ -3,8 +3,6 @@
 """
 from django.test import TestCase
 from .models import PrivateInfo
-
-
 # Create your tests here.
 
 class MessageModelTests(TestCase):
