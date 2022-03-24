@@ -15,8 +15,8 @@ venv.bak/
 # Unittest / Coverage report
 .coverage
 .pytest_cache/
-coverage-reports/
-xunit-reports/
+#coverage-reports/
+#xunit-reports/
 htmlcov/
 
 **/.DS_Store

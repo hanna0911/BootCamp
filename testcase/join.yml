@@ -1,0 +1,31 @@
+- name: 注册成功测试
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: Test@123
+      personal_info:
+        city: 北京
+        department: 管理部门
+        name: test
+    headers:
+      X-AUTH: ${access_token}}
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 重复注册报错
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: Test@123
+      personal_info:
+        city: 北京
+        department: 管理部门
+        name: test
+    headers:
+      X-AUTH: ${access_token}}
+  validate:
+    - equals: { status_code: 400 }

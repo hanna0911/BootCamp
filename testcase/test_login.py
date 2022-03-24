@@ -10,8 +10,12 @@ from utils.engine import my_engine
 # from api.models import PrivateInfo
 
 class TestLogin:
-    def test_login(self):
-        my_engine.test("/testcase/test.yml")
+    pass
+    # @pytest.mark.order(1)
+    # def test_join(self):
+    #     my_engine.test("/testcase/join.yml")
+    # def test_login(self):
+    #     my_engine.test("/testcase/login.yml")
 
 #
 # def setup_module():

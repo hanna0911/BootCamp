@@ -23,6 +23,11 @@ def gen_response(code: int, data):
     }, status=code)
 
 
+def init_test(req: HttpRequest):
+    PrivateInfo.objects.get(username__exact="testid").delete()
+    return gen_response(200, "ok")
+
+
 def login(request: HttpRequest):  # 登录
     '''
     recieve post '/login' from frontend

@@ -7,6 +7,7 @@ pytest-xdist
 pytest-ordering
 pytest-rerunfailures
 allure-pytest
+pytest-django
 pyyaml~=5.4.1
 pycodestyle
 pylint

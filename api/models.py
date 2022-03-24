@@ -22,18 +22,18 @@ class PrivateInfo(models.Model):
     username = models.CharField(max_length=NAME_LEN)  # 用户用于登录的用户名
     avatar = models.ImageField()  # 用户头像
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
-    entryTime = models.DateTimeField()  # 用户入职时间
+    entryTime = models.DateTimeField(null=True)  # 用户入职时间
     employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型
-    graduationTime = models.DateTimeField()  # 毕业时间
+    graduationTime = models.DateTimeField(null=True)  # 毕业时间
     registrationTime = models.DateTimeField(auto_now_add=True)  # 注册时间
     superior = models.CharField(max_length=NAME_LEN)  # 直属上级
     detail = models.CharField(max_length=1000)  # 入职情况和详细信息
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
-    isAdmin = models.BooleanField()  # 是否是管理员
-    isTeacher = models.BooleanField()  # 是否是老师
-    isHRBP = models.BooleanField()  # 是否是HRBP
-    isNew = models.BooleanField()  # 是否是新人
+    isAdmin = models.BooleanField(default=False)  # 是否是管理员
+    isTeacher = models.BooleanField(default=False)  # 是否是老师
+    isHRBP = models.BooleanField(default=False)  # 是否是HRBP
+    isNew = models.BooleanField(default=False)  # 是否是新人
 
 
 class ProgramTable(models.Model):
