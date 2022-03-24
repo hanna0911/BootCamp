@@ -28,6 +28,7 @@ class Engine:
             if "equals" in validate[i].keys():
                 equ_assert = validate[i]["equals"]
                 if "status_code" in equ_assert.keys():
+                    print(res.status_code, "???")
                     assert res.status_code == equ_assert["status_code"]
 
 

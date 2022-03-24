@@ -1,7 +1,7 @@
-- name: 查询所有薪资配置规则数据
+- name: 登录成功测试
   request:
     method: POST
-    url: api/dytin/customSalaryConfigRule/queryAll
+    url: /login
     data:
       name: test
       username: testid
