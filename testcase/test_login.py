@@ -1,12 +1,18 @@
 """
 测试登录
 """
-# import pytest
+import pytest
+from utils.engine import my_engine
+
 # import requests
 # from requests import Response
 # from requests import request
 # from api.models import PrivateInfo
-#
+
+class TestLogin:
+    def test_login(self):
+        my_engine.test("/testcase/test.yml")
+
 #
 # def setup_module():
 #     user = PrivateInfo.objects.create(name="test", userid="testid",

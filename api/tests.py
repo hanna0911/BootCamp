@@ -7,7 +7,7 @@ from .models import PrivateInfo
 
 class MessageModelTests(TestCase):
     def setUp(self):
-        user = PrivateInfo.objects.create(name="test", userid="testid",
+        user = PrivateInfo.objects.create(name="test", username="testid",
                                           password="8776f108e247ab1e2b323042c049c266407c81fbad41bde1e8dfc1bb66fd267e",
                                           city="北京", dept="管理部门")
         user.save()

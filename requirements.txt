@@ -6,4 +6,4 @@ openpyxl~=3.0.7
 pymysql==1.0.2
 mysqlclient
 Pillow
-requests
+traceback

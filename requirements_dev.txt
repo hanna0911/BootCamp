@@ -10,3 +10,4 @@ allure-pytest
 pyyaml~=5.4.1
 pycodestyle
 pylint
+logging
