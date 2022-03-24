@@ -101,3 +101,39 @@ class CoursewareTable(models.Model):
     cover = models.ImageField()  # 封面
     uploadTime = models.DateTimeField(auto_now_add=True)  # 上传时间
     url = models.CharField(max_length=LONG_INFO_LEN)  # 课件地址
+
+
+class UserProgramTable(models.Model):
+    """
+    用户-Program（一个Program是若干课程、任务和考试打成的包）关系表
+    """
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 本记录所属用户
+    program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
+    finished = models.BooleanField(default=False)  # 是否完成
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
+    score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
+
+
+class UserEventTable(models.Model):
+    """
+    用户-培训内容（包括单个课程、任务和考试）关系表
+    """
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)
+    event = models.ForeignKey(EventTable, on_delete=models.PROTECT)
+    finished = models.BooleanField(default=False)
+    finishedSubUnitCount = models.IntegerField(default=0)
+    beginTime = models.DateTimeField(auto_now_add=True)
+    endTime = models.DateTimeField()
+    score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Event有效）
+
+
+class UserLessonTable(models.Model):
+    """
+    用户-课程Lesson（Lesson是Course的子项）
+    """
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)
+    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)
+    finished = models.BooleanField(default=False)
+    beginTime = models.DateTimeField(auto_now_add=True)
+    endTime = models.DateTimeField()
