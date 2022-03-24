@@ -26,6 +26,19 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
+# SESSIONS: session related settings
+# TODO: 在改成https之后，需要修改SESSION_COOKIE_SECURE为True
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 使用的是session的数据库实现，也可改成缓存
+SESSION_COOKIE_NAME = 'SessionID'
+SESSION_COOKIE_PATH = "/"
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_SECURE = False  # 如果改成True，则是用https传输cookie（后期转成https的时候需要修改）
+SESSION_COOKIE_HTTPONLY = True  # cookie只支持http传输（转成https之后可能也要改）
+SESSION_COOKIE_AGE = 3600  # cookie中session有效期（单位为秒）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 关闭浏览器session自动过期
+SESSION_SAVE_EVERY_REQUEST = False  # 只有改变了session相关变量的request才会重新保存session
+
+
 # Application definition
 
 INSTALLED_APPS = [

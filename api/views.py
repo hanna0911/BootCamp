@@ -12,11 +12,11 @@ from .models import PrivateInfo
 
 
 def gen_response(code: int, data):
-    '''
+    """
     for generating JsonResponse
     :param code, data
     :return JsonResponse
-    '''
+    """
     return JsonResponse({
         'code': code,
         'data': data
@@ -24,15 +24,19 @@ def gen_response(code: int, data):
 
 
 def init_test(req: HttpRequest):
+    """
+    初始化测试
+    """
     PrivateInfo.objects.get(username__exact="testid").delete()
     return gen_response(200, "ok")
 
 
 def login(request: HttpRequest):  # 登录
-    '''
-    recieve post '/login' from frontend
+    """
+    receive post '/login' from frontend
     request.body: username, password
-    '''
+    保存相应的session信息用来完成登录的持久化
+    """
     try:
         data = json.loads(request.body)
         print(data)
@@ -48,8 +52,18 @@ def login(request: HttpRequest):  # 登录
         return gen_response(400, {"result": "failure", "message": "wrong password"})
     else:
         print(username, password)  # 加密后的username和password
+        # 设置session信息并保存
+        request.session['username'] = username  # 在session中保存username
+        # TODO: 在身份系统实现之后引入身份的存储
+        session_key = request.session.session_key
+        # 返回成功信息
         return_message = {"result": "success", "message": "login successful"}
-        return gen_response(200, return_message)  # 先暂时全部返回True
+        response = JsonResponse({
+            'code': 200,
+            'data': return_message
+        })
+        response.set_cookie("SessionID", session_key)
+        return response
 
 
 def join(request):  # 注册
