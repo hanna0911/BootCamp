@@ -1,6 +1,8 @@
+"""
+用于测试远程服务的引擎
+"""
 from requests import request
 from utils.reader import read_testcase_yaml, analysis_parameters
-import json
 
 
 class Engine:

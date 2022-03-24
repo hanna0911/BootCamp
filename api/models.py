@@ -45,7 +45,7 @@ class ProgramTable(models.Model):
     author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 项目作者或者管理者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 项目简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
-    subItemNum = models.IntegerField()  # 子项目数
+    contentCount = models.IntegerField()  # 子项目数
     beginTime = models.DateTimeField()  # 项目开始时间
     finishTime = models.DateTimeField()  # 项目结束时间
     deadline = models.DateTimeField()  # 项目对于个人来书都ddl
@@ -54,7 +54,7 @@ class ProgramTable(models.Model):
     releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
 
 
-class EventTable(models.Model):
+class ContentTable(models.Model):
     """
     包括course exam task
     """
@@ -63,7 +63,7 @@ class EventTable(models.Model):
     author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, blank=True)  # 事件作者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
-    subItemNum = models.IntegerField()  # 子项目数
+    lessonCount = models.IntegerField()  # 子项目数
     recommendedTime = models.IntegerField()  # 建议用时
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
@@ -83,7 +83,7 @@ class LessonTable(models.Model):
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课堂id
     name = models.CharField(max_length=NAME_LEN)  # 课堂名称
     author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, blank=True)  # 课堂作者
-    event = models.ForeignKey(EventTable, on_delete=models.CASCADE)  # 课堂所属的事件或者大课程
+    content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 课堂所属的事件或者大课程
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 课堂介绍
     recommendedTime = models.IntegerField()  # 建议用时
     cover = models.ImageField()  # 封面
@@ -96,7 +96,7 @@ class CoursewareTable(models.Model):
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课件id
     lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 所属课堂
-    event = models.ForeignKey(EventTable, on_delete=models.PROTECT)  # 所属课程或事件
+    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
     cover = models.ImageField()  # 封面
     uploadTime = models.DateTimeField(auto_now=True)  # 上传时间
@@ -115,25 +115,25 @@ class UserProgramTable(models.Model):
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
-class UserEventTable(models.Model):
+class UserContentTable(models.Model):
     """
     用户-培训内容（包括单个课程、任务和考试）关系表
     """
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)
-    event = models.ForeignKey(EventTable, on_delete=models.PROTECT)
-    finished = models.BooleanField(default=False)
-    finishedSubUnitCount = models.IntegerField(default=0)
-    beginTime = models.DateTimeField(auto_now_add=True)
-    endTime = models.DateTimeField()
-    score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Event有效）
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
+    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
+    finished = models.BooleanField(default=False)  # 是否结束
+    finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    endTime = models.DateTimeField()  # 结束时间
+    score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
 
 
 class UserLessonTable(models.Model):
     """
     用户-课程Lesson（Lesson是Course的子项）
     """
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)
-    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)
-    finished = models.BooleanField(default=False)
-    beginTime = models.DateTimeField(auto_now_add=True)
-    endTime = models.DateTimeField()
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
+    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 课程
+    finished = models.BooleanField(default=False)  # 是否结束
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    endTime = models.DateTimeField()  # 结束时间

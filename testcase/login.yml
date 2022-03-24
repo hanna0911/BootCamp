@@ -9,3 +9,27 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: 密码错误测试
+  request:
+    method: POST
+    url: /login
+    data:
+      name: test
+      username: testid
+      password: 1111
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 用户不存在测试
+  request:
+    method: POST
+    url: /login
+    data:
+      name: test
+      username: 12345678
+      password: 1111
+    headers:
+  validate:
+    - equals: { status_code: 400 }
