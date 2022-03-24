@@ -25,7 +25,7 @@ class PrivateInfo(models.Model):
     entryTime = models.DateTimeField(null=True)  # 用户入职时间
     employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型
     graduationTime = models.DateTimeField(null=True)  # 毕业时间
-    registrationTime = models.DateTimeField(auto_now_add=True)  # 注册时间
+    registrationTime = models.DateTimeField(auto_now=True)  # 注册时间
     superior = models.CharField(max_length=NAME_LEN)  # 直属上级
     detail = models.CharField(max_length=1000)  # 入职情况和详细信息
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
@@ -51,7 +51,7 @@ class ProgramTable(models.Model):
     deadline = models.DateTimeField()  # 项目对于个人来书都ddl
     audience = models.IntegerField()  # 项目受众
     cover = models.ImageField()  # 项目封面
-    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
 
 
 class EventTable(models.Model):
@@ -73,7 +73,7 @@ class EventTable(models.Model):
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
     programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
-    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
 
 
 class LessonTable(models.Model):
@@ -87,7 +87,7 @@ class LessonTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 课堂介绍
     recommendedTime = models.IntegerField()  # 建议用时
     cover = models.ImageField()  # 封面
-    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
 
 
 class CoursewareTable(models.Model):
@@ -99,5 +99,5 @@ class CoursewareTable(models.Model):
     event = models.ForeignKey(EventTable, on_delete=models.PROTECT)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
     cover = models.ImageField()  # 封面
-    uploadTime = models.DateTimeField(auto_now_add=True)  # 上传时间
+    uploadTime = models.DateTimeField(auto_now=True)  # 上传时间
     url = models.CharField(max_length=LONG_INFO_LEN)  # 课件地址

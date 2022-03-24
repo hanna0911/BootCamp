@@ -1,0 +1,13 @@
+- classname: private
+  name: test
+  city: 北京
+  dept: 管理部门
+  password: 1234
+  username: testis
+  bio: 我爱软工
+  entryTime: 2020-12-12 00:00:00
+  employeeType: 长期
+  graduationTime: 2020-12-12 00:00:00
+  superior: superior
+  detail: 很牛
+  historicalMembers:
