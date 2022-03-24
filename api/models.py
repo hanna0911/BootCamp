@@ -27,7 +27,7 @@ class PrivateInfo(models.Model):
     graduationTime = models.DateTimeField()  # 毕业时间
     registrationTime = models.DateTimeField(auto_now_add=True)  # 注册时间
     superior = models.CharField(max_length=NAME_LEN)  # 直属上级
-    detail = models.CharField(1000)  # 入职情况和详细信息
+    detail = models.CharField(max_length=1000)  # 入职情况和详细信息
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
     isAdmin = models.BooleanField()  # 是否是管理员
@@ -67,11 +67,11 @@ class EventTable(models.Model):
     recommendedTime = models.IntegerField()  # 建议用时
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
-    class_ = models.IntegerField()  # 事件类型
+    type = models.IntegerField()  # 事件类型
     isTemplate = models.BooleanField()  # 是否是模板
     taskType = models.IntegerField()  # 任务类型(针对task类)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
-    link = models.CharField(LONG_INFO_LEN)  # 任务链接
+    link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
     programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
 
