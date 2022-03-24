@@ -19,7 +19,7 @@ class PrivateInfo(models.Model):
     city = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在城市
     dept = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在部门
     password = models.CharField(max_length=LONG_INFO_LEN)  # 用户密码(加密后)
-    username = models.CharField(max_length=SHORT_INFO_LEN)  # 用户用于登录的用户名
+    username = models.CharField(max_length=NAME_LEN)  # 用户用于登录的用户名
     avatar = models.ImageField()  # 用户头像
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
     entryTime = models.DateTimeField()  # 用户入职时间
@@ -95,8 +95,8 @@ class CoursewareTable(models.Model):
     课件库
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课件id
-    lesson = models.ForeignKey(LessonTable, on_delete=models.SET_NULL)  # 所属课堂
-    event = models.ForeignKey(EventTable, on_delete=models.SET_NULL)  # 所属课程或事件
+    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 所属课堂
+    event = models.ForeignKey(EventTable, on_delete=models.PROTECT)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
     cover = models.ImageField()  # 封面
     uploadTime = models.DateTimeField(auto_now_add=True)  # 上传时间
