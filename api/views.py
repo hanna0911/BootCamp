@@ -8,6 +8,7 @@ from django.http import HttpRequest, HttpResponse, JsonResponse
 from .models import PrivateInfo
 import string
 import re
+import hashlib
 
 
 # Create your views here.
@@ -65,6 +66,16 @@ def check_password_format(password: string):
         return False
 
 
+def encrypt(cleartext: string):
+    """
+    SHA256 Encryption Function
+    """
+    encoder = hashlib.sha256()
+    encoder.update(cleartext)
+    ret = encoder.hexdigest()
+    return ret
+
+
 def login(request: HttpRequest):  # 登录
     """
     receive post '/login' from frontend
@@ -101,10 +112,10 @@ def login(request: HttpRequest):  # 登录
 
 
 def join(request):  # 注册
-    '''
+    """
     recieve post '/join' from frontend
     request.body: username, password, personal_info
-    '''
+    """
     try:
         data = json.loads(request.body)
     except Exception:
