@@ -9,7 +9,7 @@ from django.db import models
 NAME_LEN = 50
 SHORT_INFO_LEN = 20
 LONG_INFO_LEN = 200
-
+COMMENT_LEN = 500
 
 class PrivateInfo(models.Model):
     """
@@ -26,17 +26,38 @@ class PrivateInfo(models.Model):
     detail = models.CharField(max_length=1000)  # 入职情况和详细信息
     leader = models.CharField(max_length=NAME_LEN)  # 直属上级
     registrationDate = models.DateTimeField(auto_now_add=True)  # 注册时间
+    employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型，例如长期工、实习工等
     # 用户身份相关
-    employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型
     isAdmin = models.BooleanField(default=False)  # 是否是管理员
     isTeacher = models.BooleanField(default=False)  # 是否是老师
     isHRBP = models.BooleanField(default=False)  # 是否是HRBP
     isNew = models.BooleanField(default=False)  # 是否是新人
     # 新人相关
-    graduationDate = models.DateTimeField(null=True)  # 毕业时间
+    newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
+    newcomerIsGraduate = models.BooleanField(default=False)  # 新人是否已经毕业
+    newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
     # 导师相关
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
+    teacherNominationDate = models.DateField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
+    teacherIsExamined = models.BooleanField(default=False)  # 导师是否被hrbp审核
+    teacherExaminedDate = models.DateField(null=True)  # 导师被hrbp审核通过时间
+    teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
+    teacherDutyDate = models.DateField(null=True)  # 导师上岗时间
+    teacherScore = models.FloatField()  # 老师被新人评价的平均分数
+
+
+class TeacherNewcomerTable(models.Model):
+    """
+    描述导师和新人间关系的表
+    """
+    relationID = models.AutoField(primary_key=True)  # 自增主键
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的新人
+    teacherScore = models.FloatField()  # 该老师被该新人评价的分数
+    newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
+    newcomerScore = models.FloatField()  # 该新人被该老师评价的分数
+    teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
 
 
 class ProgramTable(models.Model):
