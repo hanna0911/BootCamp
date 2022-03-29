@@ -55,9 +55,22 @@ def create_data(path: str):
                 isHRBP=info["isHRBP"],
                 isNew=info["isNew"]
             )
+        elif info["classname"].lower() == "program":
+            ProgramTable.objects.create(
+                id=info["id"],
+                name=info["name"],
+                author=info["author"],
+                intro=info["intro"],
+                tag=info["tag"],
+                contentCount=info["contentCount"],
+                beginTime=info["beginTime"],
+                finishTime=info["finishTime"],
+                deadline=info["deadline"],
+                audience=info["audience"],
+                cover=info["cover"],
+            )
 
-
-if __name__ == '__main__':
-    info = read_testcase_yaml("/testcase/test.yml")
-    gen = analysis_parameters(info)
-    next(gen)
+    if __name__ == '__main__':
+        info = read_testcase_yaml("/testcase/test.yml")
+        gen = analysis_parameters(info)
+        next(gen)
