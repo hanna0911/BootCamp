@@ -149,6 +149,7 @@ class UserProgramTable(models.Model):
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
     deadline = models.DateTimeField()  # 项目对于个人来说的ddl
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 该program的指派人
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
@@ -163,6 +164,7 @@ class UserContentTable(models.Model):
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 该content的指派人
     # course相关
     isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
