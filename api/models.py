@@ -66,6 +66,7 @@ class ContentTable(models.Model):
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
     type = models.IntegerField()  # 事件类型
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     isTemplate = models.BooleanField()  # 是否是模板
     taskType = models.IntegerField()  # 任务类型(针对task类)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
@@ -136,6 +137,7 @@ class UserContentTable(models.Model):
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
+    examUsedTime = models.TimeField()  # 个人考试用时
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
 
