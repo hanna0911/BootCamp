@@ -15,25 +15,28 @@ class PrivateInfo(models.Model):
     """
     user table
     """
+    username = models.CharField(max_length=NAME_LEN)  # 用户用于登录的用户名
+    password = models.CharField(max_length=LONG_INFO_LEN)  # 用户密码(加密后)
     name = models.CharField(max_length=NAME_LEN)  # 用户的真实姓名
     city = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在城市
     dept = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在部门
-    password = models.CharField(max_length=LONG_INFO_LEN)  # 用户密码(加密后)
-    username = models.CharField(max_length=NAME_LEN)  # 用户用于登录的用户名
     avatar = models.ImageField()  # 用户头像
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
-    entryTime = models.DateTimeField(null=True)  # 用户入职时间
-    employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型
-    graduationTime = models.DateTimeField(null=True)  # 毕业时间
-    registrationTime = models.DateTimeField(auto_now=True)  # 注册时间
-    superior = models.CharField(max_length=NAME_LEN)  # 直属上级
+    joinDate = models.DateTimeField(null=True)  # 用户入职时间
     detail = models.CharField(max_length=1000)  # 入职情况和详细信息
-    historicalMembers = models.IntegerField(default=0)  # 历史带新人数
-    currentMembers = models.IntegerField(default=0)  # 当前带新人数
+    leader = models.CharField(max_length=NAME_LEN)  # 直属上级
+    registrationDate = models.DateTimeField(auto_now_add=True)  # 注册时间
+    # 用户身份相关
+    employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型
     isAdmin = models.BooleanField(default=False)  # 是否是管理员
     isTeacher = models.BooleanField(default=False)  # 是否是老师
     isHRBP = models.BooleanField(default=False)  # 是否是HRBP
     isNew = models.BooleanField(default=False)  # 是否是新人
+    # 新人相关
+    graduationDate = models.DateTimeField(null=True)  # 毕业时间
+    # 导师相关
+    historicalMembers = models.IntegerField(default=0)  # 历史带新人数
+    currentMembers = models.IntegerField(default=0)  # 当前带新人数
 
 
 class ProgramTable(models.Model):
@@ -46,12 +49,10 @@ class ProgramTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 项目简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
-    beginTime = models.DateTimeField()  # 项目开始时间
-    finishTime = models.DateTimeField()  # 项目结束时间
-    deadline = models.DateTimeField()  # 项目对于个人来书都ddl
+    recommendTime = models.DateTimeField()  # 推荐（默认）完成时间，用于生成默认ddl
     audience = models.IntegerField()  # 项目受众
     cover = models.ImageField()  # 项目封面
-    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
+    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
 
 
 class ContentTable(models.Model):
@@ -63,17 +64,20 @@ class ContentTable(models.Model):
     author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, blank=True)  # 事件作者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
-    lessonCount = models.IntegerField()  # 子项目数
-    recommendedTime = models.IntegerField()  # 建议用时
+    recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
     type = models.IntegerField()  # 事件类型
     isTemplate = models.BooleanField()  # 是否是模板
+    programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
+    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    # course相关
+    lessonCount = models.IntegerField()  # lesson数
+    # exam相关
+    # task相关
     taskType = models.IntegerField()  # 任务类型(针对task类)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
-    programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
-    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
 
 
 class LessonTable(models.Model):
@@ -87,7 +91,7 @@ class LessonTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 课堂介绍
     recommendedTime = models.IntegerField()  # 建议用时
     cover = models.ImageField()  # 封面
-    releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
+    releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
 
 
 class CoursewareTable(models.Model):
@@ -99,7 +103,7 @@ class CoursewareTable(models.Model):
     content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
     cover = models.ImageField()  # 封面
-    uploadTime = models.DateTimeField(auto_now=True)  # 上传时间
+    uploadTime = models.DateTimeField(auto_now_add=True)  # 上传时间
     url = models.CharField(max_length=LONG_INFO_LEN)  # 课件地址
 
 
@@ -119,9 +123,11 @@ class UserProgramTable(models.Model):
     relationID = models.AutoField(primary_key=True)  # 自增主键
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 本记录所属用户
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
+    finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
-    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
+    deadline = models.DateTimeField()  # 项目对于个人来说的ddl
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
@@ -133,10 +139,16 @@ class UserContentTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
     content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
-    finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
-    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
+    deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
+    # course相关
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
+    finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
+    # exam相关
+    examUsedTime = models.TimeField()  # 个人考试用时
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
+    # task相关
 
 
 class UserLessonTable(models.Model):
@@ -147,5 +159,5 @@ class UserLessonTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
     lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
-    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
