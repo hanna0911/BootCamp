@@ -46,9 +46,7 @@ class ProgramTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 项目简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
-    beginTime = models.DateTimeField()  # 项目开始时间
-    finishTime = models.DateTimeField()  # 项目结束时间
-    deadline = models.DateTimeField()  # 项目对于个人来书都ddl
+    recommendTime = models.DateTimeField()  # 推荐（默认）完成时间，用于生成默认ddl
     audience = models.IntegerField()  # 项目受众
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now=True)  # 发布时间
@@ -119,9 +117,11 @@ class UserProgramTable(models.Model):
     relationID = models.AutoField(primary_key=True)  # 自增主键
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 本记录所属用户
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
+    finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
     beginTime = models.DateTimeField(auto_now=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
+    deadline = models.DateTimeField()  # 项目对于个人来说的ddl
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
