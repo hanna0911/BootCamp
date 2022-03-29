@@ -137,6 +137,7 @@ class UserContentTable(models.Model):
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
     beginTime = models.DateTimeField(auto_now=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
+    deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
 
 
