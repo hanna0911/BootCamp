@@ -1,6 +1,6 @@
-'''
+"""
 描述数据库结构的文件
-'''
+"""
 
 from django.db import models
 
@@ -103,14 +103,24 @@ class CoursewareTable(models.Model):
     url = models.CharField(max_length=LONG_INFO_LEN)  # 课件地址
 
 
+class ProgramContentTable(models.Model):
+    """
+    Program-Content对照表（考虑到不同Program可能共用一个Content）
+    """
+    relationID = models.AutoField(primary_key=True)  # 自增主键
+    program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # Program
+    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 属于这个Program的Content
+
+
 class UserProgramTable(models.Model):
     """
     用户-Program（一个Program是若干课程、任务和考试打成的包）关系表
     """
+    relationID = models.AutoField(primary_key=True)  # 自增主键
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 本记录所属用户
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
     finished = models.BooleanField(default=False)  # 是否完成
-    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
@@ -119,11 +129,12 @@ class UserContentTable(models.Model):
     """
     用户-培训内容（包括单个课程、任务和考试）关系表
     """
+    relationID = models.AutoField(primary_key=True)  # 自增主键
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
     content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
-    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
 
@@ -132,8 +143,9 @@ class UserLessonTable(models.Model):
     """
     用户-课程Lesson（Lesson是Course的子项）
     """
+    relationID = models.AutoField(primary_key=True)  # 自增主键
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
     lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
-    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
