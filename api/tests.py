@@ -3,6 +3,7 @@
 """
 from django.test import TestCase
 from utils.reader import *
+import logging
 
 
 # Create your tests here.
@@ -26,13 +27,14 @@ class Tests(TestCase):
         req = case["request"]
         validate = case["validate"]
         if req["method"].lower() == "post":
+            logging.info("posting url: {}".format(req["url"]))
             res = self.client.post(req["url"], data=req["data"], content_type="application/json")
         elif req["method"].lower() == "get":
+            logging.info("getting url: {}".format(req["url"]))
             res = self.client.get(req["url"], data=req["data"], content_type="application/json")
         else:
             print("error, invalid method!")
             return None
-
         for i in range(len(validate)):
             if "equals" in validate[i].keys():
                 equ_assert = validate[i]["equals"]
