@@ -72,7 +72,7 @@ def join(request):  # 注册
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
         return gen_response(400, {}, "duplicate username")
 
-    new_person = PrivateInfo.objects.create(name=personal_info["name"], dept=personal_info["department"],
+    new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
                                             city=personal_info["city"], password=encrypt(password),
                                             username=username)
     new_person.save()

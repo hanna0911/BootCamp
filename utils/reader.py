@@ -103,6 +103,18 @@ def create_data_yml(path: str):
 
 
 def create_data_xlsx(path: str):
+    # def write_db(path: str, model):
+    #     root = get_root_path()
+    #     df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
+    #
+    #     for i in range(len(df)):
+    #         info = df.iloc[i]
+    #         content
+    #         for j in
+    #     PrivateInfo.objects.create(
+    #         "paidhg", "username"
+    #     )
+
     root = get_root_path()
     df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
     for i in range(len(df)):

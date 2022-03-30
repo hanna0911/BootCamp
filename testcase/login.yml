@@ -3,7 +3,7 @@
     method: POST
     url: /login
     data:
-      name: admin
+      name: newtest
       username: admin
       password: Test@123
     headers:
