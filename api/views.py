@@ -6,7 +6,7 @@
 import json
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from .models import PrivateInfo
-from api_util import *
+from .api_util import *
 
 
 # Create your views here.
@@ -73,10 +73,12 @@ def join(request):  # 注册
 
     # 检查用户名格式
     if not check_username_format(username):
-        return gen_response(400, {"result": "failure", "message": "wrong username format"})
+        return gen_response(400, {}, "wrong username format")
+    elif not check_password_format(password):
+        return gen_response(400, {}, "wrong password format")
     # 检查用户名重复
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
-        return gen_response(400, {"result": "failure", "message": "duplicate username"})
+        return gen_response(400, {}, "duplicate username")
 
     new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
                              city=personal_info["city"], password=password, username=username)
@@ -87,11 +89,10 @@ def join(request):  # 注册
     # TODO: 在身份系统实现之后引入身份的存储
 
     session_key = request.session.session_key
-    print(check_username_format(username))
-    return_message = {"result": "success", "message": "registration successful"}
+    return_message = "registration successful"
     response = JsonResponse({
         'code': 200,
         'data': return_message
     })
     response.set_cookie("SessionID", session_key)
-    return response  # 先暂时全部返回True
+    return gen_response(200, {}, message=return_message)  # 先暂时全部返回True

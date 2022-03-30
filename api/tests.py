@@ -5,6 +5,8 @@ from django.test import TestCase
 from utils.reader import *
 import logging
 
+logging.basicConfig(level=logging.DEBUG)
+
 
 # Create your tests here.
 
@@ -26,21 +28,23 @@ class Tests(TestCase):
     def request(self, case: dict):
         req = case["request"]
         validate = case["validate"]
+        logging.info(case["name"])
         if req["method"].lower() == "post":
-            logging.info("posting url: {}".format(req["url"]))
+            logging.debug("posting url: {}".format(req["url"]))
             res = self.client.post(req["url"], data=req["data"], content_type="application/json")
         elif req["method"].lower() == "get":
-            logging.info("getting url: {}".format(req["url"]))
+            logging.debug("getting url: {}".format(req["url"]))
             res = self.client.get(req["url"], data=req["data"], content_type="application/json")
         else:
-            print("error, invalid method!")
+            logging.debug("invalid method")
             return None
         for i in range(len(validate)):
             if "equals" in validate[i].keys():
                 equ_assert = validate[i]["equals"]
                 if "status_code" in equ_assert.keys():
-                    print(res.status_code)
+                    logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
                     assert res.status_code == equ_assert["status_code"]
+                    logging.info("OK")
 
     def test_join(self):
         self.process("/testcase/join.yml")

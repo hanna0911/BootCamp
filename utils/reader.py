@@ -37,37 +37,49 @@ def create_data(path: str):
     for info in infos:
         if info["classname"].lower() == "privateinfo":
             PrivateInfo.objects.create(
+                password=info["password"],
+                username=info["username"],
+
                 name=info["name"],
                 city=info["city"],
                 dept=info["dept"],
-                password=info["password"],
-                username=info["username"],
                 bio=info["bio"],
-                entryTime=info["entryTime"],
-                employeeType=info["employeeType"],
-                graduationTime=info["graduationTime"],
-                superior=info["superior"],
+                joinDate=info["joinDate"],
+                joinStatus=info["joinStatus"],
                 detail=info["detail"],
-                historicalMembers=info["historicalMembers"],
-                currentMembers=info["currentMembers"],
+                leader=info["leader"],
+                registrationDate=info["registrationDate"],
+                employeeType=info["employeeType"],
+
                 isAdmin=info["isAdmin"],
                 isTeacher=info["isTeacher"],
                 isHRBP=info["isHRBP"],
-                isNew=info["isNew"]
+                isNew=info["isNew"],
+
+                newcomerStartDate=info["newcomerStartDate"],
+                newcomerIsGraduate=info["newcomerIsGraduate"],
+                newcomerGraduateDate=info["newcomerGraduateDate"],
+
+                historicalMembers=info["historicalMembers"],
+                currentMembers=info["currentMembers"],
+                teacherNominationDate=info["teacherNominationDate"],
+                teacherExaminedStatus=info["teacherExaminedStatus"],
+                teacherExaminedDate=info["teacherExaminedDate"],
+                teacherIsDuty=info["teacherIsDuty"],
+                teacherDutyDate=info["teacherDutyDate"],
+                teacherScore=info["teacherScore"],
             )
         elif info["classname"].lower() == "program":
+            author = PrivateInfo.objects.get(username__exact=info['author'])
             ProgramTable.objects.create(
                 id=info["id"],
                 name=info["name"],
-                author=info["author"],
+                author=author,
                 intro=info["intro"],
                 tag=info["tag"],
                 contentCount=info["contentCount"],
-                beginTime=info["beginTime"],
-                finishTime=info["finishTime"],
-                deadline=info["deadline"],
                 audience=info["audience"],
-                cover=info["cover"],
+                recommendTime=info["recommendTime"]
             )
 
     if __name__ == '__main__':

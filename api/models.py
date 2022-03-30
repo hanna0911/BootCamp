@@ -18,11 +18,13 @@ class PrivateInfo(models.Model):
     """
     username = models.CharField(max_length=NAME_LEN)  # 用户用于登录的用户名
     password = models.CharField(max_length=LONG_INFO_LEN)  # 用户密码(加密后)
+
     name = models.CharField(max_length=NAME_LEN)  # 用户的真实姓名
     city = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在城市
     dept = models.CharField(max_length=SHORT_INFO_LEN)  # 用户所在部门
     avatar = models.ImageField()  # 用户头像
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
+
     joinDate = models.DateTimeField(null=True)  # 用户入职时间
     joinStatus = models.IntegerField(default=0)  # 入职情况,0代表待入职,1代表在职,2代表离职
     detail = models.CharField(max_length=1000)  # 详细信息
@@ -46,7 +48,7 @@ class PrivateInfo(models.Model):
     teacherExaminedDate = models.DateField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
     teacherDutyDate = models.DateField(null=True)  # 导师上岗时间
-    teacherScore = models.FloatField()  # 老师被新人评价的平均分数
+    teacherScore = models.FloatField(default=0)  # 老师被新人评价的平均分数
 
 
 class Honor(models.Model):
@@ -63,8 +65,8 @@ class TeacherNewcomerTable(models.Model):
     描述导师和新人间关系的表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的导师
-    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的新人
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="AsTeacher")  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="AsNewcomer")  # 外键，该关系中的新人
     teacherScore = models.FloatField()  # 该老师被该新人评价的分数
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField()  # 该新人被该老师评价的分数
@@ -76,8 +78,8 @@ class NewcomerRecode(models.Model):
     导师对新人的带新记录
     """
     content = models.CharField(max_length=COMMENT_LEN)
-    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的导师
-    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的新人
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeTeacher")  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeNewcomer")  # 外键，该关系中的新人
     commitTime = models.DateTimeField(auto_now=True)  # 带新记录发表的时间
 
 
@@ -91,7 +93,7 @@ class ProgramTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 项目简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
-    recommendTime = models.DateTimeField()  # 推荐（默认）完成时间，用于生成默认ddl
+    recommendTime = models.IntegerField(null=True)  # 推荐（默认）完成时间，用于生成默认ddl
     audience = models.IntegerField()  # 项目受众
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
@@ -165,14 +167,14 @@ class UserProgramTable(models.Model):
     用户-Program（一个Program是若干课程、任务和考试打成的包）关系表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 本记录所属用户
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsUser")  # 本记录所属用户
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
     finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
     deadline = models.DateTimeField()  # 项目对于个人来说的ddl
-    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 该program的指派人
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsAssigner")  # 该program的指派人
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
@@ -181,13 +183,13 @@ class UserContentTable(models.Model):
     用户-培训内容（包括单个课程、任务和考试）关系表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
+    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ContentAsUser")  # 用户
     content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
     userBeginTime = models.DateTimeField(auto_now_add=True)  # 开始时间 这个时间属于个人
     userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
-    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 该content的指派人
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ContentAsAssigner")  # 该content的指派人
     # course相关
     isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量

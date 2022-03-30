@@ -38,7 +38,6 @@ SESSION_COOKIE_AGE = 3600  # cookie中session有效期（单位为秒）
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # 关闭浏览器session自动过期
 SESSION_SAVE_EVERY_REQUEST = False  # 只有改变了session相关变量的request才会重新保存session
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -48,7 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api' # 增加了api应用
+    'api'  # 增加了api应用
 ]
 
 MIDDLEWARE = [
@@ -113,11 +112,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
-
+# TIME_ZONE = 'UTC'
+USE_TZ = False
 USE_I18N = True
 
-USE_TZ = True
+# USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.0/howto/static-files/

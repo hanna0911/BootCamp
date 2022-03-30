@@ -65,7 +65,7 @@ def check_password_format(password: str):
     has_uppercase = re.search(r"[A-Z]+", password)  # 判断是否含有大写字母
     has_lowercase = re.search(r"[a-z]+", password)  # 判断是否含有小写字母
     has_number = re.search(r"[0-9]+", password)  # 判断是否含有数字
-    has_special_char = re.search(r"(?=[^A-Za-z0-9)])(?=[\S]).{1}")  # 判断是否含有特殊字符
+    has_special_char = re.search(r"(?=[^A-Za-z0-9)])(?=[\S]).{1}", password)  # 判断是否含有特殊字符
     if has_uppercase and has_lowercase and has_number and has_special_char:
         return True
     else:

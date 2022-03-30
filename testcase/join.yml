@@ -18,7 +18,7 @@
     method: POST
     url: /join
     data:
-      username: testid
+      username: newtest
       password: Test@123
       personal_info:
         city: 北京

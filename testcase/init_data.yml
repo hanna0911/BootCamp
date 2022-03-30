@@ -1,61 +1,38 @@
 
 # 个人信息部分
 - classname: privateinfo
-  name: test
-  city: 北京
-  dept: 管理部门
-  password: Test@123
-  username: testid
-  bio: 我爱软工
-  entryTime: 2020-12-12 00:00:00
-  employeeType: 长期
-  graduationTime: 2020-12-12 00:00:00
-  superior: admin
-  detail: 很牛
-  historicalMembers: 0
-  currentMembers: 2
-  isAdmin: 0
-  isTeacher: 1
-  isHRBP: 1
-  isNew: 1
-
-- classname: privateinfo
-  name: 管理员
-  city: 北京
-  dept: 管理部门
-  password: Admin@123
   username: admin
+  password: Test@123
+
+  name: admin
+  city: 北京
+  dept: 管理部门
   bio: 我爱软工
-  entryTime: 2020-12-12 00:00:00
-  employeeType: 长期
-  graduationTime: 2020-12-12 00:00:00
-  superior: admin
-  detail: 我是admin
-  historicalMembers: 0
-  currentMembers: 2
+  joinDate: 2020-12-12 00:00:00
+  joinStatus: 1
+  detail: 很牛
+  leader: admin
+  registrationDate: 2020-12-12 00:00:00
+  employeeType: 正式
+
   isAdmin: 1
   isTeacher: 1
   isHRBP: 1
   isNew: 1
 
-- classname: privateinfo
-  name: new
-  city: 上海
-  dept: 开发部门
-  password: new@123
-  username: new
-  bio: 我是新人
-  entryTime: 2020-12-12 00:00:00
-  employeeType: 长期
-  graduationTime: 2020-12-12 00:00:00
-  superior: admin
-  detail: 很菜
+  newcomerStartDate:
+  newcomerIsGraduate: true
+  newcomerGraduateDate: 2020-12-12 00:00:00
+
   historicalMembers: 0
-  currentMembers: 0
-  isAdmin: 0
-  isTeacher: 0
-  isHRBP: 0
-  isNew: 1
+  currentMembers: 2
+  teacherNominationDate: 2020-12-12 00:00:00
+  teacherExaminedStatus: 1
+  teacherExaminedDate: 2020-12-12 00:00:00
+  teacherIsDuty: true
+  teacherDutyDate: 2020-12-12 00:00:00
+  teacherScore: 5.0
+
 
 # 项目信息部分
 
@@ -65,12 +42,9 @@
   author: admin
   intro: 这是测试培训
   tag: 测试
-  contentCount:
-  beginTime: 2020-12-12 00:00:00
-  finishTime: 2020-12-14 00:00:00
-  deadline: 2020-12-13 00:00:00
-  audience: 新人
-  cover: 打开目录
+  contentCount: 20
+  audience: 3
+  recommendTime: 204
 
 
 
