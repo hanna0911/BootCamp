@@ -24,8 +24,8 @@
   newcomerIsGraduate: true
   newcomerGraduateDate: 2020-12-12 00:00:00
 
-  historicalMembers: 0
-  currentMembers: 2
+  historicalMembers: 1
+  currentMembers: 0
   teacherNominationDate: 2020-12-12 00:00:00
   teacherExaminedStatus: 1
   teacherExaminedDate: 2020-12-12 00:00:00
@@ -33,50 +33,107 @@
   teacherDutyDate: 2020-12-12 00:00:00
   teacherScore: 5.0
 
-#- classname: privateinfo
-#  username: newtest
-#  password: Test@123
-#
-#  name: admin
-#  city: 北京
-#  dept: 管理部门
-#  bio: 我爱软工
-#  joinDate: 2020-12-12 00:00:00
-#  joinStatus: 1
-#  detail: 很牛
-#  leader: admin
-#  registrationDate: 2020-12-12 00:00:00
-#  employeeType: 正式
-#
-#  isAdmin: 1
-#  isTeacher: 1
-#  isHRBP: 1
-#  isNew: 1
-#
-#  newcomerStartDate:
-#  newcomerIsGraduate: true
-#  newcomerGraduateDate: 2020-12-12 00:00:00
-#
-#  historicalMembers: 0
-#  currentMembers: 2
-#  teacherNominationDate: 2020-12-12 00:00:00
-#  teacherExaminedStatus: 1
-#  teacherExaminedDate: 2020-12-12 00:00:00
-#  teacherIsDuty: true
-#  teacherDutyDate: 2020-12-12 00:00:00
-#  teacherScore: 5.0
+- classname: privateinfo
+  username: HRBP
+  password: Test@123
 
-# 项目信息部分
+  name: HRBP
+  city: 北京
+  dept: 管理部门
+  bio: 我爱软工
+  joinDate: 2020-12-12 00:00:00
+  joinStatus: 1
+  detail: 很牛
+  leader: admin
+  registrationDate: 2020-12-12 00:00:00
+  employeeType: 正式
 
-- classname: program
-  id: 1234
-  name: 测试培训
-  author: admin
-  intro: 这是测试培训
-  tag: 测试
-  contentCount: 20
-  audience: 3
-  recommendTime: 204
+  isAdmin: 0
+  isTeacher: 0
+  isHRBP: 1
+  isNew: 0
+
+  newcomerStartDate:
+  newcomerIsGraduate: true
+  newcomerGraduateDate: 2020-12-12 00:00:00
+
+  historicalMembers: 0
+  currentMembers: 0
+  teacherNominationDate: 2020-12-12 00:00:00
+  teacherExaminedStatus: 1
+  teacherExaminedDate: 2020-12-12 00:00:00
+  teacherIsDuty: true
+  teacherDutyDate: 2020-12-12 00:00:00
+  teacherScore: 0.0
+
+- classname: privateinfo
+  username: teacher
+  password: Test@123
+
+  name: teacher
+  city: 北京
+  dept: 管理部门
+  bio: 我爱软工
+  joinDate: 2020-12-12 00:00:00
+  joinStatus: 1
+  detail: 很牛
+  leader: admin
+  registrationDate: 2020-12-12 00:00:00
+  employeeType: 正式
+
+  isAdmin: 0
+  isTeacher: 1
+  isHRBP: 0
+  isNew: 0
+
+  newcomerStartDate:
+  newcomerIsGraduate: true
+  newcomerGraduateDate: 2020-12-12 00:00:00
+
+  historicalMembers: 0
+  currentMembers: 0
+  teacherNominationDate: 2020-12-12 00:00:00
+  teacherExaminedStatus: 1
+  teacherExaminedDate: 2020-12-12 00:00:00
+  teacherIsDuty: true
+  teacherDutyDate: 2020-12-12 00:00:00
+  teacherScore: 4.5
+
+
+- classname: privateinfo
+  username: student
+  password: Test@123
+
+  name: student
+  city: 北京
+  dept: 管理部门
+  bio: 我爱软工
+  joinDate: 2020-12-12 00:00:00
+  joinStatus: 1
+  detail: 很牛
+  leader: admin
+  registrationDate: 2020-12-12 00:00:00
+  employeeType: 正式
+
+  isAdmin: 0
+  isTeacher: 0
+  isHRBP: 0
+  isNew: 1
+
+  newcomerStartDate:
+  newcomerIsGraduate: true
+  newcomerGraduateDate: 2020-12-12 00:00:00
+
+  historicalMembers: 0
+  currentMembers: 0
+  teacherNominationDate: 2020-12-12 00:00:00
+  teacherExaminedStatus: 1
+  teacherExaminedDate: 2020-12-12 00:00:00
+  teacherIsDuty: true
+  teacherDutyDate: 2020-12-12 00:00:00
+  teacherScore: 4.5
+
+
 
 
 

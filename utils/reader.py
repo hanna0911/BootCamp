@@ -1,8 +1,11 @@
+import logging
 import traceback
 from pathlib import Path
 import yaml
 from api.models import *
 from api.api_util import encrypt
+import pandas as pd
+from django.db.models import Model
 
 
 def get_root_path():
@@ -16,6 +19,15 @@ def read_testcase_yaml(path: str):
             return info
     except Exception as e:
         print("读取出错,异常信息:{}".format(traceback.format_exc()))
+
+
+def open_xlsx(path: str):
+    try:
+        df = pd.read_excel(path)
+        return df
+    except Exception as e:
+        print("读取错误")
+        raise e
 
 
 def analysis_parameters(info: list):
@@ -33,7 +45,7 @@ def analysis_parameters(info: list):
         print("读取出错,异常信息:{}".format(traceback.format_exc()))
 
 
-def create_data(path: str):
+def create_data_yml(path: str):
     infos = read_testcase_yaml(path)
     for info in infos:
         if info["classname"].lower() == "privateinfo":
@@ -87,3 +99,36 @@ def create_data(path: str):
         info = read_testcase_yaml("/testcase/test.yml")
         gen = analysis_parameters(info)
         next(gen)
+
+
+def create_data_xlsx(path: str):
+    df: pd.DataFrame = open_xlsx(path)
+    print(df)
+
+
+def create_templage_xlsx(path: str):
+    def save(writer: pd.ExcelWriter, model, sheet_name: str):
+        info = model._meta.fields
+        info_list = [info[i].name for i in range(len(info))]
+        info_dict = {}
+        for i in range(1, len(info_list)):
+            info_dict[info_list[i]] = []
+        private_data = pd.DataFrame(info_dict)
+        private_data.to_excel(writer, sheet_name=sheet_name)
+
+    writer = pd.ExcelWriter(path)
+    save(writer, PrivateInfo, PrivateInfo._meta.model_name)
+    save(writer, Honor, Honor._meta.model_name)
+    save(writer, TeacherNewcomerTable, TeacherNewcomerTable._meta.model_name)
+    save(writer, NewcomerRecode, NewcomerRecode._meta.model_name)
+    save(writer, ProgramTable, ProgramTable._meta.model_name)
+    save(writer, ContentTable, ContentTable._meta.model_name)
+    save(writer, LessonTable, LessonTable._meta.model_name)
+    save(writer, CoursewareTable, CoursewareTable._meta.model_name)
+    save(writer, ProgramContentTable, ProgramContentTable._meta.model_name)
+    save(writer, UserProgramTable, UserProgramTable._meta.model_name)
+    save(writer, UserContentTable, UserContentTable._meta.model_name)
+    save(writer, UserLessonTable, UserLessonTable._meta.model_name)
+
+    writer.save()
+    writer.close()

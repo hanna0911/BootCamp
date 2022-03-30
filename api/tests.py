@@ -12,7 +12,7 @@ logging.basicConfig(level=logging.DEBUG)
 
 class Tests(TestCase):
     def setUp(self):
-        create_data("/testcase/init_data.yml")
+        create_data_yml("/testcase/init_data.yml")
 
     def process(self, path: str):
         case_info = read_testcase_yaml(path)

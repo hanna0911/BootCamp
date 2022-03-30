@@ -4,22 +4,12 @@
 """
 # from django.shortcuts import render
 import json
-import logging
-
-from django.http import HttpRequest, HttpResponse, JsonResponse
+from django.http import HttpRequest
 from .models import PrivateInfo
 from .api_util import *
 
 
 # Create your views here.
-
-
-def init_test(req: HttpRequest):
-    """
-    初始化测试
-    """
-    PrivateInfo.objects.get(username__exact="testid").delete()
-    return gen_response(200, "ok")
 
 
 def login(request: HttpRequest):  # 登录
