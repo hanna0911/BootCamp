@@ -1,9 +1,10 @@
 import re
 from django.http import JsonResponse
 import hashlib
+from .models import PrivateInfo
 
 
-def gen_response(code: int, data):
+def gen_response(code: int, data, message="succeed"):
     """
     for generating JsonResponse
     :param code, data
@@ -11,7 +12,8 @@ def gen_response(code: int, data):
     """
     return JsonResponse({
         'code': code,
-        'data': data
+        'data': data,
+        'message': message
     }, status=code)
 
 
@@ -23,6 +25,19 @@ def encrypt(cleartext: str):
     encoder.update(cleartext)
     ret = encoder.hexdigest()
     return ret
+
+
+def get_permission(username: str):
+    """
+    获取该用户的所有权限
+    :param username: 用户名
+    :return:
+    """
+    person = PrivateInfo.objects.all().get(username__exact=username)
+    if person:
+        return person.isNew, person.isTeacher, person.isHRBP, person.isAdmin
+    else:
+        raise Exception("找不到username:{}".format(username))
 
 
 def check_username_format(username: str):

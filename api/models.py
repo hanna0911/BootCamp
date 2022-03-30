@@ -11,6 +11,7 @@ SHORT_INFO_LEN = 20
 LONG_INFO_LEN = 200
 COMMENT_LEN = 500
 
+
 class PrivateInfo(models.Model):
     """
     user table
@@ -23,7 +24,8 @@ class PrivateInfo(models.Model):
     avatar = models.ImageField()  # 用户头像
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
     joinDate = models.DateTimeField(null=True)  # 用户入职时间
-    detail = models.CharField(max_length=1000)  # 入职情况和详细信息
+    joinStatus = models.IntegerField(default=0)  # 入职情况,0代表待入职,1代表在职,2代表离职
+    detail = models.CharField(max_length=1000)  # 详细信息
     leader = models.CharField(max_length=NAME_LEN)  # 直属上级
     registrationDate = models.DateTimeField(auto_now_add=True)  # 注册时间
     employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型，例如长期工、实习工等
@@ -40,11 +42,20 @@ class PrivateInfo(models.Model):
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
     teacherNominationDate = models.DateField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
-    teacherIsExamined = models.BooleanField(default=False)  # 导师是否被hrbp审核
+    teacherExaminedStatus = models.IntegerField(default=0)  # 审核状态,0 代表未审核,1代表通过,2代表拒绝
     teacherExaminedDate = models.DateField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
     teacherDutyDate = models.DateField(null=True)  # 导师上岗时间
     teacherScore = models.FloatField()  # 老师被新人评价的平均分数
+
+
+class Honor(models.Model):
+    """
+    个人荣誉
+    """
+    type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
+    owner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 荣誉的归属者
+    pic = models.ImageField()
 
 
 class TeacherNewcomerTable(models.Model):
@@ -58,6 +69,16 @@ class TeacherNewcomerTable(models.Model):
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField()  # 该新人被该老师评价的分数
     teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
+
+
+class NewcomerRecode(models.Model):
+    """
+    导师对新人的带新记录
+    """
+    content = models.CharField(max_length=COMMENT_LEN)
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 外键，该关系中的新人
+    commitTime = models.DateTimeField(auto_now=True)  # 带新记录发表的时间
 
 
 class ProgramTable(models.Model):
@@ -95,6 +116,8 @@ class ContentTable(models.Model):
     # course相关
     lessonCount = models.IntegerField()  # lesson数
     # exam相关
+    beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
+    endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关
     taskType = models.IntegerField()  # 任务类型(针对task类)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
@@ -161,8 +184,8 @@ class UserContentTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
     content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
-    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField()  # 结束时间
+    userBeginTime = models.DateTimeField(auto_now_add=True)  # 开始时间 这个时间属于个人
+    userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 该content的指派人
     # course相关
