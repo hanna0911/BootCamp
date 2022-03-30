@@ -33,6 +33,38 @@
   teacherDutyDate: 2020-12-12 00:00:00
   teacherScore: 5.0
 
+#- classname: privateinfo
+#  username: newtest
+#  password: Test@123
+#
+#  name: admin
+#  city: 北京
+#  dept: 管理部门
+#  bio: 我爱软工
+#  joinDate: 2020-12-12 00:00:00
+#  joinStatus: 1
+#  detail: 很牛
+#  leader: admin
+#  registrationDate: 2020-12-12 00:00:00
+#  employeeType: 正式
+#
+#  isAdmin: 1
+#  isTeacher: 1
+#  isHRBP: 1
+#  isNew: 1
+#
+#  newcomerStartDate:
+#  newcomerIsGraduate: true
+#  newcomerGraduateDate: 2020-12-12 00:00:00
+#
+#  historicalMembers: 0
+#  currentMembers: 2
+#  teacherNominationDate: 2020-12-12 00:00:00
+#  teacherExaminedStatus: 1
+#  teacherExaminedDate: 2020-12-12 00:00:00
+#  teacherIsDuty: true
+#  teacherDutyDate: 2020-12-12 00:00:00
+#  teacherScore: 5.0
 
 # 项目信息部分
 

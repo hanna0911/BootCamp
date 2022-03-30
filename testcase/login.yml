@@ -3,8 +3,8 @@
     method: POST
     url: /login
     data:
-      name: test
-      username: testid
+      name: admin
+      username: admin
       password: Test@123
     headers:
   validate:
@@ -16,7 +16,7 @@
     url: /login
     data:
       name: test
-      username: testid
+      username: admin
       password: 1111
     headers:
   validate:

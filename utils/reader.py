@@ -2,6 +2,7 @@ import traceback
 from pathlib import Path
 import yaml
 from api.models import *
+from api.api_util import encrypt
 
 
 def get_root_path():
@@ -37,7 +38,7 @@ def create_data(path: str):
     for info in infos:
         if info["classname"].lower() == "privateinfo":
             PrivateInfo.objects.create(
-                password=info["password"],
+                password=encrypt(info["password"]),
                 username=info["username"],
 
                 name=info["name"],

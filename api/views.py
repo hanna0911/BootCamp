@@ -4,6 +4,8 @@
 """
 # from django.shortcuts import render
 import json
+import logging
+
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from .models import PrivateInfo
 from .api_util import *
@@ -36,9 +38,9 @@ def login(request: HttpRequest):  # 登录
     username = data.get('username')
     password = data.get('password')
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
-        return gen_response(400, {"result": "failure", "message": "user not found"})
-    elif PrivateInfo.objects.all().filter(username__exact=username).first().password != password:
-        return gen_response(400, {"result": "failure", "message": "wrong password"})
+        return gen_response(400, {}, "user not found")
+    elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
+        return gen_response(400, {}, "wrong password")
     else:
         print(username, password)  # 加密后的username和password
         # 设置session信息并保存
@@ -46,10 +48,10 @@ def login(request: HttpRequest):  # 登录
         # TODO: 在身份系统实现之后引入身份的存储
         session_key = request.session.session_key
         # 返回成功信息
-        return_message = {"result": "success", "message": "login successful"}
         response = JsonResponse({
             'code': 200,
-            'data': return_message
+            'data': {},
+            "message": "login successful"
         })
         response.set_cookie("SessionID", session_key)
         return response
@@ -80,10 +82,10 @@ def join(request):  # 注册
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
         return gen_response(400, {}, "duplicate username")
 
-    new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
-                             city=personal_info["city"], password=password, username=username)
+    new_person = PrivateInfo.objects.create(name=personal_info["name"], dept=personal_info["department"],
+                                            city=personal_info["city"], password=encrypt(password),
+                                            username=username)
     new_person.save()
-
     # 设置session信息并保存
     request.session["username"] = username
     # TODO: 在身份系统实现之后引入身份的存储

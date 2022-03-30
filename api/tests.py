@@ -43,7 +43,7 @@ class Tests(TestCase):
                 equ_assert = validate[i]["equals"]
                 if "status_code" in equ_assert.keys():
                     logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
-                    assert res.status_code == equ_assert["status_code"]
+                    self.assertEqual(res.status_code, equ_assert["status_code"])
                     logging.info("OK")
 
     def test_join(self):

@@ -21,6 +21,7 @@ def encrypt(cleartext: str):
     """
     SHA256 Encryption Function
     """
+    cleartext = str(cleartext).encode('utf-8')
     encoder = hashlib.sha256()
     encoder.update(cleartext)
     ret = encoder.hexdigest()
