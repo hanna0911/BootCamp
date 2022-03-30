@@ -6,4 +6,5 @@ from . import views
 urlpatterns = [
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
+    path('switch_role', views.switch_role, name='switch_role')  # 切换身份
 ]
