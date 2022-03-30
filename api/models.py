@@ -43,11 +43,11 @@ class PrivateInfo(models.Model):
     # 导师相关
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
-    teacherNominationDate = models.DateField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
+    teacherNominationDate = models.DateTimeField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
     teacherExaminedStatus = models.IntegerField(default=0)  # 审核状态,0 代表未审核,1代表通过,2代表拒绝
-    teacherExaminedDate = models.DateField(null=True)  # 导师被hrbp审核通过时间
+    teacherExaminedDate = models.DateTimeField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
-    teacherDutyDate = models.DateField(null=True)  # 导师上岗时间
+    teacherDutyDate = models.DateTimeField(null=True)  # 导师上岗时间
     teacherScore = models.FloatField(default=0)  # 老师被新人评价的平均分数
 
 

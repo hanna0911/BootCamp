@@ -5,6 +5,7 @@ import yaml
 from api.models import *
 from api.api_util import encrypt
 import pandas as pd
+import os
 from django.db.models import Model
 
 
@@ -21,9 +22,9 @@ def read_testcase_yaml(path: str):
         print("读取出错,异常信息:{}".format(traceback.format_exc()))
 
 
-def open_xlsx(path: str):
+def open_xlsx(path: str, sheet_name):
     try:
-        df = pd.read_excel(path)
+        df = pd.read_excel(path, sheet_name=sheet_name)
         return df
     except Exception as e:
         print("读取错误")
@@ -102,8 +103,43 @@ def create_data_yml(path: str):
 
 
 def create_data_xlsx(path: str):
-    df: pd.DataFrame = open_xlsx(path)
-    print(df)
+    root = get_root_path()
+    df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        PrivateInfo.objects.create(
+            password=encrypt(info["password"]),
+            username=info["username"],
+
+            name=info["name"],
+            city=info["city"],
+            dept=info["dept"],
+            bio=info["bio"],
+            joinDate=info["joinDate"],
+            joinStatus=info["joinStatus"],
+            detail=info["detail"],
+            leader=info["leader"],
+            registrationDate=info["registrationDate"],
+            employeeType=info["employeeType"],
+
+            isAdmin=info["isAdmin"],
+            isTeacher=info["isTeacher"],
+            isHRBP=info["isHRBP"],
+            isNew=info["isNew"],
+
+            newcomerStartDate=str(info["newcomerStartDate"]),
+            newcomerIsGraduate=info["newcomerIsGraduate"],
+            newcomerGraduateDate=str(info["newcomerGraduateDate"]),
+
+            historicalMembers=info["historicalMembers"],
+            currentMembers=info["currentMembers"],
+            teacherNominationDate=info["teacherNominationDate"],
+            teacherExaminedStatus=info["teacherExaminedStatus"],
+            teacherExaminedDate=info["teacherExaminedDate"],
+            teacherIsDuty=info["teacherIsDuty"],
+            teacherDutyDate=info["teacherDutyDate"],
+            teacherScore=info["teacherScore"],
+        )
 
 
 def create_templage_xlsx(path: str):
