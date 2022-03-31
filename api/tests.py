@@ -11,9 +11,11 @@ logging.basicConfig(level=logging.DEBUG)
 # Create your tests here.
 
 class Tests(TestCase):
+
     def setUp(self):
-        # create_data_yml("/testcase/init_data.yml")
-        create_data_xlsx("/testcase/template.xlsx")
+        self.session = {}
+        create_data_yml("/testcase/init_data.yml")
+        # create_data_xlsx("/testcase/template.xlsx")
 
     def process(self, path: str):
         case_info = read_testcase_yaml(path)
@@ -46,11 +48,20 @@ class Tests(TestCase):
                     logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
                     self.assertEqual(res.status_code, equ_assert["status_code"])
                     logging.info("OK")
+        if "type" in case.keys():
+            task_type = case["type"]
+            if task_type == "session":
+                logging.error(res.body["SessionID"])
+                self.session[req["username"]] = res.COOKIES["SessionID"]
 
     # def test_join(self):
     #     self.process("/testcase/join.yml")
     #
     # def test_login(self):
     #     self.process("/testcase/login.yml")
+
+    def test_get_session(self):
+        self.process("/testcase/get_session.yml")
+
     def test_ok(self):
         assert 1, 1

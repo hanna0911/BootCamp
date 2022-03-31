@@ -1,0 +1,52 @@
+
+- name: 获取admin session
+  type: session
+  request:
+    method: POST
+    url: /login
+    data:
+      name: admin
+      username: admin
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取HRBPs ession
+  type: session
+  request:
+    method: POST
+    url: /login
+    data:
+      name: HRBP
+      username: HRBP
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取teacher ession
+  type: session
+  request:
+    method: POST
+    url: /login
+    data:
+      name: test
+      username: 12345678
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取stusent session
+  type: session
+  request:
+    method: POST
+    url: /login
+    data:
+      name: test
+      username: student
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }

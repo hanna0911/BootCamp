@@ -37,13 +37,16 @@ def analysis_parameters(info: list):
             if "name" in case.keys() and 'request' in case.keys() and 'validate' in case.keys():
                 req = case["request"]
                 if "method" in req.keys() and "url" in req.keys() and "data" in req.keys():
-                    yield case
+                    if req["url"] == "/login" or req["url"] == "/join" or "ident" in case.keys():
+                        yield case
+                    else:
+                        logging.error("非注册登录路由下未指定ident字段")
                 else:
-                    print("错误的yml文件,请确认是否有name,request,validate 等字段")
+                    logging.error("错误的yml文件,请确认是否有name,request,validate 等字段")
             else:
-                print("错误的yml文件,请确认是否有name,request,validate 等字段")
+                logging.error("错误的yml文件,请确认是否有name,request,validate 等字段")
     except Exception as e:
-        print("读取出错,异常信息:{}".format(traceback.format_exc()))
+        logging.error("读取出错,异常信息:{}".format(traceback.format_exc()))
 
 
 def create_data_yml(path: str):

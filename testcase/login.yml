@@ -33,3 +33,4 @@
     headers:
   validate:
     - equals: { status_code: 400 }
+

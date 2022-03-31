@@ -38,8 +38,7 @@ def login(request: HttpRequest):  # 登录
         print(username, password)  # 加密后的username和password
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
-        print(request.session['role'])
-        # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份
+        # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
         session_key = request.session.session_key
         # 返回成功信息
         response = JsonResponse({
