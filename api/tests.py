@@ -52,7 +52,7 @@ class Tests(TestCase):
             task_type = case["type"]
             if task_type == "session":
                 logging.error(res.body["SessionID"])
-                self.session[req["username"]] = res.COOKIES["SessionID"]
+                self.session[req["username"]] = res.headers["SessionID"]
 
     # def test_join(self):
     #     self.process("/testcase/join.yml")
