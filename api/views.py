@@ -136,17 +136,17 @@ def switch_role(request: HttpRequest):
     return response
 
 
-def admin_newcomer_list(request: HttpRequest):
-    """
-    接收前端向/admin_newcomer_list的get请求
-    获取所有新人的数据
-    仅限管理员使用
-    TODO
-    """
-
-
-def newcomer_info(request: HttpRequest):
-    """
-    接受前端向/newcomer_info的post请求
-    TODO
-    """
+# def admin_newcomer_list(request: HttpRequest):
+#     """
+#     接收前端向/admin_newcomer_list的get请求
+#     获取所有新人的数据
+#     仅限管理员使用
+#     TODO
+#     """
+#
+#
+# def newcomer_info(request: HttpRequest):
+#     """
+#     接受前端向/newcomer_info的post请求
+#     TODO
+#     """
