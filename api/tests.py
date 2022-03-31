@@ -30,7 +30,12 @@ class Tests(TestCase):
     def login(self, ident):
         if ident == "admin":
             self.process("/testcase/idents/admin.yml")
-
+        elif ident.lower() == "hrbp":
+            self.process("/testcase/idents/HRBP.yml")
+        elif ident == "teacher":
+            self.process("/testcase/idents/teacher.yml")
+        elif ident == "newcomer":
+            self.process("/testcase/idents/newcomer.yml")
 
     def process(self, path: str):
         case_info = read_testcase_yaml(path)
@@ -43,14 +48,14 @@ class Tests(TestCase):
                 print('Generator return value:', e.value)
                 break
 
-    def get_response(self, client: Client, req: dict) -> JsonResponse:
+    def get_response(self, req: dict) -> JsonResponse:
         if req["method"].lower() == "post":
             logging.debug("posting url: {}".format(req["url"]))
-            res = client.post(req["url"], data=req["data"], content_type="application/json")
+            res = self.client.post(req["url"], data=req["data"], content_type="application/json")
             return res
         elif req["method"].lower() == "get":
             logging.debug("getting url: {}".format(req["url"]))
-            res = client.get(req["url"], data=req["data"], content_type="application/json")
+            res = self.client.get(req["url"], data=req["data"], content_type="application/json")
             return res
         else:
             logging.debug("invalid method")
@@ -73,19 +78,7 @@ class Tests(TestCase):
         if "type" in case.keys():
             task_type = case["type"]
             if task_type == "sessions":
-                res = self.get_response(Clients[req["data"]["username"]], req)
-                # logging.info(res.cookies)
-                # logging.info("in client")
-                # logging.error(Clients[req["data"]["username"]].cookies)
-                # logging.info(Clients[req["data"]["username"]].session)
-                # logging.info(Clients[req["data"]["username"]].cookies)
-                res = self.get_response(Clients[req["data"]["username"]], {
-                    "method": "POST",
-                    "url": "/switch_role",
-                    "data":
-                        {"switch_to": "admin"}
-                })
-                logging.error(res)
+                res = self.get_response(req)
                 self.validate(validate, res)
         elif "ident" in case.keys():
             # logging.warning("ident")
@@ -93,21 +86,19 @@ class Tests(TestCase):
             for ident in ident_list:
                 # 遍历所有身份进行请求
                 self.login(ident)
-                res = self.get_response(self.client, req)
+                res = self.get_response(req)
                 self.validate(validate, res)
         else:
-            # logging.warning("last")
-            self.validate(validate, self.get_response(self.client, req))
+            self.validate(validate, self.get_response(req))
 
-    # def test_join(self):
-    #     self.process("/testcase/join.yml")
-    #
-    # def test_login(self):
-    #     self.process("/testcase/login.yml")
+    def test_join(self):
+        self.process("/testcase/join.yml")
 
-    # @pytest.mark.run('first')
-    # def test_get_session(self):
-    #     self.process("/testcase/get_session.yml")
+    def test_login(self):
+        self.process("/testcase/login.yml")
+    @pytest.mark.run('first')
+    def test_get_session(self):
+        self.process("/testcase/get_session.yml")
 
     def test_switch_role(self):
         self.process("/testcase/switch_role.yml")

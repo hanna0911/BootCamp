@@ -17,7 +17,7 @@
 
   isAdmin: 1
   isTeacher: 1
-  isHRBP: 1
+  isHRBP: 0
   isNew: 1
 
   newcomerStartDate:
@@ -49,9 +49,9 @@
   employeeType: 正式
 
   isAdmin: 0
-  isTeacher: 0
+  isTeacher: 1
   isHRBP: 1
-  isNew: 0
+  isNew: 1
 
   newcomerStartDate:
   newcomerIsGraduate: true
@@ -84,7 +84,7 @@
   isAdmin: 0
   isTeacher: 1
   isHRBP: 0
-  isNew: 0
+  isNew: 1
 
   newcomerStartDate:
   newcomerIsGraduate: true

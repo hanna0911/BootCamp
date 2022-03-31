@@ -25,3 +25,29 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: 切换HRBP身份
+  ident:
+    - HRBP
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: HRBP
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 切换teacher身份
+  ident:
+    - HRBP
+    - teacher
+    - admin
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: teacher
+    headers:
+  validate:
+    - equals: { status_code: 200 }

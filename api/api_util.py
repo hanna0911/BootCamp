@@ -4,7 +4,7 @@ import hashlib
 from .models import PrivateInfo
 
 
-def gen_response(code: int, data, message="succeed"):
+def gen_response(code: int, data={}, message="succeed"):
     """
     for generating JsonResponse
     :param code, data
@@ -26,19 +26,6 @@ def encrypt(cleartext: str):
     encoder.update(cleartext)
     ret = encoder.hexdigest()
     return ret
-
-
-def get_permission(username: str):
-    """
-    获取该用户的所有权限
-    :param username: 用户名
-    :return:
-    """
-    person = PrivateInfo.objects.all().get(username__exact=username)
-    if person:
-        return person.isNew, person.isTeacher, person.isHRBP, person.isAdmin
-    else:
-        raise Exception("找不到username:{}".format(username))
 
 
 def check_username_format(username: str):
@@ -78,10 +65,10 @@ def check_role_format(role: str):
     身份名称合法性校验
     仅 newcomer, teacher, hrbp, admin 合法
     """
-    if role == "newcomer" or role == "teacher" or role == "hrbp" or role == "admin":
+    if role == "newcomer" or role == "teacher" or role.lower() == "hrbp" or role == "admin":
         return True
     else:
-        return False
+        raise Exception("invalid role format")
 
 
 def unknown_error_response():
@@ -125,14 +112,14 @@ def role_authentication(username: str, target_role: str):
     校验某用户是否具有某身份的权限
     """
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0 \
-       or not check_role_format(target_role):  # 用户不存在或查询的身份格式错误
+            or not check_role_format(target_role):  # 用户不存在或查询的身份格式错误
         return False
     user_info = PrivateInfo.objects.all().filter(username__exact=username).first()  # 获取用户信息
     if target_role == "newcomer":  # 查询的身份是新人
         return user_info.isNew
     if target_role == "teacher":  # 查询的身份是导师
         return user_info.isTeacher
-    if target_role == "hrbp":  # 查询的身份是hrbp
+    if target_role.lower() == "hrbp":  # 查询的身份是hrbp
         return user_info.isHRBP
     if target_role == "admin":  # 查询的身份是管理员
         return user_info.isAdmin

@@ -2,12 +2,9 @@
 暂行的一部分接口文件,之后开始写接口后按接口分类进行文件划分
 目前接口：Login登录，Join注册
 """
-# from django.shortcuts import render
 import datetime
 import json
 import logging
-from django.contrib.sessions.backends.db import SessionStore
-import requests
 from django.http import HttpRequest
 from .models import PrivateInfo
 from .api_util import *
@@ -31,8 +28,8 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    # if "username" in request.session.keys():
-    #     return gen_response(400, {}, "dup login")
+    if "username" in request.session.keys():
+        return gen_response(400, {}, "dup login")
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
@@ -41,25 +38,8 @@ def login(request: HttpRequest):  # 登录
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
         # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
-        request.session["test"] = "tdog"
-        # logging.error(request.session)
-        # logging.error(request.session.session_key)
-        if not request.session.session_key:
-            request.session.create()
-        # logging.error(request.session)
-        # logging.error(request.session)
-        session_key = request.session.session_key
-        # logging.error(session_key)
-        # logging.error(SessionStore(session_key=session_key))
         # 返回成功信息
-        response = JsonResponse({
-            'code': 200,
-            'data': {"SessionID": session_key},
-            "message": "login successful"
-        })
-        # response.set_cookie("SessionID", str(session_key))
-        logging.error(response.cookies)
-        return response
+        return gen_response(200, message="login successful")
 
 
 def join(request):  # 注册
@@ -79,15 +59,15 @@ def join(request):  # 注册
     personal_info = data.get('personal_info')
     print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
     if not (username and password and personal_info):
-        return gen_response(400, {}, "lack of argument")
+        return gen_response(400, message="lack of argument")
     # 检查用户名格式
     if not check_username_format(username):
-        return gen_response(400, {}, "wrong username format")
+        return gen_response(400, message="wrong username format")
     elif not check_password_format(password):
-        return gen_response(400, {}, "wrong password format")
+        return gen_response(400, message="wrong password format")
     # 检查用户名重复
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
-        return gen_response(400, {}, "duplicate username")
+        return gen_response(400, message="duplicate username")
     new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["dept"],
                              city=personal_info["city"], password=encrypt(password),
                              username=username)
@@ -99,19 +79,8 @@ def join(request):  # 注册
     # 设置session信息并保存
     request.session["username"] = username
     request.session['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份
-    if not request.session.session_key:
-        request.session.create()
-    session_key = request.session.session_key
-    request.session.save()
     # 返回成功信息
-    return_message = "registration successful"
-    response = JsonResponse({
-        'code': 200,
-        'data': return_message,
-        "message": "success"
-    })
-    response.set_cookie("SessionID", session_key)
-    return response  # 先暂时全部返回True
+    return gen_response(200, message="registration successful")
 
 
 def switch_role(request: HttpRequest):
@@ -126,15 +95,10 @@ def switch_role(request: HttpRequest):
         return unknown_error_response()
     target_role = request_data.get('switch_to')
     if target_role is None:  # 字段缺失
-        return gen_response(400, {}, "lack of arguments")
-    # if not check_username_format(target_role):  # switch_to字段错误
-    #     return unknown_error_response()
+        return gen_response(400, message="lack of arguments")
     user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）
     if user_session is None:  # session不存在
         return session_timeout_response()
-    logging.error(request.session.session_key)
-    logging.warning(request.COOKIES)
-    logging.warning(request.session)
     username = request.session["username"]
 
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:  # 数据库找不到这个用户
@@ -145,8 +109,8 @@ def switch_role(request: HttpRequest):
     # 验证成功则按下面的代码来处理
     user_session['role'] = target_role
     user_session.set_expiry(3600)  # session续命1小时
-    print(request.session['role'])
-    return gen_response(200, {}, 'role switched to ' + target_role)
+    logging.info(user_session['role'])
+    return gen_response(200, message='role switched to ' + target_role)
 
 # def admin_newcomer_list(request: HttpRequest):
 #     """

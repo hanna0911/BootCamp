@@ -1,0 +1,11 @@
+- name: newcomer login
+  request:
+    method: POST
+    url: /login
+    data:
+      name: newcomer
+      username: newcomer
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }

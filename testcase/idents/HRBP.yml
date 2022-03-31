@@ -4,7 +4,7 @@
     url: /login
     data:
       name: HRBP
-      username: aHRBP
+      username: HRBP
       password: Test@123
     headers:
   validate:
