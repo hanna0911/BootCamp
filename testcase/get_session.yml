@@ -1,6 +1,6 @@
 
-- name: 获取admin session
-  type: session
+- name: 获取admin sessions
+  type: sessions
   request:
     method: POST
     url: /login
@@ -12,8 +12,8 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取HRBP session
-  type: session
+- name: 获取HRBP sessions
+  type: sessions
   request:
     method: POST
     url: /login
@@ -25,8 +25,8 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取teacher session
-  type: session
+- name: 获取teacher sessions
+  type: sessions
   request:
     method: POST
     url: /login
@@ -38,8 +38,8 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取studennt session
-  type: session
+- name: 获取studennt sessions
+  type: sessions
   request:
     method: POST
     url: /login

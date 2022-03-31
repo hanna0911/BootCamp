@@ -1,5 +1,8 @@
 - name: 切换身份
-  ident: teacher,
+  ident:
+    - admin
+    - HRBP
+    - teacher
   request:
     method: POST
     url: /switch_role

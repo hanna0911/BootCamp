@@ -26,7 +26,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-# SESSIONS: session related settings
+# SESSIONS: sessions related settings
 # TODO: 在改成https之后，需要修改SESSION_COOKIE_SECURE为True
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'  # 使用的是session的数据库实现，也可改成缓存
 SESSION_COOKIE_NAME = 'SessionID'

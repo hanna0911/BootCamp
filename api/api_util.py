@@ -102,7 +102,7 @@ def session_timeout_response():
     """
     response: JsonResponse = JsonResponse({
         'result': 'failed',
-        'message': 'session timeout'
+        'message': 'sessions timeout'
     })
     response.status_code = 400
     return response
