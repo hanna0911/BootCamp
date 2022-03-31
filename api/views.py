@@ -31,8 +31,8 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    if "username" in request.session.keys():
-        return gen_response(400, {}, "dup login")
+    # if "username" in request.session.keys():
+    #     return gen_response(400, {}, "dup login")
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
