@@ -10,10 +10,11 @@ import logging
 
 logging.basicConfig(level=logging.DEBUG)
 
-
 # Create your tests here.
 
 sessions = {}
+
+
 class Tests(TestCase):
     def setUp(self):
         create_data_yml("/testcase/init_data.yml")
@@ -62,17 +63,15 @@ class Tests(TestCase):
             if task_type == "sessions":
                 res = self.get_response(req)
                 self.validate(validate, res)
-                sessions[req['data']["username"]] = str(self.client.cookies.get("SessionID"))
-                logging.error(req['data']["username"])
-                logging.error(str(self.client.cookies.get("SessionID")))
+                str_list = str(self.client.cookies.get("SessionID")).split()
+                session_id = str_list[1].replace("SessionID=", "").replace(";", "")
+                logging.error(session_id)
+                sessions[req['data']["username"]] = session_id
         if "ident" in case.keys():
             ident_list = case["ident"]
             for ident in ident_list:
                 # 遍历所有身份进行请求
                 self.client.cookies.clear()
-                logging.error("after clear")
-                logging.error(self.client.cookies)
-                logging.error(sessions[ident])
                 self.client.cookies["SessionID"] = sessions[ident]
                 logging.error(self.client.cookies)
                 res = self.get_response(req)
@@ -90,5 +89,5 @@ class Tests(TestCase):
     def test_get_session(self):
         self.process("/testcase/get_session.yml")
 
-    def test_switch_role(self):
-        self.process("/testcase/switch_role.yml")
+    # def test_switch_role(self):
+    #     self.process("/testcase/switch_role.yml")

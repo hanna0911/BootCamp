@@ -1,11 +1,11 @@
 - name: 切换身份
   ident:
-    - newcomer
+    - admin
   request:
     method: POST
     url: /switch_role
     data:
-      switch_to: teacher
+      switch_to: admin
     headers:
   validate:
-    - equals: { status_code: 400 }
+    - equals: { status_code: 200 }

@@ -33,7 +33,7 @@ def login(request: HttpRequest):  # 登录
     password = data.get('password')
     if "username" in request.session.keys():
         return gen_response(400, {}, "dup login")
-    elif len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
+    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
         return gen_response(400, {}, "wrong password")
