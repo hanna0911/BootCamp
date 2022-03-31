@@ -1,0 +1,11 @@
+- name: admin login
+  request:
+    method: POST
+    url: /login
+    data:
+      name: admin
+      username: admin
+      password: Test@123
+    headers:
+  validate:
+    - equals: { status_code: 200 }

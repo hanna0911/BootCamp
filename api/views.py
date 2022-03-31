@@ -6,7 +6,7 @@
 import datetime
 import json
 import logging
-
+from django.contrib.sessions.backends.db import SessionStore
 import requests
 from django.http import HttpRequest
 from .models import PrivateInfo
@@ -41,14 +41,24 @@ def login(request: HttpRequest):  # 登录
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
         # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
+        request.session["test"] = "tdog"
+        # logging.error(request.session)
+        # logging.error(request.session.session_key)
+        if not request.session.session_key:
+            request.session.create()
+        # logging.error(request.session)
+        # logging.error(request.session)
         session_key = request.session.session_key
+        # logging.error(session_key)
+        # logging.error(SessionStore(session_key=session_key))
         # 返回成功信息
         response = JsonResponse({
             'code': 200,
             'data': {"SessionID": session_key},
             "message": "login successful"
         })
-        response.set_cookie("SessionID", session_key)
+        # response.set_cookie("SessionID", str(session_key))
+        logging.error(response.cookies)
         return response
 
 
@@ -82,15 +92,17 @@ def join(request):  # 注册
                              city=personal_info["city"], password=encrypt(password),
                              username=username)
     # 身份系统测试： 默认有新人、导师和管理员三个身份， 没有hrbp
-    # new_person.isNew = True
-    # new_person.isAdmin = True
-    # new_person.isTeacher = True
+    new_person.isNew = True
+    new_person.isAdmin = True
+    new_person.isTeacher = True
     new_person.save()
     # 设置session信息并保存
-    session = request.session
-    session["username"] = username
+    request.session["username"] = username
     request.session['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份
-    session_key = session.session_key
+    if not request.session.session_key:
+        request.session.create()
+    session_key = request.session.session_key
+    request.session.save()
     # 返回成功信息
     return_message = "registration successful"
     response = JsonResponse({
@@ -115,27 +127,26 @@ def switch_role(request: HttpRequest):
     target_role = request_data.get('switch_to')
     if target_role is None:  # 字段缺失
         return gen_response(400, {}, "lack of arguments")
-    if not check_username_format(target_role):  # switch_to字段错误
-        return unknown_error_response()
+    # if not check_username_format(target_role):  # switch_to字段错误
+    #     return unknown_error_response()
     user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）
     if user_session is None:  # session不存在
         return session_timeout_response()
-    logging.error(user_session.keys())
-    username = user_session['username']
+    logging.error(request.session.session_key)
+    logging.warning(request.COOKIES)
+    logging.warning(request.session)
+    username = request.session["username"]
+
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:  # 数据库找不到这个用户
-        return unknown_error_response()
+        logging.error("user not found")
+        return gen_response(400, {}, "user not found")
     if not role_authentication(username=username, target_role=target_role):  # 用户没有此权限
-        return unknown_error_response()
+        return gen_response(400, {}, "no permission ")
     # 验证成功则按下面的代码来处理
     user_session['role'] = target_role
     user_session.set_expiry(3600)  # session续命1小时
-    response: JsonResponse = JsonResponse({
-        'result': 'success',
-        'message': 'role switched to ' + target_role
-    })
-    response.status_code = 200
     print(request.session['role'])
-    return response
+    return gen_response(200, {}, 'role switched to ' + target_role)
 
 # def admin_newcomer_list(request: HttpRequest):
 #     """

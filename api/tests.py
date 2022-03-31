@@ -1,10 +1,10 @@
 """
 用于测试
 """
-import json
-
 import pytest
-from django.test import TestCase
+from django.test import TestCase, Client
+from django.contrib.sessions.backends.db import SessionStore
+from django.http import JsonResponse
 from utils.reader import *
 import logging
 
@@ -14,11 +14,23 @@ logging.basicConfig(level=logging.DEBUG)
 
 sessions = {}
 
+Clients = {
+    'admin': Client(),
+    "HRBP": Client(),
+    "teacher": Client(),
+    "newcomer": Client()
+}
+
 
 class Tests(TestCase):
     def setUp(self):
         create_data_yml("/testcase/init_data.yml")
         # create_data_xlsx("/testcase/template.xlsx")
+
+    def login(self, ident):
+        if ident == "admin":
+            self.process("/testcase/idents/admin.yml")
+
 
     def process(self, path: str):
         case_info = read_testcase_yaml(path)
@@ -31,14 +43,14 @@ class Tests(TestCase):
                 print('Generator return value:', e.value)
                 break
 
-    def get_response(self, req):
+    def get_response(self, client: Client, req: dict) -> JsonResponse:
         if req["method"].lower() == "post":
             logging.debug("posting url: {}".format(req["url"]))
-            res = self.client.post(req["url"], data=req["data"], content_type="application/json")
+            res = client.post(req["url"], data=req["data"], content_type="application/json")
             return res
         elif req["method"].lower() == "get":
             logging.debug("getting url: {}".format(req["url"]))
-            res = self.client.get(req["url"], data=req["data"], content_type="application/json")
+            res = client.get(req["url"], data=req["data"], content_type="application/json")
             return res
         else:
             logging.debug("invalid method")
@@ -61,33 +73,41 @@ class Tests(TestCase):
         if "type" in case.keys():
             task_type = case["type"]
             if task_type == "sessions":
-                res = self.get_response(req)
+                res = self.get_response(Clients[req["data"]["username"]], req)
+                # logging.info(res.cookies)
+                # logging.info("in client")
+                # logging.error(Clients[req["data"]["username"]].cookies)
+                # logging.info(Clients[req["data"]["username"]].session)
+                # logging.info(Clients[req["data"]["username"]].cookies)
+                res = self.get_response(Clients[req["data"]["username"]], {
+                    "method": "POST",
+                    "url": "/switch_role",
+                    "data":
+                        {"switch_to": "admin"}
+                })
+                logging.error(res)
                 self.validate(validate, res)
-                str_list = str(self.client.cookies.get("SessionID")).split()
-                session_id = str_list[1].replace("SessionID=", "").replace(";", "")
-                logging.error(session_id)
-                sessions[req['data']["username"]] = session_id
-        if "ident" in case.keys():
+        elif "ident" in case.keys():
+            # logging.warning("ident")
             ident_list = case["ident"]
             for ident in ident_list:
                 # 遍历所有身份进行请求
-                self.client.cookies.clear()
-                self.client.cookies["SessionID"] = sessions[ident]
-                logging.error(self.client.cookies)
-                res = self.get_response(req)
+                self.login(ident)
+                res = self.get_response(self.client, req)
                 self.validate(validate, res)
         else:
-            self.validate(validate, self.get_response(req))
+            # logging.warning("last")
+            self.validate(validate, self.get_response(self.client, req))
 
-    def test_join(self):
-        self.process("/testcase/join.yml")
+    # def test_join(self):
+    #     self.process("/testcase/join.yml")
+    #
+    # def test_login(self):
+    #     self.process("/testcase/login.yml")
 
-    def test_login(self):
-        self.process("/testcase/login.yml")
+    # @pytest.mark.run('first')
+    # def test_get_session(self):
+    #     self.process("/testcase/get_session.yml")
 
-    @pytest.mark.run('first')
-    def test_get_session(self):
-        self.process("/testcase/get_session.yml")
-
-    # def test_switch_role(self):
-    #     self.process("/testcase/switch_role.yml")
+    def test_switch_role(self):
+        self.process("/testcase/switch_role.yml")

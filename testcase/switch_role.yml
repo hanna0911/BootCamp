@@ -9,3 +9,19 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+
+- name: 切换新人身份
+  ident:
+    - admin
+    - HRBP
+    - teacher
+    - newcomer
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: newcomer
+    headers:
+  validate:
+    - equals: { status_code: 200 }
