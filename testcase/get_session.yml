@@ -38,14 +38,14 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取studennt sessions
+- name: 获取newcomer sessions
   type: sessions
   request:
     method: POST
     url: /login
     data:
       name: test
-      username: student
+      username: newcomer
       password: Test@123
     headers:
   validate:

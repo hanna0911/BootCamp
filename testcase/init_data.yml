@@ -100,10 +100,10 @@
   teacherScore: 4.5
 
 - classname: privateinfo
-  username: student
+  username: newcomer
   password: Test@123
 
-  name: student
+  name: newcomer
   city: 北京
   dept: 管理部门
   bio: 我爱软工

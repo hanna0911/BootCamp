@@ -31,7 +31,9 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
+    if "username" in request.session.keys():
+        return gen_response(400, {}, "dup login")
+    elif len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
         return gen_response(400, {}, "wrong password")
@@ -118,7 +120,7 @@ def switch_role(request: HttpRequest):
     user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）
     if user_session is None:  # session不存在
         return session_timeout_response()
-
+    logging.error(user_session.keys())
     username = user_session['username']
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:  # 数据库找不到这个用户
         return unknown_error_response()
@@ -134,7 +136,6 @@ def switch_role(request: HttpRequest):
     response.status_code = 200
     print(request.session['role'])
     return response
-
 
 # def admin_newcomer_list(request: HttpRequest):
 #     """
