@@ -5,6 +5,7 @@
 # from django.shortcuts import render
 import datetime
 import json
+import logging
 
 import requests
 from django.http import HttpRequest
@@ -35,7 +36,6 @@ def login(request: HttpRequest):  # 登录
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
         return gen_response(400, {}, "wrong password")
     else:
-        print(username, password)  # 加密后的username和password
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
         # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
@@ -43,7 +43,7 @@ def login(request: HttpRequest):  # 登录
         # 返回成功信息
         response = JsonResponse({
             'code': 200,
-            'data': {},
+            'data': {"SessionID": session_key},
             "message": "login successful"
         })
         response.set_cookie("SessionID", session_key)
@@ -66,7 +66,8 @@ def join(request):  # 注册
     password = data.get('password')
     personal_info = data.get('personal_info')
     print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
-
+    if not (username and password and personal_info):
+        return gen_response(400, {}, "lack of argument")
     # 检查用户名格式
     if not check_username_format(username):
         return gen_response(400, {}, "wrong username format")
@@ -75,24 +76,25 @@ def join(request):  # 注册
     # 检查用户名重复
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
         return gen_response(400, {}, "duplicate username")
-
-    new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["department"],
-                                            city=personal_info["city"], password=encrypt(password),
-                                            username=username)
+    new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["dept"],
+                             city=personal_info["city"], password=encrypt(password),
+                             username=username)
     # 身份系统测试： 默认有新人、导师和管理员三个身份， 没有hrbp
     # new_person.isNew = True
     # new_person.isAdmin = True
     # new_person.isTeacher = True
     new_person.save()
     # 设置session信息并保存
-    request.session["username"] = username
+    session = request.session
+    session["username"] = username
     request.session['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份
-    session_key = request.session.session_key
+    session_key = session.session_key
     # 返回成功信息
     return_message = "registration successful"
     response = JsonResponse({
         'code': 200,
-        'data': return_message
+        'data': return_message,
+        "message": "success"
     })
     response.set_cookie("SessionID", session_key)
     return response  # 先暂时全部返回True
@@ -108,11 +110,9 @@ def switch_role(request: HttpRequest):
         request_data = json.loads(request.body)
     except Exception:  # json parse 失败
         return unknown_error_response()
-    action = request_data.get('action')
     target_role = request_data.get('switch_to')
-    print(action, target_role)
-    if action is None or action != "switch role" or target_role is None:  # 字段缺失或action字段错误
-        return unknown_error_response()
+    if target_role is None:  # 字段缺失
+        return gen_response(400, {}, "lack of arguments")
     if not check_username_format(target_role):  # switch_to字段错误
         return unknown_error_response()
     user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）

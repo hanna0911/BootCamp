@@ -1,6 +1,8 @@
 """
 用于测试
 """
+import json
+
 from django.test import TestCase
 from utils.reader import *
 import logging
@@ -29,6 +31,7 @@ class Tests(TestCase):
                 break
 
     def request(self, case: dict):
+        self.client.cookies.clear()
         req = case["request"]
         validate = case["validate"]
         logging.info(case["name"])
@@ -51,17 +54,16 @@ class Tests(TestCase):
         if "type" in case.keys():
             task_type = case["type"]
             if task_type == "session":
-                logging.error(res.body["SessionID"])
-                self.session[req["username"]] = res.headers["SessionID"]
+                self.session[req['data']["username"]] = str(self.client.cookies.get("SessionID"))
 
-    # def test_join(self):
-    #     self.process("/testcase/join.yml")
-    #
-    # def test_login(self):
-    #     self.process("/testcase/login.yml")
+    def test_join(self):
+        self.process("/testcase/join.yml")
+
+    def test_login(self):
+        self.process("/testcase/login.yml")
 
     def test_get_session(self):
         self.process("/testcase/get_session.yml")
 
-    def test_ok(self):
-        assert 1, 1
+    def test_switch_role(self):
+        self.process("/testcase/switch_role.yml")

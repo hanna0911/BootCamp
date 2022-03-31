@@ -99,7 +99,6 @@
   teacherDutyDate: 2020-12-12 00:00:00
   teacherScore: 4.5
 
-
 - classname: privateinfo
   username: student
   password: Test@123

@@ -12,7 +12,7 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取HRBPs ession
+- name: 获取HRBP session
   type: session
   request:
     method: POST
@@ -25,20 +25,20 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取teacher ession
+- name: 获取teacher session
   type: session
   request:
     method: POST
     url: /login
     data:
       name: test
-      username: 12345678
+      username: teacher
       password: Test@123
     headers:
   validate:
     - equals: { status_code: 200 }
 
-- name: 获取stusent session
+- name: 获取studennt session
   type: session
   request:
     method: POST

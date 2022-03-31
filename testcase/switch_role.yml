@@ -1,0 +1,10 @@
+- name: 切换身份
+  ident: teacher,
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: teacher
+    headers:
+  validate:
+    - equals: { status_code: 200 }

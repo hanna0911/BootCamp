@@ -7,7 +7,7 @@
       password: Test@123
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: test
     headers:
   validate:
@@ -22,7 +22,7 @@
       password: Test@123
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: test
     headers:
   validate:
@@ -37,7 +37,7 @@
       password: Test@123
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: longUser
       headers:
   validate:
@@ -52,7 +52,7 @@
       password: test@123
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: noUpperUser
       headers:
   validate:
@@ -67,7 +67,7 @@
       password: TEST@123
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: noLowerUser
       headers:
   validate:
@@ -82,7 +82,7 @@
       password: test@TEST
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: noNumberUser
       headers:
   validate:
@@ -97,7 +97,7 @@
       password: Test1234
       personal_info:
         city: 北京
-        department: 管理部门
+        dept: 管理部门
         name: noSpecialCharUser
       headers:
   validate:
