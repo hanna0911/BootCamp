@@ -50,7 +50,6 @@ def join(request):  # 注册
     try:
         data = json.loads(request.body)
     except Exception:
-        print(0)
         return gen_response(400, 'Load json request failed')
 
     # TODO: 在数据库中搜索有没有重名的用户，如果没有则创建新用户
@@ -105,13 +104,12 @@ def switch_role(request: HttpRequest):
         logging.error("user not found")
         return gen_response(400, {}, "user not found")
     if not role_authentication(username=username, target_role=target_role):  # 用户没有此权限
-        return gen_response(400, {}, "no permission ")
+        return gen_response(400, {}, "no permission or user not found ")
     # 验证成功则按下面的代码来处理
     user_session['role'] = target_role
     user_session.set_expiry(3600)  # session续命1小时
     logging.info(user_session['role'])
     return gen_response(200, message='role switched to ' + target_role)
-
 
 #
 # def newcomer_info(request: HttpRequest):

@@ -1,0 +1,10 @@
+- name: 获取候选导师列表
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /teacher_wait_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }

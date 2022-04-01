@@ -2,6 +2,7 @@ import re
 from django.http import JsonResponse
 import hashlib
 from .models import PrivateInfo
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def gen_response(code: int, data={}, message="succeed"):
@@ -111,10 +112,10 @@ def role_authentication(username: str, target_role: str):
     """
     校验某用户是否具有某身份的权限
     """
-    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0 \
-            or not check_role_format(target_role):  # 用户不存在或查询的身份格式错误
+    check_role_format(target_role)
+    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:  # 用户不存在或查询的身份格式错误
         return False
-    user_info = PrivateInfo.objects.all().filter(username__exact=username).first()  # 获取用户信息
+    user_info = PrivateInfo.objects.get(username__exact=username)  # 获取用户信息
     if target_role == "newcomer":  # 查询的身份是新人
         return user_info.isNew
     if target_role == "teacher":  # 查询的身份是导师
@@ -123,4 +124,3 @@ def role_authentication(username: str, target_role: str):
         return user_info.isHRBP
     if target_role == "admin":  # 查询的身份是管理员
         return user_info.isAdmin
-    return False  # 这个分支不会被触发，出于鲁棒性考量返回一个False

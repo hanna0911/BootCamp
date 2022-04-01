@@ -36,6 +36,8 @@ class Tests(TestCase):
             self.process("/testcase/idents/teacher.yml")
         elif ident == "newcomer":
             self.process("/testcase/idents/newcomer.yml")
+        else:
+            raise Exception("wrong ident")
 
     def process(self, path: str):
         case_info = read_testcase_yaml(path)
@@ -102,3 +104,6 @@ class Tests(TestCase):
 
     def test_switch_role(self):
         self.process("/testcase/switch_role.yml")
+
+    def test_teacher_wait_list(self):
+        self.process("/testcase/teacher_wait_list.yml")
