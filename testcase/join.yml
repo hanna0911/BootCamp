@@ -1,0 +1,104 @@
+- name: 注册成功测试
+  request:
+    method: POST
+    url: /join
+    data:
+      username: newtest
+      password: Test@123
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: test
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 重复注册报错
+  request:
+    method: POST
+    url: /join
+    data:
+      username: newtest
+      password: Test@123
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: test
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 注册时用户名校验报错
+  request:
+    method: POST
+    url: /join
+    data:
+      username: thisIsAVeryVeryVeryVeryLongUsername
+      password: Test@123
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: longUser
+      headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 密码校验报错-没有大写字母
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: test@123
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: noUpperUser
+      headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 密码校验报错-没有小写字母
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: TEST@123
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: noLowerUser
+      headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 密码校验报错-没有数字
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: test@TEST
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: noNumberUser
+      headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 密码校验报错-没有数字
+  request:
+    method: POST
+    url: /join
+    data:
+      username: testid
+      password: Test1234
+      personal_info:
+        city: 北京
+        dept: 管理部门
+        name: noSpecialCharUser
+      headers:
+  validate:
+    - equals: { status_code: 400 }

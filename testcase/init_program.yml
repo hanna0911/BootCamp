@@ -1,0 +1,12 @@
+# 项目信息部分
+
+- classname: program
+  id: 1234
+  name: 测试培训
+  author: admin
+  intro: 这是测试培训
+  tag: 测试
+  contentCount: 20
+  audience: 3
+  recommendTime: 204
+

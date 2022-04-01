@@ -1,0 +1,53 @@
+- name: 切换身份
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: admin
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+
+- name: 切换新人身份
+  ident:
+    - admin
+    - HRBP
+    - teacher
+    - newcomer
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: newcomer
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 切换HRBP身份
+  ident:
+    - HRBP
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: HRBP
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 切换teacher身份
+  ident:
+    - HRBP
+    - teacher
+    - admin
+  request:
+    method: POST
+    url: /switch_role
+    data:
+      switch_to: teacher
+    headers:
+  validate:
+    - equals: { status_code: 200 }
