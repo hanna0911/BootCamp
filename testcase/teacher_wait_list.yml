@@ -1,4 +1,4 @@
-- name: 获取候选导师列表
+- name: admin获取候选导师列表
   ident:
     - admin
   request:
@@ -8,3 +8,16 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: 其他获取候选导师列表
+  ident:
+    - teacher
+    - HRBP
+    - newcomer
+  request:
+    method: POST
+    url: /teacher_wait_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }

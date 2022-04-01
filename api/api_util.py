@@ -2,7 +2,6 @@ import re
 from django.http import JsonResponse
 import hashlib
 from .models import PrivateInfo
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def gen_response(code: int, data={}, message="succeed"):
@@ -124,3 +123,30 @@ def role_authentication(username: str, target_role: str):
         return user_info.isHRBP
     if target_role == "admin":  # 查询的身份是管理员
         return user_info.isAdmin
+
+
+def load_private_info(pv: PrivateInfo) -> dict:
+    """
+    只load 个人信息部分，新人和导师信息需要根据不同接口分别写入
+    :param pv:
+    :return:
+    """
+    info = {}
+    info["username"] = pv.username
+    info["name"] = pv.name
+    info["city"] = pv.city
+    info["dept"] = pv.dept
+    info["bio"] = pv.bio
+
+    info["joinDate"] = pv.joinDate
+    info["joinStatus"] = pv.joinStatus
+    info["detail"] = pv.detail
+    info["leader"] = pv.leader
+    info["registrationDat"] = pv.registrationDate
+    info["employeeType"] = pv.employeeType
+
+    info["isAdmin"] = pv.isAdmin
+    info["isTeacher"] = pv.isTeacher
+    info["isHRBP"] = pv.isHRBP
+    info["isNew"] = pv.isNew
+    return info
