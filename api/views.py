@@ -112,14 +112,7 @@ def switch_role(request: HttpRequest):
     logging.info(user_session['role'])
     return gen_response(200, message='role switched to ' + target_role)
 
-# def admin_newcomer_list(request: HttpRequest):
-#     """
-#     接收前端向/admin_newcomer_list的get请求
-#     获取所有新人的数据
-#     仅限管理员使用
-#     TODO
-#     """
-#
+
 #
 # def newcomer_info(request: HttpRequest):
 #     """
