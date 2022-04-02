@@ -150,3 +150,21 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["isHRBP"] = pv.isHRBP
     info["isNew"] = pv.isNew
     return info
+
+
+def gen_set_cookie_response(code: int, data: dict = {}, cookie: dict = {}):
+    """
+    生成带有set-cookie的response
+    P.S. 不要乱改已经写好的response！以及不要和接口文档有任何出入！
+    """
+    response: JsonResponse = JsonResponse(data)
+    response.status_code = code
+    for key in cookie.keys():
+        response.set_cookie(key, cookie[key])
+    return response
+
+
+def gen_standard_response(code: int, data: dict = {}):
+    response: JsonResponse = JsonResponse(data)
+    response.status_code = code
+    return response
