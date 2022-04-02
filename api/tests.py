@@ -53,11 +53,11 @@ class Tests(TestCase):
     def get_response(self, req: dict) -> JsonResponse:
         if req["method"].lower() == "post":
             logging.debug("posting url: {}".format(req["url"]))
-            res = self.client.post(req["url"], data=req["data"], content_type="application/json")
+            res = self.client.post("/api" + req["url"], data=req["data"], content_type="application/json")
             return res
         elif req["method"].lower() == "get":
             logging.debug("getting url: {}".format(req["url"]))
-            res = self.client.get(req["url"], data=req["data"], content_type="application/json")
+            res = self.client.get("/api" + req["url"], data=req["data"], content_type="application/json")
             return res
         else:
             logging.debug("invalid method")
