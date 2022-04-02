@@ -10,4 +10,5 @@ urlpatterns = [
     path("teacher_wait_list", lists.teacher_wait_list, name="teacher_wait_list"),
     path("nominate_process", lists.nominate_process, name="nominate_process"),
     path("duty_teacher_list", lists.duty_teacher_list, name="duty_teacher_list"),
+    path("get_token", views.get_token, name="get_token")
 ]
