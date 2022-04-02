@@ -1,5 +1,5 @@
 import re
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpRequest
 import hashlib
 from .models import PrivateInfo
 
@@ -69,6 +69,13 @@ def check_role_format(role: str):
         return True
     else:
         raise Exception("invalid role format")
+
+
+def check_method(req: HttpRequest, method: str):
+    if req.method == method.upper():
+        return True
+    else:
+        return False
 
 
 def unknown_error_response():

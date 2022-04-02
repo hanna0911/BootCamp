@@ -94,7 +94,7 @@ class ProgramTable(models.Model):
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
     recommendTime = models.IntegerField(null=True)  # 推荐（默认）完成时间，用于生成默认ddl
-    audience = models.IntegerField()  # 项目受众
+    audience = models.IntegerField()  # 项目受众 0 表示新人，1表示老师
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
 

@@ -2,8 +2,8 @@ import json
 import logging
 
 from django.http import HttpRequest
-from .api_util import gen_response, role_authentication, load_private_info
-from .models import PrivateInfo,UserProgramTable
+from .api_util import gen_response, role_authentication, load_private_info, check_method
+from .models import PrivateInfo, UserProgramTable
 
 
 def admin_newcomer_list(request: HttpRequest):
@@ -24,6 +24,8 @@ def teacher_wait_list(req: HttpRequest):
     :param req:
     :return:
     """
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
     username = req.session.get("username", None)
     if username is None:
         return gen_response(
@@ -41,6 +43,8 @@ def teacher_wait_list(req: HttpRequest):
 
 def nominate_process(req: HttpRequest):
     username = req.session.get("username", None)
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
     if username is None:
         return gen_response(
             400, message="no username in session, probly not login")
@@ -60,8 +64,9 @@ def nominate_process(req: HttpRequest):
             tmp["teacherExaminedStatus"] = "拒绝"
         else:
             raise Exception("数据可数据错误，请检查写入接口是否正确")
-        # program_relations = teacher.ProgramsAsUser.get()
-
+        program_relations = teacher.ProgramsAsUser.filter(program__audience=1)
+        print(type(program_relations))
+        print( program_relations)
 
     return gen_response(400, message="not supported")
 

@@ -21,7 +21,6 @@ def login(request: HttpRequest):  # 登录
     """
     try:
         data = json.loads(request.body)
-        print(data)
     except Exception:
         return gen_response(400, 'Load json request faile')
 
@@ -56,7 +55,6 @@ def join(request):  # 注册
     username = data.get('username')
     password = data.get('password')
     personal_info = data.get('personal_info')
-    print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
     if not (username and password and personal_info):
         return gen_response(400, message="lack of argument")
     # 检查用户名格式

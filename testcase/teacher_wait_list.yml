@@ -2,7 +2,7 @@
   ident:
     - admin
   request:
-    method: POST
+    method: GET
     url: /teacher_wait_list
     data:
     headers:
@@ -14,6 +14,17 @@
     - teacher
     - HRBP
     - newcomer
+  request:
+    method: GET
+    url: /teacher_wait_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 方法错误
+  ident:
+    - admin
   request:
     method: POST
     url: /teacher_wait_list

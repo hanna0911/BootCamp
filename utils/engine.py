@@ -23,7 +23,6 @@ class Engine:
                 case = next(gen)
                 self.run(case)
             except StopIteration as e:
-                print('Generator return value:', e.value)
                 break
 
     def run(self, case):
