@@ -155,6 +155,30 @@ def create_data_xlsx(path: str):
             teacherDutyDate=info["teacherDutyDate"],
             teacherScore=info["teacherScore"],
         )
+    size = len(PrivateInfo.objects.all())
+    logging.info("{} private info loaded".format(size))
+
+    df: pd.DataFrame = open_xlsx(str(root) + path, "teachernewcomertable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        teacher = PrivateInfo.objects.get(name=info["teacher"])
+        newcomer = PrivateInfo.objects.get(name=info["newcomer"])
+        TeacherNewcomerTable.objects.create(
+            newcomer=newcomer,
+            teacher=teacher,
+            teacherScore=info["teacherScore"],
+            newcomerToTeacher=info["newcomerToTeacher"],
+            newcomerScore=info["newcomerScore"],
+            teacherToNewcomer=info["teacherToNewcomer"]
+        )
+    size = len(TeacherNewcomerTable.objects.all())
+    logging.info("{} teacher newcomer info loaded".format(size))
+
+    df:pd.DataFrame = open_xlsx(str(root)+path,"newcomerrecode")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        teacher = PrivateInfo.objects.get(name=info["teacher"])
+        newcomer = PrivateInfo.objects.get(name=info["newcomer"])
 
 
 def create_templage_xlsx(path: str):
@@ -183,3 +207,5 @@ def create_templage_xlsx(path: str):
 
     writer.save()
     writer.close()
+
+
