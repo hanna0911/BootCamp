@@ -122,7 +122,7 @@ class ContentTable(models.Model):
     beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
     endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关
-    taskType = models.IntegerField()  # 任务类型(针对task类)
+    taskType = models.IntegerField(default=0)  # 任务类型(针对task类)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
 
@@ -172,9 +172,9 @@ class UserProgramTable(models.Model):
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
     finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
-    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
-    deadline = models.DateTimeField()  # 项目对于个人来说的ddl
+    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
+    endTime = models.DateTimeField(null=True)  # 结束时间（仅结束后有意义，完成项目时赋值）
+    deadline = models.DateTimeField(null=True)  # 项目对于个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsAssigner")  # 该program的指派人
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 

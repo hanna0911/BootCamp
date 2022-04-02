@@ -24,7 +24,7 @@ Clients = {
 
 class Tests(TestCase):
     def setUp(self):
-        # create_data_yml("/testcase/init_data.yml")
+        create_data_yml("/testcase/init_data.yml")
         create_data_xlsx("/testcase/template.xlsx")
 
     def login(self, ident):
