@@ -108,5 +108,5 @@ class Tests(TestCase):
 
     # def test_teacher_wait_list(self):
     #     self.process("/testcase/teacher_wait_list.yml")
-    # def test_nominate_process(self):
-    #     self.process("/testcase/nominate_process.yml")
+    def test_nominate_process(self):
+        self.process("/testcase/nominate_process.yml")

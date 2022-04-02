@@ -64,11 +64,13 @@ def nominate_process(req: HttpRequest):
             tmp["teacherExaminedStatus"] = "拒绝"
         else:
             raise Exception("数据可数据错误，请检查写入接口是否正确")
-        program_relations = teacher.ProgramsAsUser.filter(program__audience=1)
-        print(type(program_relations))
-        print(program_relations)
-
-    return gen_response(400, message="not supported")
+        user_program = teacher.ProgramsAsUser.filter(program__audience=1).first()
+        if user_program.finished:
+            tmp["learningStatus"] = "已完成"
+        else:
+            tmp["learningStatus"] = "进行中"
+        return_list.append(tmp)
+    return gen_response(200, return_list, "send {} data".format(len(return_list)))
 
 
 def duty_teacher_list(req: HttpRequest):

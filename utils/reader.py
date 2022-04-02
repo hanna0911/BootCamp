@@ -286,6 +286,39 @@ def create_data_xlsx(path: str):
         )
     logging.info("{} user program info loaded".format(len(UserProgramTable.objects.all())))
 
+    df: pd.DataFrame = open_xlsx(str(root) + path, "usercontenttable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        user = PrivateInfo.objects.get(username=info["user"])
+        content = ContentTable.objects.get(id=info["content"])
+        assigner = PrivateInfo.objects.get(username=info["assigner"])
+        UserContentTable.objects.create(
+            user=user,
+            content=content,
+            finished=info["finished"],
+            userBeginTime=info["userBeginTime"],
+            userEndTime=info["userEndTime"],
+            deadline=info["deadline"],
+            assigner=assigner,
+            isObligatory=info["isObligatory"],
+            finishedLessonCount=info["finishedLessonCount"],
+            examUsedTime=info["examUsedTime"],
+            score=info["score"]
+        )
+    logging.info("{} user content info loaded".format(len(UserContentTable.objects.all())))
+    df: pd.DataFrame = open_xlsx(str(root) + path, "userlessontable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        user = PrivateInfo.objects.get(username=info["user"])
+        lesson = LessonTable.objects.get(id=info["lesson"])
+        UserLessonTable.objects.create(
+            user=user,
+            lesson=lesson,
+            beginTime=info['beginTime'],
+            endTime=info["endTime"],
+            finished=info["finished"]
+        )
+    logging.info("{} user lesson info loaded".format(len(UserLessonTable.objects.all())))
 
 
 def create_templage_xlsx(path: str):
