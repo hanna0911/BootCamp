@@ -57,7 +57,8 @@ class Honor(models.Model):
     """
     type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
     owner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 荣誉的归属者
-    pic = models.ImageField()
+    text = models.CharField(max_length=LONG_INFO_LEN) # 奖励描述
+    pic = models.ImageField() # 荣誉图片
 
 
 class TeacherNewcomerTable(models.Model):
@@ -111,7 +112,7 @@ class ContentTable(models.Model):
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
-    type = models.IntegerField()  # 事件类型
+    type = models.IntegerField()  # 事件类型 0 代表course，1代表exam，2代表task
     isTemplate = models.BooleanField()  # 是否是模板
     programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间

@@ -66,7 +66,7 @@ def nominate_process(req: HttpRequest):
             raise Exception("数据可数据错误，请检查写入接口是否正确")
         program_relations = teacher.ProgramsAsUser.filter(program__audience=1)
         print(type(program_relations))
-        print( program_relations)
+        print(program_relations)
 
     return gen_response(400, message="not supported")
 
