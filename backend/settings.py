@@ -24,7 +24,9 @@ SECRET_KEY = 'django-insecure-y5ajh9&xag899uxg#wlzbwz(!ra*9s+ugbstb%b!2zzstd!8g9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8080"
+]
 
 # SESSIONS: sessions related settings
 # TODO: 在改成https之后，需要修改SESSION_COOKIE_SECURE为True
@@ -54,7 +56,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware', # test前后端login通讯，暂时注释掉！记得改回来！
+    'django.middleware.csrf.CsrfViewMiddleware', # test前后端login通讯，暂时注释掉！记得改回来！
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -106,6 +108,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
