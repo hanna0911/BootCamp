@@ -1,34 +1,34 @@
-- name: admin获取候选导师列表
+- name: admin获取候提名进度
   ident:
     - admin
   request:
     method: GET
-    url: /teacher_wait_list
+    url: /nominate_process
     data:
     headers:
   validate:
     - equals: { status_code: 200 }
 
-- name: 其他获取候选导师列表
+- name: 其他角色获取提名进度
   ident:
     - teacher
     - HRBP
     - newcomer
   request:
     method: GET
-    url: /teacher_wait_list
+    url: /nominate_process
     data:
     headers:
   validate:
     - equals: { status_code: 400 }
 
-- name: 方法错误
+- name: 错误方法
   ident:
     - admin
   request:
     method: POST
-    url: /teacher_wait_list
+    url: /nominate_process
     data:
     headers:
   validate:
-    - equals: { status_code: 400 }
+    - equals: { status_code: 200 }

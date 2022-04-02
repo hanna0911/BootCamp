@@ -47,7 +47,6 @@ class Tests(TestCase):
                 case = next(gen)
                 self.request(case)
             except StopIteration as e:
-                print('Generator return value:', e.value)
                 break
 
     def get_response(self, req: dict) -> JsonResponse:
@@ -93,17 +92,19 @@ class Tests(TestCase):
         else:
             self.validate(validate, self.get_response(req))
 
-    def test_join(self):
-        self.process("/testcase/join.yml")
+    # def test_join(self):
+    #     self.process("/testcase/join.yml")
 
-    def test_login(self):
-        self.process("/testcase/login.yml")
-    @pytest.mark.run('first')
-    def test_get_session(self):
-        self.process("/testcase/get_session.yml")
+    # def test_login(self):
+    #     self.process("/testcase/login.yml")
+    # @pytest.mark.run('first')
+    # def test_get_session(self):
+    #     self.process("/testcase/get_session.yml")
 
-    def test_switch_role(self):
-        self.process("/testcase/switch_role.yml")
+    # def test_switch_role(self):
+    #     self.process("/testcase/switch_role.yml")
 
-    def test_teacher_wait_list(self):
-        self.process("/testcase/teacher_wait_list.yml")
+    # def test_teacher_wait_list(self):
+    #     self.process("/testcase/teacher_wait_list.yml")
+    def test_nominate_process(self):
+        self.process("/testcase/nominate_process.yml")

@@ -5,12 +5,19 @@
 import datetime
 import json
 import logging
+import django
 from django.http import HttpRequest
+from django.views.decorators.csrf import ensure_csrf_cookie
+
 from .models import PrivateInfo
 from .api_util import *
 
 
 # Create your views here.
+@ensure_csrf_cookie
+def get_token(request: HttpRequest):
+    if request.method == "GET":
+        return gen_standard_response(200, {})
 
 
 def login(request: HttpRequest):  # 登录
@@ -21,7 +28,6 @@ def login(request: HttpRequest):  # 登录
     """
     try:
         data = json.loads(request.body)
-        print(data)
     except Exception:
         return gen_response(400, 'Load json request faile')
 
@@ -38,8 +44,12 @@ def login(request: HttpRequest):  # 登录
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
         # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
+        session_key = request.session.session_key
         # 返回成功信息
-        return gen_response(200, message="login successful")
+        # 返回成功信息
+        return gen_set_cookie_response(code=200,
+                                       data={"result": "success", "message": "account created"},
+                                       cookie={"SessionID": session_key})
 
 
 def join(request):  # 注册
@@ -56,17 +66,20 @@ def join(request):  # 注册
     username = data.get('username')
     password = data.get('password')
     personal_info = data.get('personal_info')
-    print(username, password, personal_info)  # 加密后的用户名、密码，收到的个人信息（部门+城市）
     if not (username and password and personal_info):
-        return gen_response(400, message="lack of argument")
+        return gen_standard_response(code=400,
+                                     data={"result": "failure", "message": 'lack of argument'})
     # 检查用户名格式
     if not check_username_format(username):
-        return gen_response(400, message="wrong username format")
+        return gen_standard_response(code=400,
+                                     data={"result": "failure", "message": 'wrong username format'})
     elif not check_password_format(password):
-        return gen_response(400, message="wrong password format")
+        return gen_standard_response(code=400,
+                                     data={"result": "failure", "message": 'wrong password format'})
     # 检查用户名重复
     if len(PrivateInfo.objects.all().filter(username__exact=username)) > 0:
-        return gen_response(400, message="duplicate username")
+        return gen_standard_response(code=400,
+                                     data={"result": "failure", "message": 'duplicate username'})
     new_person = PrivateInfo(name=personal_info["name"], dept=personal_info["dept"],
                              city=personal_info["city"], password=encrypt(password),
                              username=username)
@@ -78,8 +91,11 @@ def join(request):  # 注册
     # 设置session信息并保存
     request.session["username"] = username
     request.session['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份
+    session_key = request.session.session_key
     # 返回成功信息
-    return gen_response(200, message="registration successful")
+    return gen_set_cookie_response(code=200,
+                                   data={"result": "success", "message": "account created"},
+                                   cookie={"SessionID": session_key})
 
 
 def switch_role(request: HttpRequest):
@@ -109,8 +125,9 @@ def switch_role(request: HttpRequest):
     user_session['role'] = target_role
     user_session.set_expiry(3600)  # session续命1小时
     logging.info(user_session['role'])
-    return gen_response(200, message='role switched to ' + target_role)
-
+    return gen_standard_response(code=200,
+                                 data={"result": "success",
+                                       "message": 'role switched to ' + target_role})
 #
 # def newcomer_info(request: HttpRequest):
 #     """
