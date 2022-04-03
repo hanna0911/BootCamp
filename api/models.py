@@ -57,7 +57,7 @@ class Honor(models.Model):
     """
     type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
     owner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 荣誉的归属者
-    text = models.CharField(max_length=LONG_INFO_LEN) # 奖励描述
+    text = models.CharField(max_length=LONG_INFO_LEN, default="None")  # 奖励描述
     pic = models.ImageField() # 荣誉图片
 
 
