@@ -175,3 +175,10 @@ def gen_standard_response(code: int, data: dict = {}):
     response: JsonResponse = JsonResponse(data)
     response.status_code = code
     return response
+
+
+def illegal_request_type_error_response():
+    response: JsonResponse = JsonResponse({"result": "error",
+                                           "message": "illegal request type"})
+    response.status_code = 400
+    return response
