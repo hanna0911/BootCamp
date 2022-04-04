@@ -25,7 +25,7 @@ Clients = {
 class Tests(TestCase):
     def setUp(self):
         create_data_yml("/testcase/init_data.yml")
-        # create_data_xlsx("/testcase/template.xlsx")
+        create_data_xlsx("/testcase/template.xlsx")
 
     def login(self, ident):
         if ident == "admin":
@@ -92,6 +92,8 @@ class Tests(TestCase):
         else:
             self.validate(validate, self.get_response(req))
 
+    def test_blanck(self):
+        assert 1,1
     # def test_join(self):
     #     self.process("/testcase/join.yml")
 
