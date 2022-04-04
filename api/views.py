@@ -164,7 +164,7 @@ def newcomer_info(request: HttpRequest):
     try:  # 尝试parse请求中的json
         request_data = json.loads(request.body)
     except Exception:
-        return unknown_error_response()
+        return gen_response(400, message="load json fail")
     target_username = request_data.get("newcomer")
     if target_username is None:
         return unknown_error_response()
@@ -194,14 +194,14 @@ def newcomer_info(request: HttpRequest):
             "details": newcomer.detail},
         "programs": []}
     # TODO: finish the user-program relation part of this function
-    # for relation in program_relations:
-    #     response_data["programs"].append({
-    #         "program_id": relation.program.id,
-    #         "begin_time": str(relation.beginTime),
-    #         "end_time": str(relation.endTime),
-    #         # "finished_content": relation.finishedContentCount,
-    #         "score": relation.score,
-    #         "deadline": str(relation.deadline)
-    #     })
+    for relation in program_relations:
+        response_data["programs"].append({
+            "program_id": relation.program.id,
+            "begin_time": str(relation.beginTime),
+            "end_time": str(relation.endTime),
+            # "finished_content": relation.finishedContentCount,
+            "score": relation.score,
+            "deadline": str(relation.deadline)
+        })
     print(response_data)
     return gen_standard_response(200, response_data)

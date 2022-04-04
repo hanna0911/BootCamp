@@ -93,7 +93,8 @@ class Tests(TestCase):
             self.validate(validate, self.get_response(req))
 
     def test_blanck(self):
-        assert 1,1
+        assert 1, 1
+
     # def test_join(self):
     #     self.process("/testcase/join.yml")
 
@@ -108,5 +109,7 @@ class Tests(TestCase):
 
     # def test_teacher_wait_list(self):
     #     self.process("/testcase/teacher_wait_list.yml")
-    def test_nominate_process(self):
-        self.process("/testcase/nominate_process.yml")
+    # def test_nominate_process(self):
+    #     self.process("/testcase/nominate_process.yml")
+    def test_get_newcomer_info(self):
+        self.process("/testcase/get_newcomer_info.yml")

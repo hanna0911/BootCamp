@@ -1,1 +1,11 @@
 #TODO
+- name: admin获取新人信息
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /newcomer_info
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
