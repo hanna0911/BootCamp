@@ -81,7 +81,7 @@ class NewcomerRecode(models.Model):
     content = models.CharField(max_length=COMMENT_LEN)
     teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeTeacher")  # 外键，该关系中的导师
     newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeNewcomer")  # 外键，该关系中的新人
-    commitTime = models.DateTimeField(auto_now=True)  # 带新记录发表的时间
+    commitTime = models.DateTimeField(auto_now_add=True)  # 带新记录发表的时间
 
 
 class ProgramTable(models.Model):
@@ -172,7 +172,7 @@ class UserProgramTable(models.Model):
     program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
     finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
-    beginTime = models.DateTimeField(auto_now=True)  # 开始时间
+    beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField(null=True)  # 结束时间（仅结束后有意义，完成项目时赋值）
     deadline = models.DateTimeField(null=True)  # 项目对于个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsAssigner")  # 该program的指派人
