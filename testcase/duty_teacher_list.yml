@@ -1,33 +1,33 @@
-- name: admin获取候提名进度
+- name: admin,HRBP在岗导师列表
   ident:
     - admin
+    - HRBP
   request:
     method: GET
-    url: /nominate_process
+    url: /duty_teacher_list
     data:
     headers:
   validate:
     - equals: { status_code: 200 }
 
-- name: 其他角色获取提名进度
+- name: 其他获取候选导师列表
   ident:
     - teacher
-    - HRBP
     - newcomer
   request:
     method: GET
-    url: /nominate_process
+    url: /duty_teacher_list
     data:
     headers:
   validate:
     - equals: { status_code: 400 }
 
-- name: 错误方法
+- name: 方法错误
   ident:
     - admin
   request:
     method: POST
-    url: /nominate_process
+    url: /duty_teacher_list
     data:
     headers:
   validate:
