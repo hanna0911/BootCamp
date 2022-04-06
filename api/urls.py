@@ -3,6 +3,7 @@ from . import views, lists
 
 # api应用的路由配置
 urlpatterns = [
+
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path('switch_role', views.switch_role, name='switch_role'),  # 切换身份
