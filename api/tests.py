@@ -119,3 +119,9 @@ class Tests(TestCase):
 
     # def test_duty_teacher_list(self):
     #     self.process("/testcase/duty_teacher_list.yml")
+
+    def test_nominated_list(self):
+        self.process("/testcase/nominated_list.yml")
+
+    def test_admin_newcomer_list(self  ):
+        self.process("/testcase/admin_newcomer_list.yml")

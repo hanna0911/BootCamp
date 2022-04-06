@@ -1,0 +1,34 @@
+- name: admin获取新人列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /admin_newcomer_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 其他角色获取新人列表
+  ident:
+    - teacher
+    - HRBP
+    - newcomer
+  request:
+    method: GET
+    url: /admin_newcomer_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 错误方法
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /admin_newcomer_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }

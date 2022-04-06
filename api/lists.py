@@ -13,8 +13,21 @@ def admin_newcomer_list(request: HttpRequest):
     仅限管理员使用
     TODO
     """
+    if not check_method(request, "GET"):
+        return gen_response(400, message="invalid method")
+    username = request.session.get("username", None)
+    if username is None:
+        return gen_response(400, message="no username in session, probly not login")
+    if not role_authentication(username, "admin"):
+        return gen_response(400, message="permission deny")
 
-    return gen_response(400, message="not supported")
+    newcomer_list = PrivateInfo.objects.filter(isNew=True, isTeacher=False, isAdmin=False, isHRBP=False)
+    return_list = []
+    for newcomer in newcomer_list:
+        tmp = load_private_info(newcomer)
+        return_list.append(tmp)
+
+    return gen_response(200, return_list, "tmp supported")
 
 
 def teacher_wait_list(req: HttpRequest):
@@ -95,4 +108,6 @@ def duty_teacher_list(req: HttpRequest):
 
 
 def nominated_list(req: HttpRequest):
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
     return gen_response(400, "not supported")
