@@ -2,7 +2,7 @@ import json
 import logging
 
 from django.http import HttpRequest
-from .api_util import gen_response, role_authentication, load_private_info, check_method
+from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check
 from .models import PrivateInfo, UserProgramTable
 
 
@@ -37,7 +37,6 @@ def teacher_wait_list(req: HttpRequest):
     for new in newcommer_list:
         tmp = load_private_info(new)
         return_list.append(tmp)
-    logging.error(return_list)
     return gen_response(200, return_list)
 
 
@@ -74,4 +73,26 @@ def nominate_process(req: HttpRequest):
 
 
 def duty_teacher_list(req: HttpRequest):
-    return gen_response(400, message="not supported      ")
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(
+            400, message="no username in session, probly not login")
+    if not role_list_check(username, ["admin", "HRBP"]):
+        return gen_response(400, message="permission denied")
+    teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=True)
+    return_list = []
+    for teacher in teacher_list:
+        tmp = load_private_info(teacher)
+        tmp["historicalMembers"] = teacher.historicalMembers
+        tmp["currentMembers"] = teacher.currentMembers
+        tmp["teacherDutyDate"] = teacher.teacherDutyDate
+        tmp["teacherScore"] = teacher.teacherScore
+        tmp["OKR"] = "unknown"
+        return_list.append(tmp)
+    return gen_response(200, data=return_list, message="send {} data".format(len(return_list)))
+
+
+def nominated_list(req: HttpRequest):
+    return gen_response(400, "not supported")

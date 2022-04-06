@@ -132,6 +132,23 @@ def role_authentication(username: str, target_role: str):
         return user_info.isAdmin
 
 
+def role_list_check(username: str, rolelist: list):
+    if len(PrivateInfo.objects.filter(username=username)) == 0:
+        return False
+    info = PrivateInfo.objects.get(username=username)
+    for role in rolelist:
+        check_role_format(role)
+        if role == "newcomer" and info.isNew:
+            return True
+        if role == "admin" and info.isAdmin:
+            return True
+        if role.lower() == "hrbp" and info.isHRBP:
+            return True
+        if role == " teacher" and info.isTeacher:
+            return True
+    return False
+
+
 def load_private_info(pv: PrivateInfo) -> dict:
     """
     只load 个人信息部分，新人和导师信息需要根据不同接口分别写入
@@ -149,7 +166,7 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["joinStatus"] = pv.joinStatus
     info["detail"] = pv.detail
     info["leader"] = pv.leader
-    info["registrationDat"] = pv.registrationDate
+    info["registrationDate"] = pv.registrationDate
     info["employeeType"] = pv.employeeType
 
     info["isAdmin"] = pv.isAdmin

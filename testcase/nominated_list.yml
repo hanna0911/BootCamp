@@ -1,0 +1,23 @@
+- name: HRBP获取待审核导师列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /nominated_list
+    data: {}
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 其他身份获取待审核导师列表
+  ident:
+    - admin
+    - newcomer
+    - teacher
+  request:
+    method: GET
+    url: /nominated_list
+    data: {}
+    headers:
+  validate:
+    - equals: { status_code: 400 }

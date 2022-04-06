@@ -11,5 +11,6 @@ urlpatterns = [
     path("nominate_process", lists.nominate_process, name="nominate_process"),
     path("duty_teacher_list", lists.duty_teacher_list, name="duty_teacher_list"),
     path("get_token", views.get_token, name="get_token"),
-    path("newcomer_info", views.newcomer_info, name="newcomer_info")
+    path("newcomer_info", views.newcomer_info, name="newcomer_info"),
+    path("nominated_list", lists.nominated_list, name="nominated_list")
 ]
