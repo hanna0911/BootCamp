@@ -1,8 +1,9 @@
 from django.urls import path
 from . import views, lists
-
+from backend.write_db import write_db
 # api应用的路由配置
 urlpatterns = [
+    path("write_db", write_db),
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path('switch_role', views.switch_role, name='switch_role'),  # 切换身份

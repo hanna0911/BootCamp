@@ -33,7 +33,7 @@ def admin_newcomer_list(request: HttpRequest):
             tmp["teacher"] = teacher_queue.first().teacher.name
             tmp["tutor"] = teacher_queue.first().teacher.name
         tmp["joinBootcamp"] = True
-        tmp["graduated"] = newcomer.newcomerIsGraduate # temp
+        tmp["graduated"] = newcomer.newcomerIsGraduate  # temp
         tmp["evaluate"] = "暂无"
         return_list.append(tmp)
     return gen_response(200, return_list, "tmp supported")
@@ -86,7 +86,9 @@ def nominate_process(req: HttpRequest):
         else:
             raise Exception("数据可数据错误，请检查写入接口是否正确")
         user_program = teacher.ProgramsAsUser.filter(program__audience=1).first()
-        if user_program.finished:
+        if user_program is None:
+            tmp["learningStatus"] = "未参加"
+        elif user_program.finished:
             tmp["learningStatus"] = "已完成"
         else:
             tmp["learningStatus"] = "进行中"
@@ -117,14 +119,14 @@ def duty_teacher_list(req: HttpRequest):
 
 
 def nominated_list(req: HttpRequest):
-#     if not check_method(req, "GET"):
-#         return gen_response(400, message="invalid method")
-#     username = req.session.get("username", None)
-#     if username is None:
-#         return gen_response(
-#             400, message="no username in session, probly not login")
-#     if not role_authentication(username, "HRBP"):
-#         return gen_response(400, message="permission denied")
-#     teacher_list = PrivateInfo.objects.filter()
-#
+    #     if not check_method(req, "GET"):
+    #         return gen_response(400, message="invalid method")
+    #     username = req.session.get("username", None)
+    #     if username is None:
+    #         return gen_response(
+    #             400, message="no username in session, probly not login")
+    #     if not role_authentication(username, "HRBP"):
+    #         return gen_response(400, message="permission denied")
+    #     teacher_list = PrivateInfo.objects.filter()
+    #
     return gen_response(400, message="not supported")
