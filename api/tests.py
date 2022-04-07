@@ -3,7 +3,6 @@
 """
 import pytest
 from django.test import TestCase, Client
-from django.contrib.sessions.backends.db import SessionStore
 from django.http import JsonResponse
 from utils.reader import *
 import logging
@@ -24,7 +23,8 @@ Clients = {
 
 class Tests(TestCase):
     def setUp(self):
-        create_data_yml("/testcase/init_data.yml")
+        # create_data_yml("/testcase/init_data.yml")
+        self.process("/testcase/write_db.yml")
         # create_data_xlsx("/testcase/template.xlsx")
 
     def login(self, ident):
@@ -92,19 +92,34 @@ class Tests(TestCase):
         else:
             self.validate(validate, self.get_response(req))
 
-    # def test_join(self):
-    #     self.process("/testcase/join.yml")
+    def test_blanck(self):
+        assert 1, 1
 
-    # def test_login(self):
-    #     self.process("/testcase/login.yml")
-    # @pytest.mark.run('first')
-    # def test_get_session(self):
-    #     self.process("/testcase/get_session.yml")
+    def test_join(self):
+        self.process("/testcase/join.yml")
 
-    # def test_switch_role(self):
-    #     self.process("/testcase/switch_role.yml")
+    def test_login(self):
+        self.process("/testcase/login.yml")
 
-    # def test_teacher_wait_list(self):
-    #     self.process("/testcase/teacher_wait_list.yml")
+    def test_switch_role(self):
+        self.process("/testcase/switch_role.yml")
+
+    def test_teacher_wait_list(self):
+        self.process("/testcase/teacher_wait_list.yml")
+
+    def test_duty_teacher_list(self):
+        self.process("/testcase/duty_teacher_list.yml")
+
+
+    def test_admin_newcomer_list(self  ):
+        self.process("/testcase/admin_newcomer_list.yml")
+
+
     def test_nominate_process(self):
         self.process("/testcase/nominate_process.yml")
+
+    # def test_nominated_list(self):
+    #     self.process("/testcase/nominated_list.yml")
+
+    # def test_get_newcomer_info(self):
+    #     self.process("/testcase/get_newcomer_info.yml")

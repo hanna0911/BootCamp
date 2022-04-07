@@ -1,8 +1,10 @@
 from django.urls import path
-from . import views, lists
+from . import views, lists, upload
+from backend.write_db import write_db
 
 # api应用的路由配置
 urlpatterns = [
+    path("write_db", write_db),
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path('switch_role', views.switch_role, name='switch_role'),  # 切换身份
@@ -10,5 +12,9 @@ urlpatterns = [
     path("teacher_wait_list", lists.teacher_wait_list, name="teacher_wait_list"),
     path("nominate_process", lists.nominate_process, name="nominate_process"),
     path("duty_teacher_list", lists.duty_teacher_list, name="duty_teacher_list"),
-    path("get_token", views.get_token, name="get_token")
+    path("get_token", views.get_token, name="get_token"),
+    path("newcomer_info", views.newcomer_info, name="newcomer_info"),
+    path("nominated_list", lists.nominated_list, name="nominated_list"),
+    path("create_program", upload.create_program, name="create_program"),
+    path("admin_create_content_template", upload.create_content, name="create_content_template")
 ]

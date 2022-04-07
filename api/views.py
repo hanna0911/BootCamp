@@ -6,10 +6,11 @@ import datetime
 import json
 import logging
 import django
+import requests
 from django.http import HttpRequest
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from .models import PrivateInfo
+from .models import PrivateInfo, UserProgramTable, ProgramTable
 from .api_util import *
 
 
@@ -18,6 +19,8 @@ from .api_util import *
 def get_token(request: HttpRequest):
     if request.method == "GET":
         return gen_standard_response(200, {})
+    else:  # 只接受GET请求
+        return illegal_request_type_error_response()
 
 
 def login(request: HttpRequest):  # 登录
@@ -26,6 +29,8 @@ def login(request: HttpRequest):  # 登录
     request.body: username, password
     保存相应的session信息用来完成登录的持久化
     """
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -57,6 +62,8 @@ def join(request):  # 注册
     recieve post '/join' from frontend
     request.body: username, password, personal_info
     """
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
     try:
         data = json.loads(request.body)
     except Exception:
@@ -104,6 +111,8 @@ def switch_role(request: HttpRequest):
     负载格式：{"action": "switch role", "switch_to": "newcomer/teacher/hrbp/admin"}
     更改当前身份
     """
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
     try:
         request_data = json.loads(request.body)
     except Exception:  # json parse 失败
@@ -128,9 +137,71 @@ def switch_role(request: HttpRequest):
     return gen_standard_response(code=200,
                                  data={"result": "success",
                                        "message": 'role switched to ' + target_role})
-#
-# def newcomer_info(request: HttpRequest):
-#     """
-#     接受前端向/newcomer_info的post请求
-#     TODO
-#     """
+
+
+def newcomer_info(request: HttpRequest):
+    """
+    接受前端向api/newcomer_info的post请求
+    负载格式：{"action": "newcomer info", "newcomer": "__新人用户名__"}
+    响应格式：{"result": "success", "message": "info for __新人用户名__ retrieved", "personal_info":{
+            "name": "__新人姓名__",
+            "city": "__新人城市__",
+            "department": "__新人部门__",
+            "username": "__新人用户名__",
+            "bio": "__新人签名__",
+            "join_date": "__新人入职时间__",
+            "type": "__新人员工类型__",
+            "manager": "__新人上级__",
+            "details": "__新人入职情况详情__"},
+            "programs": [{"program_id": "__项目id__",
+                        "begin_time": "__开始时间__", "end_time": "__结束时间__",
+                        "finished_content": __完成内容数__, "score": __分数__, deadline: "__项目ddl__"},
+                        {}, ... , {}]}
+    权限：admin, teacher
+    """
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
+    try:  # 尝试parse请求中的json
+        request_data = json.loads(request.body)
+    except Exception:
+        return gen_response(400, message="load json fail")
+    target_username = request_data.get("newcomer")
+    if target_username is None:
+        return unknown_error_response()
+    user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）
+    if user_session is None or "role" not in user_session.keys():  # session不存在
+        return session_timeout_response()
+    if user_session["role"] != "admin" and user_session["role"] != "teacher":  # 权限认证
+        return unauthorized_action_response()
+    if len(PrivateInfo.objects.filter(username__exact=target_username)) == 0:  # 查找新人
+        return gen_standard_response(400, {"result": "failure",
+                                           "message": "newcomer not found"})
+    # 获取个人信息
+    newcomer = PrivateInfo.objects.filter(username__exact=target_username).first()
+    program_relations = UserProgramTable.objects.filter(user=newcomer).all()
+    response_data = {
+        "result": "success",
+        "message": f"info for {newcomer.username} retrieved",
+        "personal_info": {
+            "name": newcomer.name,
+            "city": newcomer.city,
+            "department": newcomer.dept,
+            "username": newcomer.username,
+            "bio": newcomer.bio,
+            "join_date": str(newcomer.joinDate),
+            "type": newcomer.employeeType,
+            "manager": newcomer.leader,
+            "details": newcomer.detail},
+        "programs": []}
+    # TODO: finish the user-program relation part of this function
+    for relation in program_relations:
+        response_data["programs"].append({
+            "program_id": relation.program.id,
+            "begin_time": str(relation.beginTime),
+            "end_time": str(relation.endTime),
+            "finished_content": relation.finishedContentCount,
+            "score": relation.score,
+            "deadline": str(relation.deadline)
+        })
+    print(response_data)
+    return gen_standard_response(200, response_data)

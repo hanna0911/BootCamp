@@ -132,6 +132,23 @@ def role_authentication(username: str, target_role: str):
         return user_info.isAdmin
 
 
+def role_list_check(username: str, rolelist: list):
+    if len(PrivateInfo.objects.filter(username=username)) == 0:
+        return False
+    info = PrivateInfo.objects.get(username=username)
+    for role in rolelist:
+        check_role_format(role)
+        if role == "newcomer" and info.isNew:
+            return True
+        if role == "admin" and info.isAdmin:
+            return True
+        if role.lower() == "hrbp" and info.isHRBP:
+            return True
+        if role == " teacher" and info.isTeacher:
+            return True
+    return False
+
+
 def load_private_info(pv: PrivateInfo) -> dict:
     """
     只load 个人信息部分，新人和导师信息需要根据不同接口分别写入
@@ -146,10 +163,22 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
-    info["joinStatus"] = pv.joinStatus
+    if pv.joinStatus == 0:
+        info["joinStatus"] = "待入职"
+        info["employed"] = "待入职"
+    elif pv.joinStatus == 1:
+        info["joinStatus"] = "在职"
+        info["employed"] = "在职"
+    elif pv.joinStatus == 2:
+        info["joinStatus"] = "离职"
+        info["employed"] = "离职"
+    else:
+        info["joinStatus"] = "未知"
+        info["employed"] = "未知"
     info["detail"] = pv.detail
     info["leader"] = pv.leader
-    info["registrationDat"] = pv.registrationDate
+    info["superior"] = pv.leader  # temp
+    info["registrationDate"] = pv.registrationDate
     info["employeeType"] = pv.employeeType
 
     info["isAdmin"] = pv.isAdmin
@@ -174,4 +203,11 @@ def gen_set_cookie_response(code: int, data: dict = {}, cookie: dict = {}):
 def gen_standard_response(code: int, data: dict = {}):
     response: JsonResponse = JsonResponse(data)
     response.status_code = code
+    return response
+
+
+def illegal_request_type_error_response():
+    response: JsonResponse = JsonResponse({"result": "error",
+                                           "message": "illegal request type"})
+    response.status_code = 400
     return response

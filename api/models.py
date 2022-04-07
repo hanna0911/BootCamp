@@ -57,7 +57,7 @@ class Honor(models.Model):
     """
     type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
     owner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 荣誉的归属者
-    text = models.CharField(max_length=LONG_INFO_LEN) # 奖励描述
+    text = models.CharField(max_length=LONG_INFO_LEN, default="None")  # 奖励描述
     pic = models.ImageField() # 荣誉图片
 
 
@@ -81,7 +81,7 @@ class NewcomerRecode(models.Model):
     content = models.CharField(max_length=COMMENT_LEN)
     teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeTeacher")  # 外键，该关系中的导师
     newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeNewcomer")  # 外键，该关系中的新人
-    commitTime = models.DateTimeField(auto_now=True)  # 带新记录发表的时间
+    commitTime = models.DateTimeField(auto_now_add=True)  # 带新记录发表的时间
 
 
 class ProgramTable(models.Model):
@@ -119,12 +119,14 @@ class ContentTable(models.Model):
     # course相关
     lessonCount = models.IntegerField()  # lesson数
     # exam相关
+    questions = models.FileField()  # 考题csv
     beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
     endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关
-    taskType = models.IntegerField()  # 任务类型(针对task类)
+    taskType = models.IntegerField(default=0)  # 任务类型(针对task类 0-text, 1-link, 2-file)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
+    taskFile = models.FileField()  # 任务文件
 
 
 class LessonTable(models.Model):
@@ -173,8 +175,8 @@ class UserProgramTable(models.Model):
     finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField()  # 结束时间（仅结束后有意义，完成项目时赋值）
-    deadline = models.DateTimeField()  # 项目对于个人来说的ddl
+    endTime = models.DateTimeField(null=True)  # 结束时间（仅结束后有意义，完成项目时赋值）
+    deadline = models.DateTimeField(null=True)  # 项目对于个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsAssigner")  # 该program的指派人
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
@@ -195,7 +197,7 @@ class UserContentTable(models.Model):
     isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
     # exam相关
-    examUsedTime = models.TimeField()  # 个人考试用时
+    examUsedTime = models.IntegerField(default=-1)  # 个人考试用时
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
     # task相关
 
