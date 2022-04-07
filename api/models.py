@@ -119,12 +119,14 @@ class ContentTable(models.Model):
     # course相关
     lessonCount = models.IntegerField()  # lesson数
     # exam相关
+    questions = models.FileField()  # 考题csv
     beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
     endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关
-    taskType = models.IntegerField(default=0)  # 任务类型(针对task类)
+    taskType = models.IntegerField(default=0)  # 任务类型(针对task类 0-text, 1-link, 2-file)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
+    taskFile = models.FileField()  # 任务文件
 
 
 class LessonTable(models.Model):
