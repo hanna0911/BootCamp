@@ -1,0 +1,8 @@
+- name: 初始化数据
+  request:
+    method: GET
+    url: /write_db
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
