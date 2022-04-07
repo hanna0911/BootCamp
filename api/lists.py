@@ -119,14 +119,25 @@ def duty_teacher_list(req: HttpRequest):
 
 
 def nominated_list(req: HttpRequest):
-    #     if not check_method(req, "GET"):
-    #         return gen_response(400, message="invalid method")
-    #     username = req.session.get("username", None)
-    #     if username is None:
-    #         return gen_response(
-    #             400, message="no username in session, probly not login")
-    #     if not role_authentication(username, "HRBP"):
-    #         return gen_response(400, message="permission denied")
-    #     teacher_list = PrivateInfo.objects.filter()
-    #
-    return gen_response(400, message="not supported")
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(
+            400, message="no username in session, probly not login")
+    if not role_authentication(username, "HRBP"):
+        return gen_response(400, message="permission denied")
+    teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
+    return_list = []
+    for teacher in teacher_list:
+        tmp = load_private_info(teacher)
+        tmp["teacherNominationDate"] = teacher.teacherNominationDate
+        user_program = teacher.ProgramsAsUser.filter(program__audience=1).first()
+        if user_program is None:
+            tmp["learningStatus"] = "未参加"
+        elif user_program.finished:
+            tmp["learningStatus"] = "已完成"
+        else:
+            tmp["learningStatus"] = "进行中"
+        return_list.append(tmp)
+    return gen_response(200, data=return_list, message="successful send {}".format(len(return_list)))

@@ -118,8 +118,8 @@ class Tests(TestCase):
     def test_nominate_process(self):
         self.process("/testcase/nominate_process.yml")
 
-    # def test_nominated_list(self):
-    #     self.process("/testcase/nominated_list.yml")
+    def test_nominated_list(self):
+        self.process("/testcase/nominated_list.yml")
 
     # def test_get_newcomer_info(self):
     #     self.process("/testcase/get_newcomer_info.yml")
