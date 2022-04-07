@@ -116,7 +116,7 @@ def create_content(request: HttpRequest):
         content_type_id = 2
     new_content = ContentTable(id=new_content_id, name=name, author=username,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
-                               audience=audience_id, cover=cover, type=content_type,
+                               audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template_bool, programId=program_id,
                                lessonCount=0, questions=csv, taskType=task_type,
                                text=task_text, link=task_link, taskFile=task_file)
