@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, lists
+from . import views, lists, upload
 
 # api应用的路由配置
 urlpatterns = [
@@ -13,4 +13,6 @@ urlpatterns = [
     path("get_token", views.get_token, name="get_token"),
     path("newcomer_info", views.newcomer_info, name="newcomer_info"),
     path("nominated_list", lists.nominated_list, name="nominated_list"),
+    path("create_program", upload.create_program, name="create_program"),
+    path("admin_create_content_template", upload.create_content, name="create_content_template")
 ]

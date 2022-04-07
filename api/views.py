@@ -171,7 +171,7 @@ def newcomer_info(request: HttpRequest):
     user_session = request.session  # 获取session（根据cookie中的SessionID自动获取对应session）
     if user_session is None or "role" not in user_session.keys():  # session不存在
         return session_timeout_response()
-    if user_session["role"] != "admin" or user_session["role"] != "teacher":  # 权限认证
+    if user_session["role"] != "admin" and user_session["role"] != "teacher":  # 权限认证
         return unauthorized_action_response()
     if len(PrivateInfo.objects.filter(username__exact=target_username)) == 0:  # 查找新人
         return gen_standard_response(400, {"result": "failure",
@@ -199,7 +199,7 @@ def newcomer_info(request: HttpRequest):
             "program_id": relation.program.id,
             "begin_time": str(relation.beginTime),
             "end_time": str(relation.endTime),
-            # "finished_content": relation.finishedContentCount,
+            "finished_content": relation.finishedContentCount,
             "score": relation.score,
             "deadline": str(relation.deadline)
         })
