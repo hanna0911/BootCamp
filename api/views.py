@@ -105,6 +105,13 @@ def join(request):  # 注册
                                    cookie={"SessionID": session_key})
 
 
+def logout(request: HttpRequest):
+    if request.method != "GET":
+        return illegal_request_type_error_response()
+    logout(request)
+    return gen_standard_response(200, data={"result": "success", "message": "logged out"})
+
+
 def switch_role(request: HttpRequest):
     """
     接收前端向/switch_role的post请求
