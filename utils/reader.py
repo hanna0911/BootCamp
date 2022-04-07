@@ -99,10 +99,6 @@ def create_data_yml(path: str):
                 recommendTime=info["recommendTime"]
             )
 
-    if __name__ == '__main__':
-        info = read_testcase_yaml("/testcase/test.yml")
-        gen = analysis_parameters(info)
-        next(gen)
 
 
 def create_data_xlsx(path: str):

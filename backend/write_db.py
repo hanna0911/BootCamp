@@ -2,7 +2,11 @@
 提供api进行数据库的写入
 """
 from django.http import HttpRequest
-from models import *
+from api.models import *
+from utils.reader import get_root_path, open_xlsx, encrypt
+import pandas as pd
+import logging
+from api.api_util import gen_response
 
 
 def write_db(req: HttpRequest):
@@ -11,7 +15,9 @@ def write_db(req: HttpRequest):
     df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
     for i in range(len(df)):
         info = df.iloc[i]
-        PrivateInfo.objects.create(
+        if len(PrivateInfo.objects.filter(username=info["username"])) > 0:
+            continue
+        pv = PrivateInfo(
             password=encrypt(info["password"]),
             username=info["username"],
 
@@ -23,7 +29,7 @@ def write_db(req: HttpRequest):
             joinStatus=info["joinStatus"],
             detail=info["detail"],
             leader=info["leader"],
-            registrationDate=info["registrationDate"],
+            registrationDate=str(info["registrationDate"]),
             employeeType=info["employeeType"],
 
             isAdmin=info["isAdmin"],
@@ -41,9 +47,10 @@ def write_db(req: HttpRequest):
             teacherExaminedStatus=info["teacherExaminedStatus"],
             teacherExaminedDate=info["teacherExaminedDate"],
             teacherIsDuty=info["teacherIsDuty"],
-            teacherDutyDate=info["teacherDutyDate"],
+            teacherDutyDate=str(info["teacherDutyDate"]),
             teacherScore=info["teacherScore"],
         )
+        pv.save()
     size = len(PrivateInfo.objects.all())
     logging.info("{} private info loaded".format(size))
 
@@ -52,7 +59,7 @@ def write_db(req: HttpRequest):
         info = df.iloc[i]
         teacher = PrivateInfo.objects.get(username=info["teacher"])
         newcomer = PrivateInfo.objects.get(username=info["newcomer"])
-        TeacherNewcomerTable.objects.create(
+        tnt = TeacherNewcomerTable(
             newcomer=newcomer,
             teacher=teacher,
             teacherScore=info["teacherScore"],
@@ -60,6 +67,7 @@ def write_db(req: HttpRequest):
             newcomerScore=info["newcomerScore"],
             teacherToNewcomer=info["teacherToNewcomer"]
         )
+        tnt.save()
     size = len(TeacherNewcomerTable.objects.all())
     logging.info("{} teacher newcomer info loaded".format(size))
 
@@ -68,19 +76,20 @@ def write_db(req: HttpRequest):
         info = df.iloc[i]
         teacher = PrivateInfo.objects.get(username=info["teacher"])
         newcomer = PrivateInfo.objects.get(username=info["newcomer"])
-        NewcomerRecode.objects.create(
+        nr = NewcomerRecode(
             teacher=teacher,
             newcomer=newcomer,
             content=info["content"],
             commitTime=info["commitTime"]
         )
+        nr.save()
     logging.info("{} newcommer recode info loaded".format(len(NewcomerRecode.objects.all())))
 
     df: pd.DataFrame = open_xlsx(str(root) + path, "programtable")
     for i in range(len(df)):
         info = df.iloc[i]
         author = PrivateInfo.objects.get(username=info["author"])
-        ProgramTable.objects.create(
+        ProgramTable(
             id=str(info["id"]),
             name=info["name"],
             author=author,
@@ -89,7 +98,7 @@ def write_db(req: HttpRequest):
             recommendTime=info["recommendTime"],
             audience=info["audience"],
             releaseTime=info["releaseTime"]
-        )
+        ).save()
     logging.info("{} programs info loaded".format(len(ProgramTable.objects.all())))
 
     df: pd.DataFrame = open_xlsx(str(root) + path, "contenttable")
@@ -97,7 +106,7 @@ def write_db(req: HttpRequest):
         info = df.iloc[i]
         author = PrivateInfo.objects.get(username=info["author"])
         program = ProgramTable.objects.get(id=info["programId"])
-        ContentTable.objects.create(
+        ContentTable(
             id=info["id"],
             name=info["name"],
             author=author,
@@ -114,7 +123,7 @@ def write_db(req: HttpRequest):
             taskType=info["taskType"],
             text=info["text"],
             link=info["link"]
-        )
+        ).save()
     logging.info("{} contents info loaded".format(len(ContentTable.objects.all())))
 
     df: pd.DataFrame = open_xlsx(str(root) + path, "lessontable")
@@ -122,7 +131,7 @@ def write_db(req: HttpRequest):
         info = df.iloc[i]
         author = PrivateInfo.objects.get(username=info["author"])
         content = ContentTable.objects.get(id=info["content"])
-        LessonTable.objects.create(
+        LessonTable(
             id=info["id"],
             name=info["name"],
             author=author,
@@ -130,31 +139,31 @@ def write_db(req: HttpRequest):
             intro=info["intro"],
             recommendedTime=info["recommendedTime"],
             releaseTime=info["releaseTime"]
-        )
+        ).save()
     logging.info("{} lessons info loaded".format(len(LessonTable.objects.all())))
     df: pd.DataFrame = open_xlsx(str(root) + path, "coursewaretable")
     for i in range(len(df)):
         info = df.iloc[i]
         lesson = LessonTable.objects.get(id=info["lesson"])
         content = ContentTable.objects.get(id=info["content"])
-        CoursewareTable.objects.create(
+        CoursewareTable(
             id=info["id"],
             lesson=lesson,
             content=content,
             name=info["name"],
             uploadTime=info["uploadTime"],
             url=info["url"]
-        )
+        ).save()
     logging.info("{} courseware info loaded".format(len(CoursewareTable.objects.all())))
     df: pd.DataFrame = open_xlsx(str(root) + path, "programcontenttable")
     for i in range(len(df)):
         info = df.iloc[i]
         program = ProgramTable.objects.get(id=info["program"])
         content = ContentTable.objects.get(id=info["content"])
-        ProgramContentTable.objects.create(
+        ProgramContentTable(
             program=program,
             content=content
-        )
+        ).save()
     logging.info("{} program content info loaded".format(len(ProgramContentTable.objects.all())))
     df: pd.DataFrame = open_xlsx(str(root) + path, "userprogramtable")
     for i in range(len(df)):
@@ -162,7 +171,7 @@ def write_db(req: HttpRequest):
         user = PrivateInfo.objects.get(username=info["user"])
         program = ProgramTable.objects.get(id=info["program"])
         assigner = PrivateInfo.objects.get(username=info["assigner"])
-        UserProgramTable.objects.create(
+        UserProgramTable(
             user=user,
             program=program,
             finishedContentCount=info["finishedContentCount"],
@@ -172,5 +181,40 @@ def write_db(req: HttpRequest):
             deadline=info["deadline"],
             assigner=assigner,
             score=info["score"]
-        )
+        ).save()
     logging.info("{} user program info loaded".format(len(UserProgramTable.objects.all())))
+
+    df: pd.DataFrame = open_xlsx(str(root) + path, "usercontenttable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        user = PrivateInfo.objects.get(username=info["user"])
+        content = ContentTable.objects.get(id=info["content"])
+        assigner = PrivateInfo.objects.get(username=info["assigner"])
+        UserContentTable(
+            user=user,
+            content=content,
+            finished=info["finished"],
+            userBeginTime=info["userBeginTime"],
+            userEndTime=info["userEndTime"],
+            deadline=info["deadline"],
+            assigner=assigner,
+            isObligatory=info["isObligatory"],
+            finishedLessonCount=info["finishedLessonCount"],
+            examUsedTime=info["examUsedTime"],
+            score=info["score"]
+        ).save()
+    logging.info("{} user content info loaded".format(len(UserContentTable.objects.all())))
+    df: pd.DataFrame = open_xlsx(str(root) + path, "userlessontable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        user = PrivateInfo.objects.get(username=info["user"])
+        lesson = LessonTable.objects.get(id=info["lesson"])
+        UserLessonTable(
+            user=user,
+            lesson=lesson,
+            beginTime=info['beginTime'],
+            endTime=info["endTime"],
+            finished=info["finished"]
+        ).save()
+    logging.info("{} user lesson info loaded".format(len(UserLessonTable.objects.all())))
+    return gen_response(200, message="succefully write in")

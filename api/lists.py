@@ -3,7 +3,7 @@ import logging
 
 from django.http import HttpRequest
 from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check
-from .models import PrivateInfo, UserProgramTable
+from .models import *
 
 
 def admin_newcomer_list(request: HttpRequest):
@@ -25,8 +25,17 @@ def admin_newcomer_list(request: HttpRequest):
     return_list = []
     for newcomer in newcomer_list:
         tmp = load_private_info(newcomer)
+        teacher_queue = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+        if len(teacher_queue) == 0:
+            tmp["tutor"] = "无"
+            tmp["teacher"] = "无"
+        else:
+            tmp["teacher"] = teacher_queue.first().teacher.name
+            tmp["tutor"] = teacher_queue.first().teacher.name
+        tmp["joinBootcamp"] = True
+        tmp["graduated"] = newcomer.newcomerIsGraduate # temp
+        tmp["evaluate"] = "暂无"
         return_list.append(tmp)
-
     return gen_response(200, return_list, "tmp supported")
 
 
@@ -108,6 +117,14 @@ def duty_teacher_list(req: HttpRequest):
 
 
 def nominated_list(req: HttpRequest):
-    if not check_method(req, "GET"):
-        return gen_response(400, message="invalid method")
-    return gen_response(400, "not supported")
+#     if not check_method(req, "GET"):
+#         return gen_response(400, message="invalid method")
+#     username = req.session.get("username", None)
+#     if username is None:
+#         return gen_response(
+#             400, message="no username in session, probly not login")
+#     if not role_authentication(username, "HRBP"):
+#         return gen_response(400, message="permission denied")
+#     teacher_list = PrivateInfo.objects.filter()
+#
+    return gen_response(400, message="not supported")

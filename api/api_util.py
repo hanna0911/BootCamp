@@ -163,9 +163,21 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
-    info["joinStatus"] = pv.joinStatus
+    if pv.joinStatus == 0:
+        info["joinStatus"] = "待入职"
+        info["employed"] = "待入职"
+    elif pv.joinStatus == 1:
+        info["joinStatus"] = "在职"
+        info["employed"] = "在职"
+    elif pv.joinStatus == 2:
+        info["joinStatus"] = "离职"
+        info["employed"] = "离职"
+    else:
+        info["joinStatus"] = "未知"
+        info["employed"] = "未知"
     info["detail"] = pv.detail
     info["leader"] = pv.leader
+    info["superior"] = pv.leader  # temp
     info["registrationDate"] = pv.registrationDate
     info["employeeType"] = pv.employeeType
 

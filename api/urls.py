@@ -3,7 +3,6 @@ from . import views, lists
 
 # api应用的路由配置
 urlpatterns = [
-
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path('switch_role', views.switch_role, name='switch_role'),  # 切换身份
@@ -13,5 +12,5 @@ urlpatterns = [
     path("duty_teacher_list", lists.duty_teacher_list, name="duty_teacher_list"),
     path("get_token", views.get_token, name="get_token"),
     path("newcomer_info", views.newcomer_info, name="newcomer_info"),
-    path("nominated_list", lists.nominated_list, name="nominated_list")
+    path("nominated_list", lists.nominated_list, name="nominated_list"),
 ]

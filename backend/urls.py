@@ -15,10 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from api import views
-
+from .write_db import write_db
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include("api.urls")),  # 暂时全部用api存储接口，后续请按照功能的不同类进行分类
+    path("write_db", write_db)
 ]

@@ -1,9 +1,8 @@
-#TODO
 - name: admin获取新人信息
   ident:
     - admin
   request:
-    method: POST
+    method: GET
     url: /newcomer_info
     data:
     headers:
