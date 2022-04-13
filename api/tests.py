@@ -95,6 +95,21 @@ class Tests(TestCase):
     def test_blanck(self):
         assert 1, 1
 
+    def test_write_db(self):
+        PrivateInfo.objects.all().delete()
+        Honor.objects.all().delete()
+        TeacherNewcomerTable.objects.all().delete()
+        NewcomerRecode.objects.all().delete()
+        ProgramTable.objects.all().delete()
+        ContentTable.objects.all().delete()
+        LessonTable.objects.all().delete()
+        CoursewareTable.objects.all().delete()
+        ProgramContentTable.objects.all().delete()
+        UserProgramTable.objects.all().delete()
+        UserContentTable.objects.all().delete()
+        UserLessonTable.objects.all().delete()
+        self.process("/testcase/write_db.yml")
+
     def test_join(self):
         self.process("/testcase/join.yml")
 
@@ -110,14 +125,14 @@ class Tests(TestCase):
     def test_duty_teacher_list(self):
         self.process("/testcase/duty_teacher_list.yml")
 
-
-    def test_admin_newcomer_list(self  ):
+    def test_admin_newcomer_list(self):
         self.process("/testcase/admin_newcomer_list.yml")
-
 
     def test_nominate_process(self):
         self.process("/testcase/nominate_process.yml")
 
+    def test_get_user_info(self):
+        self.process("/testcase/get_user_info.yml")
     # def test_nominated_list(self):
     #     self.process("/testcase/nominated_list.yml")
 

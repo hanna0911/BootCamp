@@ -58,8 +58,20 @@ def login(request: HttpRequest):  # 登录
                                        data={"result": "success", "message": "login successful"},
                                        cookie={"SessionID": session_key})
 
-def get_user_info(req:HttpRequest):
-    pass
+
+def get_user_info(req: HttpRequest):
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalide method")
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(400, message="no username in session porbly not login")
+    user = PrivateInfo.objects.get(username=username)
+    res = load_private_info(user)
+    positions = get_positions(user)
+    res["userPositions"] = positions
+    res["userAvatarPath"] = "require('../assets/logo.png')"
+    res["selectedPosition"] = chinese_role_trans[get_highest_role(username)]
+    return gen_response(200, res)
 
 
 def join(request):  # 注册

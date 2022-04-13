@@ -3,6 +3,13 @@ from django.http import JsonResponse, HttpRequest
 import hashlib
 from .models import PrivateInfo
 
+chinese_role_trans = {
+    "admin": "管理员",
+    "HRBP": "HRBP",
+    "newcomer": "新人",
+    "teacher": "导师"
+}
+
 
 def gen_response(code: int, data={}, message="succeed"):
     """
@@ -113,7 +120,8 @@ def unauthorized_action_response():
     response.status_code = 400
     return response
 
-def get_highest_role(username:str):
+
+def get_highest_role(username: str):
     """
     默认已经通过检查，则username必然存在，查询权限列表，返回最高权限的str
     :param username:
@@ -128,7 +136,6 @@ def get_highest_role(username:str):
         return "teacher"
     else:
         return "newcomer"
-
 
 
 def role_authentication(username: str, target_role: str):
@@ -177,6 +184,7 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["name"] = pv.name
     info["city"] = pv.city
     info["dept"] = pv.dept
+    info["department"] = pv.dept
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
@@ -203,6 +211,24 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["isHRBP"] = pv.isHRBP
     info["isNew"] = pv.isNew
     return info
+
+
+def get_positions(pv: PrivateInfo) -> list:
+    """
+    返回具有权限的身份列表
+    :param pv:
+    :return: 身份列表
+    """
+    return_list = []
+    if pv.isNew:
+        return_list.append("新人")
+    if pv.isTeacher:
+        return_list.append("导师")
+    if pv.isHRBP:
+        return_list.append("HRBP")
+    if pv.isAdmin:
+        return_list.append("管理员")
+    return return_list
 
 
 def gen_set_cookie_response(code: int, data: dict = {}, cookie: dict = {}):
