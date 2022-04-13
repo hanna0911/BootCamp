@@ -113,6 +113,23 @@ def unauthorized_action_response():
     response.status_code = 400
     return response
 
+def get_highest_role(username:str):
+    """
+    默认已经通过检查，则username必然存在，查询权限列表，返回最高权限的str
+    :param username:
+    :return: 最高权限str
+    """
+    p = PrivateInfo.objects.get(username=username)
+    if p.isAdmin:
+        return "admin"
+    elif p.isHRBP:
+        return "HRBP"
+    elif p.isTeacher:
+        return "teacher"
+    else:
+        return "newcomer"
+
+
 
 def role_authentication(username: str, target_role: str):
     """

@@ -7,7 +7,7 @@ import json
 import logging
 import django
 import requests
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponseRedirect
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import PrivateInfo, UserProgramTable, ProgramTable
@@ -39,8 +39,8 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    if "username" in request.session.keys():
-        return gen_response(400, {}, "dup login")
+    # if "username" in request.session.keys():
+    #     return gen_response(400, {}, "dup login")
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
@@ -48,13 +48,18 @@ def login(request: HttpRequest):  # 登录
     else:
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
-        # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
+        request.session["role"] = get_highest_role(username)
         session_key = request.session.session_key
         # 返回成功信息
-        # 返回成功信息
+        # res = HttpResponseRedirect("/newcomer-board")
+        # res.set_cookie("SessionID", session_key)
+        # return res
         return gen_set_cookie_response(code=200,
-                                       data={"result": "success", "message": "account created"},
+                                       data={"result": "success", "message": "login successful"},
                                        cookie={"SessionID": session_key})
+
+def get_user_info(req:HttpRequest):
+    pass
 
 
 def join(request):  # 注册
@@ -108,7 +113,7 @@ def join(request):  # 注册
 def logout(request: HttpRequest):
     if request.method != "GET":
         return illegal_request_type_error_response()
-    logout(request)
+    request.session.clear()
     return gen_standard_response(200, data={"result": "success", "message": "logged out"})
 
 
