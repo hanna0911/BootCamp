@@ -56,7 +56,7 @@ class Honor(models.Model):
     个人荣誉
     """
     type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
-    owner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 荣誉的归属者
+    owner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)  # 荣誉的归属者
     text = models.CharField(max_length=LONG_INFO_LEN, default="None")  # 奖励描述
     pic = models.ImageField() # 荣誉图片
 
@@ -66,8 +66,8 @@ class TeacherNewcomerTable(models.Model):
     描述导师和新人间关系的表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="AsTeacher")  # 外键，该关系中的导师
-    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="AsNewcomer")  # 外键，该关系中的新人
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="AsTeacher")  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="AsNewcomer")  # 外键，该关系中的新人
     teacherScore = models.FloatField()  # 该老师被该新人评价的分数
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField()  # 该新人被该老师评价的分数
@@ -79,8 +79,8 @@ class NewcomerRecode(models.Model):
     导师对新人的带新记录
     """
     content = models.CharField(max_length=COMMENT_LEN)
-    teacher = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeTeacher")  # 外键，该关系中的导师
-    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="RecodeNewcomer")  # 外键，该关系中的新人
+    teacher = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="RecodeTeacher")  # 外键，该关系中的导师
+    newcomer = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="RecodeNewcomer")  # 外键，该关系中的新人
     commitTime = models.DateTimeField(auto_now_add=True)  # 带新记录发表的时间
 
 
@@ -90,7 +90,7 @@ class ProgramTable(models.Model):
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 项目id
     name = models.CharField(max_length=NAME_LEN)  # 项目名称
-    author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 项目作者或者管理者
+    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)  # 项目作者或者管理者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 项目简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
@@ -106,7 +106,7 @@ class ContentTable(models.Model):
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
     name = models.CharField(max_length=NAME_LEN)  # 事件名称
-    author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, blank=True)  # 事件作者
+    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 事件作者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
@@ -135,7 +135,7 @@ class LessonTable(models.Model):
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课堂id
     name = models.CharField(max_length=NAME_LEN)  # 课堂名称
-    author = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, blank=True)  # 课堂作者
+    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 课堂作者
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 课堂所属的事件或者大课程
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 课堂介绍
     recommendedTime = models.IntegerField()  # 建议用时
@@ -148,8 +148,8 @@ class CoursewareTable(models.Model):
     课件库
     """
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课件id
-    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 所属课堂
-    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 所属课程或事件
+    lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 所属课堂
+    content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
     cover = models.ImageField()  # 封面
     uploadTime = models.DateTimeField(auto_now_add=True)  # 上传时间
@@ -161,8 +161,8 @@ class ProgramContentTable(models.Model):
     Program-Content对照表（考虑到不同Program可能共用一个Content）
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # Program
-    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 属于这个Program的Content
+    program = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # Program
+    content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 属于这个Program的Content
 
 
 class UserProgramTable(models.Model):
@@ -170,14 +170,14 @@ class UserProgramTable(models.Model):
     用户-Program（一个Program是若干课程、任务和考试打成的包）关系表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsUser")  # 本记录所属用户
-    program = models.ForeignKey(ProgramTable, on_delete=models.PROTECT)  # 本记录所属Program
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ProgramsAsUser")  # 本记录所属用户
+    program = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 本记录所属Program
     finishedContentCount = models.IntegerField(default=0)  # 完成的内容数
     finished = models.BooleanField(default=False)  # 是否完成
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField(null=True)  # 结束时间（仅结束后有意义，完成项目时赋值）
     deadline = models.DateTimeField(null=True)  # 项目对于个人来说的ddl
-    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ProgramsAsAssigner")  # 该program的指派人
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ProgramsAsAssigner")  # 该program的指派人
     score = models.IntegerField(default=-1)  # 分数（考试分数取加权平均，没有考试则数据无效）
 
 
@@ -186,13 +186,13 @@ class UserContentTable(models.Model):
     用户-培训内容（包括单个课程、任务和考试）关系表
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ContentAsUser")  # 用户
-    content = models.ForeignKey(ContentTable, on_delete=models.PROTECT)  # 培训内容
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsUser")  # 用户
+    content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
     userBeginTime = models.DateTimeField(auto_now_add=True)  # 开始时间 这个时间属于个人
     userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
-    assigner = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT, related_name="ContentAsAssigner")  # 该content的指派人
+    assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
     # course相关
     isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
@@ -207,8 +207,8 @@ class UserLessonTable(models.Model):
     用户-课程Lesson（Lesson是Course的子项）
     """
     relationID = models.AutoField(primary_key=True)  # 自增主键
-    user = models.ForeignKey(PrivateInfo, on_delete=models.PROTECT)  # 用户
-    lesson = models.ForeignKey(LessonTable, on_delete=models.PROTECT)  # 课程
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)  # 用户
+    lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间

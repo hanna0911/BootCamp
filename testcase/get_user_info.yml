@@ -1,0 +1,10 @@
+- name: 获取当前自己的信息
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /get_user_info
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
