@@ -7,7 +7,7 @@ import json
 import logging
 import django
 import requests
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import PrivateInfo, UserProgramTable, ProgramTable
@@ -69,9 +69,16 @@ def get_user_info(req: HttpRequest):
     res = load_private_info(user)
     positions = get_positions(user)
     res["userPositions"] = positions
-    res["userAvatarPath"] = "require('../assets/logo.png')"
     res["selectedPosition"] = chinese_role_trans[get_highest_role(username)]
     return gen_response(200, res)
+
+
+def avatar(req: HttpRequest):
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(400, message="no username in session porbly not login")
+    pic = PrivateInfo.objects.get(username=username).avatar
+    return HttpResponse(pic, content_type="image/png")
 
 
 def join(request):  # 注册

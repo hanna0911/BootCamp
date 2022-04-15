@@ -3,8 +3,7 @@ from . import views, lists, upload, download
 from backend.write_db import write_db
 
 # api应用的路由配置
-urlpatterns = [
-    path("write_db", write_db),
+urlpatterns = [    path("write_db", write_db),
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path("get_user_info", views.get_user_info, name="get_user_info"),
@@ -20,5 +19,6 @@ urlpatterns = [
     path("create_program", upload.create_program, name="create_program"),
     path("admin_create_content_template", upload.create_content, name="create_content_template"),
     path("admin_create_lesson_template", upload.create_lesson, name="create_lesson_template"),
-    path("video/", download.stream_video, name="video")
+    path("video/", download.stream_video, name="video"),
+    path("avatar", views.avatar, name="avatar")
 ]

@@ -31,6 +31,7 @@ def write_db(req: HttpRequest):
             leader=info["leader"],
             registrationDate=str(info["registrationDate"]),
             employeeType=info["employeeType"],
+            avatar=str(root) + "/static/头像.jpeg",
 
             isAdmin=info["isAdmin"],
             isTeacher=info["isTeacher"],
