@@ -61,7 +61,7 @@ def login(request: HttpRequest):  # 登录
 
 def get_user_info(req: HttpRequest):
     if not check_method(req, "GET"):
-        return gen_response(400, message="invalide method")
+        return gen_response(400, message="invalid method")
     username = req.session.get("username", None)
     if username is None:
         return gen_response(400, message="no username in session porbly not login")
@@ -78,6 +78,17 @@ def avatar(req: HttpRequest):
     if username is None:
         return gen_response(400, message="no username in session porbly not login")
     pic = PrivateInfo.objects.get(username=username).avatar
+    return HttpResponse(pic, content_type="image/png")
+
+
+def avatar_by_name(req: HttpRequest):
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
+    username = req.GET.get("username", None)
+    users = PrivateInfo.objects.filter(username=username)
+    if len(users) < 1:
+        return gen_response(400, "user not found")
+    pic = users.first().avatar
     return HttpResponse(pic, content_type="image/png")
 
 

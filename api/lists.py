@@ -35,6 +35,7 @@ def admin_newcomer_list(request: HttpRequest):
         tmp["joinBootcamp"] = True
         tmp["graduated"] = newcomer.newcomerIsGraduate  # temp
         tmp["evaluate"] = "暂无"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username) # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
     return gen_response(200, return_list, "tmp supported")
 
@@ -114,6 +115,7 @@ def duty_teacher_list(req: HttpRequest):
         tmp["teacherDutyDate"] = teacher.teacherDutyDate
         tmp["teacherScore"] = teacher.teacherScore
         tmp["OKR"] = "unknown"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
     return gen_response(200, data=return_list, message="send {} data".format(len(return_list)))
 
