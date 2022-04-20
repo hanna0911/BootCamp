@@ -1,9 +1,10 @@
 from django.urls import path
-from . import views, lists, upload, download
+from . import views, lists, upload, download, status
 from backend.write_db import write_db
 
 # api应用的路由配置
-urlpatterns = [    path("write_db", write_db),
+urlpatterns = [
+    path("write_db", write_db),
     path('login', views.login, name='login'),  # just for test
     path('join', views.join, name='join'),  # just for join
     path("get_user_info", views.get_user_info, name="get_user_info"),
@@ -22,5 +23,7 @@ urlpatterns = [    path("write_db", write_db),
     path("video/", download.stream_video, name="video"),
     path("avatar_by_name/", views.avatar_by_name, name="avatar_by_name"),
     path("avatar", views.avatar, name="avatar"),
-    path("upload_courseware", upload.upload_courseware, name="upload_courseware")
+    path("upload_courseware", upload.upload_courseware, name="upload_courseware"),
+    path("reject_nominate",status.reject_nominate,name="reject_nominate"),
+    path("accept_nominate",status.accept_nominate,name="accept_nominate")
 ]

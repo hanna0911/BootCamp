@@ -146,6 +146,9 @@ class Tests(TestCase):
     def test_get_newcomer_info(self):
         self.process("/testcase/get_newcomer_info.yml")
 
+    def test_nominate_accept_reject(self):
+        self.process("/testcase/nominate_accept_reject.yml")
+
     def test_video(self):
         logging.info("测试video接口")
         res = self.client.get("/api/video")

@@ -139,7 +139,7 @@ def nominated_list(req: HttpRequest):
     if username is None:
         return gen_response(
                400, message="no username in session, probly not login")
-    if not role_authentication(username, "HRBP"):
+    if not role_list_check(username, ["HRBP","admin"]): # 暂时做修改适应前端
         return gen_response(400, message="permission denied")
     teacher_list = PrivateInfo.objects.filter(isTeacher=True,teacherIsDuty=False)
     # TODO:获取培训状态
@@ -147,5 +147,6 @@ def nominated_list(req: HttpRequest):
     for teacher in teacher_list:
         tmp = load_private_info(teacher)
         tmp["teacherNominationDate"] = teacher.teacherNominationDate
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
     return gen_response(200, data=return_list)
