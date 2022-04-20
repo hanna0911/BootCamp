@@ -31,20 +31,29 @@ class PrivateInfo(models.Model):
     leader = models.CharField(max_length=NAME_LEN)  # 直属上级
     registrationDate = models.DateTimeField(auto_now_add=True)  # 注册时间
     employeeType = models.CharField(max_length=SHORT_INFO_LEN)  # 员工类型，例如长期工、实习工等
+
     # 用户身份相关
     isAdmin = models.BooleanField(default=False)  # 是否是管理员
     isTeacher = models.BooleanField(default=False)  # 是否是老师
     isHRBP = models.BooleanField(default=False)  # 是否是HRBP
     isNew = models.BooleanField(default=False)  # 是否是新人
+
     # 新人相关
     newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
     newcomerIsGraduate = models.BooleanField(default=False)  # 新人是否已经毕业
     newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
+
     # 导师相关
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
     teacherNominationDate = models.DateTimeField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
-    teacherExaminedStatus = models.IntegerField(default=0)  # 审核状态,0 代表未审核,1代表通过,2代表拒绝
+    class EnumTeacherExaminedStatus(models.IntegerChoices):
+        NotYet = 0  # 未审核
+        Pass = 1  # 审核通过
+        Fail = 2  # 审核拒绝
+    teacherExaminedStatus = models.IntegerField(
+        choices = EnumTeacherExaminedStatus.choices, 
+        default = EnumTeacherExaminedStatus.NotYet)  # 审核状态，默认值为“未审核”。使用Django枚举类型实现
     teacherExaminedDate = models.DateTimeField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
     teacherDutyDate = models.DateTimeField(null=True)  # 导师上岗时间
@@ -55,7 +64,11 @@ class Honor(models.Model):
     """
     个人荣誉
     """
-    type = models.IntegerField(default=0)  # 0：勋章 1：整数 2：奖项
+    class EnumType(models.IntegerChoices):
+        Medal = 0       # 勋章
+        Certificate = 1 # 证书
+        Award = 2       # 奖项
+    type = models.IntegerField(choices = EnumType.choices, default = EnumType.Medal)  # Honor类型，默认为“勋章”
     owner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)  # 荣誉的归属者
     text = models.CharField(max_length=LONG_INFO_LEN, default="None")  # 奖励描述
     pic = models.ImageField() # 荣誉图片
@@ -95,7 +108,10 @@ class ProgramTable(models.Model):
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 项目标签
     contentCount = models.IntegerField()  # 子项目数
     recommendTime = models.IntegerField(null=True)  # 推荐（默认）完成时间，用于生成默认ddl
-    audience = models.IntegerField()  # 项目受众 0 表示新人，1表示老师
+    class EnumAudience(models.IntegerChoices):
+        Newcomer = 0    # 新人
+        Teacher = 1     # 老师
+    audience = models.IntegerField(choices = EnumAudience.choices)  # 项目受众，无默认值
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
 
@@ -112,7 +128,11 @@ class ContentTable(models.Model):
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
     audience = models.IntegerField()  # 受众
     cover = models.ImageField()  # 封面
-    type = models.IntegerField()  # 事件类型 0 代表course，1代表exam，2代表task
+    class EnumType(models.IntegerChoices):
+        Course = 0  # course
+        Exam = 1    # exam
+        Task = 2    # task
+    type = models.IntegerField(choices = EnumType.choices)  # content类型 0 代表course，1代表exam，2代表task
     isTemplate = models.BooleanField()  # 是否是模板
     programId = models.ForeignKey(ProgramTable, on_delete=models.CASCADE)  # 所属的Programid
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
