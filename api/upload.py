@@ -1,5 +1,6 @@
 """
 所有上传新内容相关的接口
+此文件全部接口作者：@yzt
 """
 import os.path
 import time

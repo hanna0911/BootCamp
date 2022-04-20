@@ -5,6 +5,47 @@
     method: POST
     url: /newcomer_info
     data:
+      action: newcomer info
+      newcomer: admin
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: teacher获取新人信息
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_info
+    data:
+      action: newcomer info
+      newcomer: admin
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 用错误身份获取新人信息
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_info
+    data:
+      action: newcomer info
+      newcomer: admin
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取不存在的新人信息
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /newcomer_info
+    data:
+      action: newcomer info
+      newcomer: do_not_exist
+    headers:
+  validate:
+    - equals: { status_code: 400 }

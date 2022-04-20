@@ -143,8 +143,8 @@ class Tests(TestCase):
     def test_nominated_list(self):
         self.process("/testcase/nominated_list.yml")
 
-    # def test_get_newcomer_info(self):
-    #     self.process("/testcase/get_newcomer_info.yml")
+    def test_get_newcomer_info(self):
+        self.process("/testcase/get_newcomer_info.yml")
 
     def test_video(self):
         logging.info("测试video接口")
