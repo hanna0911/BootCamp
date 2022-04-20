@@ -18,7 +18,10 @@ from .api_util import *
 @ensure_csrf_cookie
 def get_token(request: HttpRequest):
     if request.method == "GET":
-        return gen_standard_response(200, {})
+        session = request.session  # 获取session
+        if session:  # session存在，说明已在登录状态
+            return gen_standard_response(200, {"result": "login success"})
+        return gen_standard_response(200, {"result": "login fail"})
     else:  # 只接受GET请求
         return illegal_request_type_error_response()
 
