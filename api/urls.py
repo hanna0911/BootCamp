@@ -21,5 +21,6 @@ urlpatterns = [    path("write_db", write_db),
     path("admin_create_lesson_template", upload.create_lesson, name="create_lesson_template"),
     path("video/", download.stream_video, name="video"),
     path("avatar_by_name/", views.avatar_by_name, name="avatar_by_name"),
-    path("avatar", views.avatar, name="avatar")
+    path("avatar", views.avatar, name="avatar"),
+    path("upload_courseware", upload.upload_courseware, name="upload_courseware")
 ]
