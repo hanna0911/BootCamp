@@ -143,9 +143,13 @@ class ContentTable(models.Model):
     beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
     endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关
-    taskType = models.IntegerField(default=0)  # 任务类型(针对task类 0-text, 1-link, 2-file)
+    class EnumTaskType(models.IntegerChoices):
+        Text = 0    # text
+        Link = 1    # link
+        File = 2    # file
+    taskType = models.IntegerField(choices = EnumTaskType.choices, default = EnumTaskType.Text)  # 任务类型(针对task类 0-text, 1-link, 2-file)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
-    link = models.CharField(max_length=LONG_INFO_LEN)  # 任务链接
+    link = models.URLField(max_length=LONG_INFO_LEN)  # 任务链接
     taskFile = models.FileField()  # 任务文件
 
 
@@ -213,12 +217,15 @@ class UserContentTable(models.Model):
     userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
+
     # course相关
     isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
+
     # exam相关
     examUsedTime = models.IntegerField(default=-1)  # 个人考试用时
     score = models.IntegerField(default=-1)  # 分数（仅对考试类型的Content有效）
+
     # task相关
 
 
