@@ -1,9 +1,9 @@
-- name: admin获取新人信息
+- name: 退出登录测试
   ident:
     - admin
   request:
-    method: POST
-    url: /newcomer_info
+    method: GET
+    url: /logout
     data:
     headers:
   validate:

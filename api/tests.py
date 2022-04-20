@@ -67,7 +67,10 @@ class Tests(TestCase):
             if "equals" in validate[i].keys():
                 equ_assert = validate[i]["equals"]
                 if "status_code" in equ_assert.keys():
-                    logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
+                    if res.headers['Content-Type'] == "application/json":
+                        logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
+                    elif res.headers['Content-Type'] == "text/html":
+                        logging.debug("status code{} text/html format".format(res.status_code))
                     self.assertEqual(res.status_code, equ_assert["status_code"])
                     logging.info("OK")
 
@@ -133,8 +136,20 @@ class Tests(TestCase):
 
     def test_get_user_info(self):
         self.process("/testcase/get_user_info.yml")
-    # def test_nominated_list(self):
-    #     self.process("/testcase/nominated_list.yml")
+
+    def test_logout(self):
+        self.process("/testcase/logout.yml")
+
+    def test_nominated_list(self):
+        self.process("/testcase/nominated_list.yml")
 
     # def test_get_newcomer_info(self):
     #     self.process("/testcase/get_newcomer_info.yml")
+
+    def test_video(self):
+        logging.info("测试video接口")
+        res = self.client.get("/api/video")
+        assert res.status_code, 200
+
+    def test_avatar_and_by_name(self):
+        self.process("/testcase/avatar.yml")
