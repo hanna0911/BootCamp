@@ -78,11 +78,11 @@ def nominate_process(req: HttpRequest):
         tmp = load_private_info(teacher)
         tmp["teacherNominationDate"] = teacher.teacherNominationDate
         status = teacher.teacherExaminedStatus
-        if status == 0:
+        if status == PrivateInfo.EnumTeacherExaminedStatus.NotYet:
             tmp["teacherExaminedStatus"] = "未审核"
-        elif status == 1:
+        elif status == PrivateInfo.EnumTeacherExaminedStatus.Pass:
             tmp["teacherExaminedStatus"] = "通过"
-        elif status == 2:
+        elif status == PrivateInfo.EnumTeacherExaminedStatus.Fail:
             tmp["teacherExaminedStatus"] = "拒绝"
         else:
             raise Exception("数据可数据错误，请检查写入接口是否正确")
