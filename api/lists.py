@@ -60,10 +60,16 @@ def teacher_wait_list(req: HttpRequest):
     for new in newcommer_list:
         tmp = load_private_info(new)
         return_list.append(tmp)
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(new.username)
     return gen_response(200, return_list)
 
 
 def nominate_process(req: HttpRequest):
+    """
+    提名进度列表
+    :param req:
+    :return:
+    """
     username = req.session.get("username", None)
     if not check_method(req, "GET"):
         return gen_response(400, message="invalid method")
@@ -93,6 +99,7 @@ def nominate_process(req: HttpRequest):
             tmp["learningStatus"] = "已完成"
         else:
             tmp["learningStatus"] = "进行中"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
     return gen_response(200, return_list, "send {} data".format(len(return_list)))
 
@@ -121,6 +128,11 @@ def duty_teacher_list(req: HttpRequest):
 
 
 def nominated_list(req: HttpRequest):
+    """
+    已经被提名,可以进行审核的教室列表
+    :param req:
+    :return:
+    """
     if not check_method(req, "GET"):
         return gen_response(400, message="invalid method")
     username = req.session.get("username", None)
