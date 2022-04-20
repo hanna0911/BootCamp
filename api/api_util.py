@@ -156,6 +156,25 @@ def role_authentication(username: str, target_role: str):
         return user_info.isAdmin
 
 
+def get_role_list(username: str):
+    try:
+        user = PrivateInfo.objects.get(username__exact = username)
+    except Exception as e:
+        return []
+
+    ret = []
+    if user.isNew:
+        ret.append("newcomer")
+    if user.isTeacher:
+        ret.append("teacher")
+    if user.isHRBP:
+        ret.append("HRBP")
+    if user.isAdmin:
+        ret.append("admin")
+
+    return ret
+
+
 def role_list_check(username: str, rolelist: list):
     if len(PrivateInfo.objects.filter(username=username)) == 0:
         return False

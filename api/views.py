@@ -18,10 +18,12 @@ from .api_util import *
 @ensure_csrf_cookie
 def get_token(request: HttpRequest):
     if request.method == "GET":
-        session = request.session  # 获取session
-        if session:  # session存在，说明已在登录状态
-            return gen_standard_response(200, {"result": "login success"})
-        return gen_standard_response(200, {"result": "login fail"})
+        # session = request.session  # 获取session
+        username = request.session.get("username", None)
+        if username:  # session存在，说明已在登录状态
+            role_list = get_role_list(username)
+            return gen_standard_response(200, {"result": "login success", "role_list": role_list})
+        return gen_standard_response(200, {"result": "login fail", "role_list": []})
     else:  # 只接受GET请求
         return illegal_request_type_error_response()
 
@@ -53,12 +55,13 @@ def login(request: HttpRequest):  # 登录
         request.session['username'] = username  # 在session中保存username
         request.session["role"] = get_highest_role(username)
         session_key = request.session.session_key
+        role_list = get_role_list(username)
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)
         # return res
         return gen_set_cookie_response(code=200,
-                                       data={"result": "success", "message": "login successful"},
+                                       data={"result": "success", "message": "login successful", "role_list": role_list},
                                        cookie={"SessionID": session_key})
 
 
