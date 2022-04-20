@@ -50,4 +50,5 @@ def stream_video(request: HttpRequest):
         resp = StreamingHttpResponse(FileWrapper(open(path, 'rb')), content_type=content_type)
         resp['Content-Length'] = str(size)
     resp['Accept-Ranges'] = 'bytes'
+    resp.status_code = 200
     return resp
