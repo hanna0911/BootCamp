@@ -196,56 +196,56 @@ def create_lesson(request: HttpRequest):
     })
 
 
-def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
-    file_ext = file.name.split(".")[-1].lower()
-    file_path = f"{dir_prefix}/{lesson_id}/"
-    file_dir = f"{dir_prefix}/{lesson_id}/{order}_{file.name}"
-    try:
-        if not os.path.exists(file_path):
-            os.makedirs(file_path)
-        with open(file_dir, "wb+") as dest:
-            for chunk in file.chunks():
-                dest.write(chunk)
-    except Exception:
-        return False, file_dir
-    return True, file_dir
-
-
-def upload_courseware(request: HttpRequest):
-    if request.method != "POST":  # 只接受POST请求
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception:
-        return gen_response(400, 'Load json request failed')
-    order = data.get('order')
-    lesson_id = data.get('lessonID')
-    cover = data.get('cover')
-    if order not in range(1, MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON):
-        return gen_standard_response(400, {"result": "failed", "message": "too many coursewares"})
-    if len(LessonTable.objects.filter(id=lesson_id)) == 0:
-        return gen_standard_response(400, {"result": "failed", "message": "lesson not found"})
-    user_session = request.session
-    if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
-        return session_timeout_response()
-    username = user_session["username"]
-    cur_role = user_session["role"]
-    if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
-        return unauthorized_action_response()
-    file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
-                                           request.FILES.get("content"))
-    if file_op_ret[0]:
-        new_courseware_id = username + "_cw_" + str(time.time())
-        lesson = LessonTable.objects.filter(id=lesson_id).first()
-        content = lesson.content
-        new_courseware = CoursewareTable(id=new_courseware_id, lesson=lesson_id, content=content,
-                                         name=request.FILES.get("content").name, cover=cover, url=file_op_ret[1])
-        new_courseware.save()
-        std_success_message = f"courseware for lesson {lesson_id} uploaded successfully"
-        return gen_standard_response(200, {"result": "success", "message": std_success_message})
-    else:
-        std_error_message = "file system failed to save uploaded file. better luck next time:("
-        return gen_standard_response(400, {"result": "success", "message": std_error_message})
+# def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
+#     file_ext = file.name.split(".")[-1].lower()
+#     file_path = f"{dir_prefix}/{lesson_id}/"
+#     file_dir = f"{dir_prefix}/{lesson_id}/{order}_{file.name}"
+#     try:
+#         if not os.path.exists(file_path):
+#             os.makedirs(file_path)
+#         with open(file_dir, "wb+") as dest:
+#             for chunk in file.chunks():
+#                 dest.write(chunk)
+#     except Exception:
+#         return False, file_dir
+#     return True, file_dir
+#
+#
+# def upload_courseware(request: HttpRequest):
+#     if request.method != "POST":  # 只接受POST请求
+#         return illegal_request_type_error_response()
+#     try:
+#         data = json.loads(request.body)
+#     except Exception:
+#         return gen_response(400, 'Load json request failed')
+#     order = data.get('order')
+#     lesson_id = data.get('lessonID')
+#     cover = data.get('cover')
+#     if order not in range(1, MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON):
+#         return gen_standard_response(400, {"result": "failed", "message": "too many coursewares"})
+#     if len(LessonTable.objects.filter(id=lesson_id)) == 0:
+#         return gen_standard_response(400, {"result": "failed", "message": "lesson not found"})
+#     user_session = request.session
+#     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
+#         return session_timeout_response()
+#     username = user_session["username"]
+#     cur_role = user_session["role"]
+#     if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
+#         return unauthorized_action_response()
+#     file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
+#                                            request.FILES.get("content"))
+#     if file_op_ret[0]:
+#         new_courseware_id = username + "_cw_" + str(time.time())
+#         lesson = LessonTable.objects.filter(id=lesson_id).first()
+#         content = lesson.content
+#         new_courseware = CoursewareTable(id=new_courseware_id, lesson=lesson_id, content=content,
+#                                          name=request.FILES.get("content").name, cover=cover, url=file_op_ret[1])
+#         new_courseware.save()
+#         std_success_message = f"courseware for lesson {lesson_id} uploaded successfully"
+#         return gen_standard_response(200, {"result": "success", "message": std_success_message})
+#     else:
+#         std_error_message = "file system failed to save uploaded file. better luck next time:("
+#         return gen_standard_response(400, {"result": "success", "message": std_error_message})
 
 
 
