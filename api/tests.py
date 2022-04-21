@@ -152,6 +152,15 @@ class Tests(TestCase):
     def test_assign_teacher(self):
         self.process("/testcase/assign_teacher.yml")
 
+    def test_upload_program(self):
+        self.process("/testcase/upload_program.yml")
+
+    def test_upload_content_template(self):
+        self.process("/testcase/upload_content_template.yml")
+
+    def test_upload_lesson_template(self):
+        self.process("/testcase/upload_lesson_template.yml")
+
     def test_video(self):
         logging.info("测试video接口")
         res = self.client.get("/api/video")
