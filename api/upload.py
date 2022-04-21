@@ -46,7 +46,7 @@ def create_program(request: HttpRequest):
         audience_id = 1
     else:
         audience_id = 0
-    username = user_session["name"]
+    username = user_session['username']
     new_program_id = username + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
     user = PrivateInfo.objects.filter(username=username)  # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
@@ -106,7 +106,7 @@ def create_content(request: HttpRequest):
     user_session = request.session
     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
         return session_timeout_response()
-    username = user_session["name"]
+    username = user_session['username']
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     program = ProgramTable.objects.filter(id=program_id).first()
@@ -174,7 +174,7 @@ def create_lesson(request: HttpRequest):
     user_session = request.session
     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
         return session_timeout_response()
-    username = user_session["name"]
+    username = user_session['username']
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     content = ContentTable.objects.filter(id=content_id).first()
@@ -228,7 +228,7 @@ def upload_courseware(request: HttpRequest):
     user_session = request.session
     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
         return session_timeout_response()
-    username = user_session["name"]
+    username = user_session["username"]
     cur_role = user_session["role"]
     if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
         return unauthorized_action_response()
