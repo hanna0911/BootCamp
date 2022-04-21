@@ -5,7 +5,7 @@
     method: POST
     url: /create_program
     data:
-      action: create program
+      action: CreateProgram
       name: test program
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -22,7 +22,7 @@
     method: POST
     url: /create_program
     data:
-      action: create program
+      action: CreateProgram
       name: test program
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -39,7 +39,7 @@
     method: POST
     url: /create_program
     data:
-      action: create program
+      action: CreateProgram
       name: test program
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3

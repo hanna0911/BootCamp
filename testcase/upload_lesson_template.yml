@@ -5,10 +5,10 @@
     method: POST
     url: /admin_create_lesson_template
     data:
-      action: create lesson template
+      action: CreateLessonTemplate
       name: test lesson
       intro: this is a test
-      recommendTIme: 120
+      recommendTime: 120
       cover: NOT_A_REAL_BMP
       isTemplate: true
       contentID: 1
@@ -23,10 +23,10 @@
     method: POST
     url: /admin_create_lesson_template
     data:
-      action: create lesson template
+      action: CreateLessonTemplate
       name: test lesson
       intro: this is a test
-      recommendTIme: 120
+      recommendTime: 120
       cover: NOT_A_REAL_BMP
       isTemplate: true
       contentID: 1
@@ -41,10 +41,10 @@
     method: POST
     url: /admin_create_lesson_template
     data:
-      action: create lesson template
+      action: CreateLessonTemplate
       name: test lesson
       intro: this is a test
-      recommendTIme: 120
+      recommendTime: 120
       cover: NOT_A_REAL_BMP
       isTemplate: true
       contentID: 1

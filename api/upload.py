@@ -37,7 +37,7 @@ def create_program(request: HttpRequest):
     audience = data.get("audience")
     cover = data.get("cover")
     # 校验action字段、name字段和audience字段是否合规
-    if action != "create program" or name is None or name == "" \
+    if action != "CreateProgram" or name is None or name == "" \
             or audience is None or (audience != "newcomer" and audience != "teacher"):
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     if intro is None or intro == "":  # 无简介的话生成默认简介
@@ -48,7 +48,7 @@ def create_program(request: HttpRequest):
         audience_id = 0
     username = user_session['username']
     new_program_id = username + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
-    user = PrivateInfo.objects.filter(username=username)  # 外键
+    user = PrivateInfo.objects.filter(username=username).first() # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
                                intro=intro, tag=tag, contentCount=0, recommendTime=recommend_time,
                                audience=audience_id, cover=cover)
@@ -73,7 +73,7 @@ def create_content(request: HttpRequest):
     name = data.get("name")
     intro = data.get("intro")
     tag = data.get("tag")
-    recommend_time = data.get("time")
+    recommend_time = data.get("recommendTime")
     audience = data.get("audience")
     cover = data.get("cover")
     content_type = data.get("type")
@@ -90,11 +90,11 @@ def create_content(request: HttpRequest):
     # 第3行 - audience字段校验
     # 第4行 - isTemplate字段校验
     # 第5行 - programID有效性校验
-    if action is None or (action != "create content template" and action != "create content")\
+    if action is None or (action != "CreateContentTemplate" and action != "create content")\
             or name is None or name == ""\
             or content_type is None or (content_type != "course" and content_type != "exam" and content_type != "task")\
             or audience is None or (audience != "teacher" and audience != "newcomer")\
-            or is_template is None or (is_template != "true" and is_template != "false")\
+            or is_template is None or (is_template is not True and is_template is not False)\
             or program_id is None or len(ProgramTable.objects.filter(id=program_id)) == 0:
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     if content_type == "exam" and csv is None:  # exam类型的content必须有考题csv文件
@@ -104,15 +104,15 @@ def create_content(request: HttpRequest):
                                    or (task_type == 2 and task_file is None)):  # 文件型task必须有文件
         return gen_standard_response(400, {"result": "failure", "message": "task content not found"})
     user_session = request.session
-    if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
+    if user_session is None or "role" not in user_session.keys() or "username" not in user_session.keys():  # session不存在
         return session_timeout_response()
     username = user_session['username']
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     program = ProgramTable.objects.filter(id=program_id).first()
-    if is_template == "true" and cur_role != "admin":
+    if is_template == True and cur_role != "admin":
         return unauthorized_action_response()
-    if is_template == "false" and cur_role != "admin" and cur_role != "teacher":
+    if is_template == False and cur_role != "admin" and cur_role != "teacher":
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
@@ -134,7 +134,7 @@ def create_content(request: HttpRequest):
     new_content = ContentTable(id=new_content_id, name=name, author=user,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
                                audience=audience_id, cover=cover, type=content_type_id,
-                               isTemplate=is_template_bool, programId=program,
+                               isTemplate=is_template, programId=program,
                                lessonCount=0, questions=csv, taskType=task_type,
                                text=task_text, link=task_link, taskFile=task_file)
     new_content.save()
@@ -166,21 +166,21 @@ def create_lesson(request: HttpRequest):
     cover = data.get("cover")
     is_template = data.get("isTemplate")
     content_id = data.get("contentID")
-    if action is None or (action != "create lesson template" and action != "create lesson")\
+    if action is None or (action != "CreateLessonTemplate" and action != "create lesson")\
             or name is None or name == ""\
-            or is_template is None or (is_template != "true" and is_template != "false")\
+            or is_template is None or (is_template is not True and is_template is not False)\
             or content_id is None or len(ContentTable.objects.filter(id=content_id)) == 0:
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     user_session = request.session
-    if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
+    if user_session is None or "role" not in user_session.keys() or "username" not in user_session.keys():  # session不存在
         return session_timeout_response()
     username = user_session['username']
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     content = ContentTable.objects.filter(id=content_id).first()
-    if is_template == "true" and cur_role != "admin":
+    if is_template == True and cur_role != "admin":
         return unauthorized_action_response()
-    if is_template == "false" and cur_role != "admin" and cur_role != "teacher":
+    if is_template == False and cur_role != "admin" and cur_role != "teacher":
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
@@ -222,9 +222,9 @@ def upload_courseware(request: HttpRequest):
     lesson_id = data.get('lessonID')
     cover = data.get('cover')
     if order not in range(1, MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON):
-        return gen_standard_response(400, {"result": "success", "message": "too many coursewares"})
+        return gen_standard_response(400, {"result": "failed", "message": "too many coursewares"})
     if len(LessonTable.objects.filter(id=lesson_id)) == 0:
-        return gen_standard_response(400, {"result": "success", "message": "lesson not found"})
+        return gen_standard_response(400, {"result": "failed", "message": "lesson not found"})
     user_session = request.session
     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
         return session_timeout_response()

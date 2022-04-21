@@ -5,7 +5,7 @@
     method: POST
     url: /admin_create_content_template
     data:
-      action: create content template
+      action: CreateContentTemplate
       name: test content
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -18,7 +18,7 @@
       taskType: 0
       taskText: PLACEHOLDER
       taskLink: PLACEHOLDER
-      taskFIle: PLACEHOLDER
+      taskFile: PLACEHOLDER
       programID: 1
     headers:
   validate:
@@ -31,7 +31,7 @@
     method: POST
     url: /admin_create_content_template
     data:
-      action: create content template
+      action: CreateContentTemplate
       name: test content
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -44,7 +44,7 @@
       taskType: 0
       taskText: PLACEHOLDER
       taskLink: PLACEHOLDER
-      taskFIle: PLACEHOLDER
+      taskFile: PLACEHOLDER
       programID: 3
     headers:
   validate:
@@ -57,7 +57,7 @@
     method: POST
     url: /admin_create_content_template
     data:
-      action: create content template
+      action: CreateContentTemplate
       name: test content
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -70,8 +70,8 @@
       taskType: 0
       taskText: PLACEHOLDER
       taskLink: PLACEHOLDER
-      taskFIle: PLACEHOLDER
-      programID: 3
+      taskFile: PLACEHOLDER
+      programID: 1
     headers:
   validate:
     - equals: { status_code: 400 }
@@ -83,7 +83,7 @@
     method: POST
     url: /admin_create_content_template
     data:
-      action: create content template
+      action: CreateContentTemplate
       name: test content
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -96,8 +96,8 @@
       taskType: 0
       taskText: PLACEHOLDER
       taskLink: PLACEHOLDER
-      taskFIle: PLACEHOLDER
-      programID: 3
+      taskFile: PLACEHOLDER
+      programID: 1
     headers:
   validate:
     - equals: { status_code: 200 }
@@ -109,7 +109,7 @@
     method: POST
     url: /admin_create_content_template
     data:
-      action: create content template
+      action: CreateContentTemplate
       name: test content
       intro: this is a test
       tag: test_tag_1 test_tag_2 test_tag_3
@@ -122,8 +122,8 @@
       taskType: 0
       taskText: PLACEHOLDER
       taskLink: PLACEHOLDER
-      taskFIle: PLACEHOLDER
-      programID: 3
+      taskFile: PLACEHOLDER
+      programID: 1
     headers:
   validate:
     - equals: { status_code: 400 }
