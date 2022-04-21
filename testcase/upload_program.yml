@@ -1,0 +1,50 @@
+- name: admin上传Program
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /create_program
+    data:
+      action: create program
+      name: test program
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      audience: newcomer
+      cover: NotARealBMP
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: teacher上传Program
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /create_program
+    data:
+      action: create program
+      name: test program
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      audience: newcomer
+      cover: NotARealBMP
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 错误权限上传Program
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /create_program
+    data:
+      action: create program
+      name: test program
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      audience: newcomer
+      cover: NotARealBMP
+    headers:
+  validate:
+    - equals: { status_code: 400 }
