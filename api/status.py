@@ -66,4 +66,6 @@ def assign_teacher(req: HttpRequest):
         return gen_response(400, message="teacher field has no teacher permission or teacher not duty")
     entry = TeacherNewcomerTable(teacher=teacher, newcomer=newcomer)
     entry.save()
+    teacher.currentMembers = teacher.currentMembers +1
+    teacher.save()
     return gen_response(200)
