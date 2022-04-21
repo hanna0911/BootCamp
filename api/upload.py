@@ -46,8 +46,9 @@ def create_program(request: HttpRequest):
         audience_id = 1
     else:
         audience_id = 0
-    new_program_id = user_session["user"] + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
-    user = PrivateInfo.objects.filter(username=user_session["user"])  # 外键
+    username = user_session["name"]
+    new_program_id = username + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
+    user = PrivateInfo.objects.filter(username=username)  # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
                                intro=intro, tag=tag, contentCount=0, recommendTime=recommend_time,
                                audience=audience_id, cover=cover)
