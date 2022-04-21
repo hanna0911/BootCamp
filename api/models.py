@@ -81,9 +81,9 @@ class TeacherNewcomerTable(models.Model):
     relationID = models.AutoField(primary_key=True)  # 自增主键
     teacher = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="AsTeacher")  # 外键，该关系中的导师
     newcomer = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="AsNewcomer")  # 外键，该关系中的新人
-    teacherScore = models.FloatField()  # 该老师被该新人评价的分数
+    teacherScore = models.FloatField(default=-1.)  # 该老师被该新人评价的分数
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
-    newcomerScore = models.FloatField()  # 该新人被该老师评价的分数
+    newcomerScore = models.FloatField(default=-1.)  # 该新人被该老师评价的分数
     teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
 
 

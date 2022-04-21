@@ -2,6 +2,7 @@ import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
 from .models import PrivateInfo
+import json
 
 chinese_role_trans = {
     "admin": "管理员",
@@ -85,6 +86,28 @@ def check_method(req: HttpRequest, method: str):
         return False
 
 
+def quick_check(req: HttpRequest, check_points: dict):
+    for key in check_points.keys():
+        if key == "method" and not check_method(req, check_points[key]):
+            return False, gen_response(400, message="invalid method")
+        elif key == "username":
+            if req.session.get("username", None) is None:
+                return False, gen_response(
+                    400, message="no username in session, probly not login")
+        elif key == "role" and not role_list_check(req.session.get("username"), check_points[key]):
+            return False, gen_response(400, message="no permission")
+        elif key == "data_field":
+            try:
+                data: dict = json.loads(req.body)
+            except Exception:
+                return False, gen_response(400, message='Load json request failed')
+            for field in check_points[key]:
+                if field not in data.keys():
+                    return False, gen_response(400, message="lack of arguments")
+
+    return True, gen_response(200)
+
+
 def unknown_error_response():
     """
     生成未知错误的标准响应
@@ -148,17 +171,18 @@ def role_authentication(username: str, target_role: str):
     user_info = PrivateInfo.objects.get(username__exact=username)  # 获取用户信息
     if target_role == "newcomer":  # 查询的身份是新人
         return user_info.isNew
-    if target_role == "teacher":  # 查询的身份是导师
+    elif target_role == "teacher":  # 查询的身份是导师
         return user_info.isTeacher
-    if target_role.lower() == "hrbp":  # 查询的身份是hrbp
+    elif target_role.lower() == "hrbp":  # 查询的身份是hrbp
         return user_info.isHRBP
-    if target_role == "admin":  # 查询的身份是管理员
+    elif target_role == "admin":  # 查询的身份是管理员
         return user_info.isAdmin
-
+    else:
+        return False
 
 def get_role_list(username: str):
     try:
-        user = PrivateInfo.objects.get(username__exact = username)
+        user = PrivateInfo.objects.get(username__exact=username)
     except Exception as e:
         return []
 
