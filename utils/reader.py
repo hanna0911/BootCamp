@@ -75,7 +75,7 @@ def analysis_parameters(info: list):
 #                 isNew=info["isNew"],
 #
 #                 newcomerStartDate=info["newcomerStartDate"],
-#                 newcomerIsGraduate=info["newcomerIsGraduate"],
+#                 newcomerGraduateState=info["newcomerGraduateState"],
 #                 newcomerGraduateDate=info["newcomerGraduateDate"],
 #
 #                 historicalMembers=info["historicalMembers"],
@@ -127,7 +127,7 @@ def analysis_parameters(info: list):
 #             isNew=info["isNew"],
 #
 #             newcomerStartDate=str(info["newcomerStartDate"]),
-#             newcomerIsGraduate=info["newcomerIsGraduate"],
+#             newcomerGraduateState=info["newcomerGraduateState"],
 #             newcomerGraduateDate=str(info["newcomerGraduateDate"]),
 #
 #             historicalMembers=info["historicalMembers"],

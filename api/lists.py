@@ -33,7 +33,7 @@ def admin_newcomer_list(request: HttpRequest):
             tmp["teacher"] = teacher_queue.first().teacher.name
             tmp["tutor"] = teacher_queue.first().teacher.name
         tmp["joinBootcamp"] = True
-        tmp["graduated"] = newcomer.newcomerIsGraduate  # temp
+        tmp["graduated"] = newcomer.newcomerGraduateState  # temp
         tmp["evaluate"] = "暂无"
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username) # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
