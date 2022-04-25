@@ -34,9 +34,9 @@ def bootcamp_attend(request: HttpRequest):
 
     try:
         startDate = data["dateRangeStart"]
-        startDate = datetime.fromtimestamp(startDate/1000)
+        startDate = datetime.fromtimestamp(startDate / 1000)
         endDate = data["dateRangeEnd"]
-        endDate = datetime.fromtimestamp(endDate/1000)
+        endDate = datetime.fromtimestamp(endDate / 1000)
     except KeyError:
         return gen_response(400, "JSON format error")
 
