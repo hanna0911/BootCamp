@@ -49,6 +49,7 @@ style-test:
     - PYCODESTYLE_RET=$?
     - pylint api/*.py
     - PYLINT_RET=$?
+    - exit $PYCODESTYLE_RET
     - if [ $PYCODESTYLE_RET \> 0 ]; then exit $PYCODESTYLE_RET; fi;
     - exit $PYLINT_RET
 
