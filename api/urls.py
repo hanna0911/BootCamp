@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, lists, upload, download, status
+from . import views, lists, upload, download, status, analysis
 from backend.write_db import write_db
 
 # api应用的路由配置
@@ -26,5 +26,6 @@ urlpatterns = [
     path("upload_courseware", upload.upload_courseware, name="upload_courseware"),
     path("reject_nominate", status.reject_nominate, name="reject_nominate"),
     path("accept_nominate", status.accept_nominate, name="accept_nominate"),
-    path("assign_teacher", status.assign_teacher, name="assign_teacher")
+    path("assign_teacher", status.assign_teacher, name="assign_teacher"),
+    path("bootcamp_attend", analysis.bootcamp_attend, name="bootcamp_attend"),
 ]
