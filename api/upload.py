@@ -95,13 +95,13 @@ def create_content(request: HttpRequest):
     # 第3行 - audience字段校验
     # 第4行 - isTemplate字段校验
     # 第5行 - programID有效性校验
-    print(action)
-    print(name)
-    print(audience)
-    print(is_template)
-    print(content_type)
-    print(program_id)
-    print(len(ProgramTable.objects.filter(id=program_id)))
+    # print(action)
+    # print(name)
+    # print(audience)
+    # print(is_template)
+    # print(content_type)
+    # print(program_id)
+    # print(len(ProgramTable.objects.filter(id=program_id)))
     if action is None or (action != "CreateContentTemplate" and action != "create content")\
             or name is None or name == ""\
             or content_type is None or (content_type != "course" and content_type != "exam" and content_type != "task")\
