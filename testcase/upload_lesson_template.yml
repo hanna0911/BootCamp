@@ -1,0 +1,53 @@
+- name: admin上传lesson
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /admin_create_lesson_template
+    data:
+      action: CreateLessonTemplate
+      name: test lesson
+      intro: this is a test
+      recommendTime: 120
+      cover: NOT_A_REAL_BMP
+      isTemplate: true
+      contentID: 1
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 身份错误 - teacher试图上传模板
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /admin_create_lesson_template
+    data:
+      action: CreateLessonTemplate
+      name: test lesson
+      intro: this is a test
+      recommendTime: 120
+      cover: NOT_A_REAL_BMP
+      isTemplate: true
+      contentID: 1
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 身份错误 - 无上传权限
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /admin_create_lesson_template
+    data:
+      action: CreateLessonTemplate
+      name: test lesson
+      intro: this is a test
+      recommendTime: 120
+      cover: NOT_A_REAL_BMP
+      isTemplate: true
+      contentID: 1
+    headers:
+  validate:
+    - equals: { status_code: 400 }
