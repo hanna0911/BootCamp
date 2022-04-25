@@ -45,7 +45,7 @@ style-test:
   before_script:
     - pip install -i https://pypi.tuna.tsinghua.edu.cn/simple -r requirements_dev.txt
   script:
-    - pycodestyle api/*.py --max-line-length=160 --ignore=E251
+    - pycodestyle api/*.py --max-line-length=160 --ignore=E251,W503
     - PYCODESTYLE_RET=$?
     - pylint api/*.py
     - PYLINT_RET=$?

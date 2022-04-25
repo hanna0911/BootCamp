@@ -180,6 +180,7 @@ def role_authentication(username: str, target_role: str):
     else:
         return False
 
+
 def get_role_list(username: str):
     try:
         user = PrivateInfo.objects.get(username__exact=username)

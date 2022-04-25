@@ -13,6 +13,7 @@ import json
 
 MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON = 10
 
+
 def create_program(request: HttpRequest):
     """
     创建一个Program
@@ -232,7 +233,7 @@ def upload_courseware(request: HttpRequest):
     if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
         return unauthorized_action_response()
     file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
-                                           request.FILES.get("content"))
+                                       request.FILES.get("content"))
     if file_op_ret[0]:
         new_courseware_id = username + "_cw_" + str(time.time())
         lesson = LessonTable.objects.filter(id=lesson_id).first()
@@ -245,6 +246,3 @@ def upload_courseware(request: HttpRequest):
     else:
         std_error_message = "file system failed to save uploaded file. better luck next time:("
         return gen_standard_response(400, {"result": "success", "message": std_error_message})
-
-
-
