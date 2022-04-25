@@ -39,7 +39,7 @@ def write_db(req: HttpRequest):
             isNew=info["isNew"],
 
             newcomerStartDate=str(info["newcomerStartDate"]),
-            newcomerIsGraduate=info["newcomerIsGraduate"],
+            newcomerGraduateState=info["newcomerGraduateState"],
             newcomerGraduateDate=str(info["newcomerGraduateDate"]),
 
             historicalMembers=info["historicalMembers"],

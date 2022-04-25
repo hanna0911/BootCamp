@@ -98,6 +98,9 @@ class Tests(TestCase):
     def test_blanck(self):
         assert 1, 1
 
+    def test_get_token(self):
+        self.process("/testcase/get_token.yml")
+
     def test_write_db(self):
         PrivateInfo.objects.all().delete()
         Honor.objects.all().delete()

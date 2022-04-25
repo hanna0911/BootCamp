@@ -20,8 +20,8 @@
   isHRBP: 0
   isNew: 1
 
-  newcomerStartDate:
-  newcomerIsGraduate: true
+  newcomerStartDate: 1
+  newcomerGraduateState: 1
   newcomerGraduateDate: 2020-12-12 00:00:00
 
   historicalMembers: 1
@@ -54,7 +54,7 @@
   isNew: 1
 
   newcomerStartDate:
-  newcomerIsGraduate: true
+  newcomerGraduateState: 1
   newcomerGraduateDate: 2020-12-12 00:00:00
 
   historicalMembers: 0
@@ -87,7 +87,7 @@
   isNew: 1
 
   newcomerStartDate:
-  newcomerIsGraduate: true
+  newcomerGraduateState: 1
   newcomerGraduateDate: 2020-12-12 00:00:00
 
   historicalMembers: 0
@@ -120,7 +120,7 @@
   isNew: 1
 
   newcomerStartDate:
-  newcomerIsGraduate: true
+  newcomerGraduateState: 1
   newcomerGraduateDate: 2020-12-12 00:00:00
 
   historicalMembers: 0

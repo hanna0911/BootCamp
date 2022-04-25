@@ -60,10 +60,12 @@ def assign_teacher(req: HttpRequest):
     try:
         teacher = PrivateInfo.objects.get(username=data.get("teacher"))
         newcomer = PrivateInfo.objects.get(username=data.get("newcomer"))
-    except:
+    except Exception as e:
         return gen_response(400, "user not found")
     if not (teacher.isTeacher and teacher.teacherIsDuty):
         return gen_response(400, message="teacher field has no teacher permission or teacher not duty")
     entry = TeacherNewcomerTable(teacher=teacher, newcomer=newcomer)
     entry.save()
+    teacher.currentMembers = teacher.currentMembers + 1
+    teacher.save()
     return gen_response(200)

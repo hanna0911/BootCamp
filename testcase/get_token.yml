@@ -1,0 +1,10 @@
+- name: 获取scrf token
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /get_token
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }

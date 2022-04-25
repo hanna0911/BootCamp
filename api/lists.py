@@ -33,9 +33,9 @@ def admin_newcomer_list(request: HttpRequest):
             tmp["teacher"] = teacher_queue.first().teacher.name
             tmp["tutor"] = teacher_queue.first().teacher.name
         tmp["joinBootcamp"] = True
-        tmp["graduated"] = newcomer.newcomerIsGraduate  # temp
+        tmp["graduated"] = newcomer.newcomerGraduateState  # temp
         tmp["evaluate"] = "暂无"
-        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username) # 直接后端指定路径，前端自动请求
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
     return gen_response(200, return_list, "tmp supported")
 
@@ -138,10 +138,10 @@ def nominated_list(req: HttpRequest):
     username = req.session.get("username", None)
     if username is None:
         return gen_response(
-               400, message="no username in session, probly not login")
-    if not role_list_check(username, ["HRBP","admin"]): # 暂时做修改适应前端
+            400, message="no username in session, probly not login")
+    if not role_list_check(username, ["HRBP", "admin"]):  # 暂时做修改适应前端
         return gen_response(400, message="permission denied")
-    teacher_list = PrivateInfo.objects.filter(isTeacher=True,teacherIsDuty=False)
+    teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
     # TODO:获取培训状态
     return_list = []
     for teacher in teacher_list:
