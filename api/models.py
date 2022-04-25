@@ -74,7 +74,7 @@ class PrivateInfo(models.Model):
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
     teacherNominationDate = models.DateTimeField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
     teacherExaminedStatus = models.IntegerField(
-        choices = EnumTeacherExaminedStatus.choices, 
+        choices = EnumTeacherExaminedStatus.choices,
         default = EnumTeacherExaminedStatus.NotYet)  # 审核状态，默认值为“未审核”。使用Django枚举类型实现
     teacherExaminedDate = models.DateTimeField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
@@ -89,15 +89,15 @@ class Honor(models.Model):
 
     # --------------------Enum枚举类的实现--------------------
     class EnumType(models.IntegerChoices):
-        Medal = 0       # 勋章
-        Certificate = 1 # 证书
-        Award = 2       # 奖项
+        Medal = 0           # 勋章
+        Certificate = 1     # 证书
+        Award = 2           # 奖项
     # --------------------------------------------------------
 
     type = models.IntegerField(choices = EnumType.choices, default = EnumType.Medal)  # Honor类型，默认为“勋章”
     owner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)  # 荣誉的归属者
     text = models.CharField(max_length=LONG_INFO_LEN, default="None")  # 奖励描述
-    pic = models.ImageField() # 荣誉图片
+    pic = models.ImageField()  # 荣誉图片
 
 
 class TeacherNewcomerTable(models.Model):

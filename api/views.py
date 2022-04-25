@@ -22,8 +22,8 @@ def get_token(request: HttpRequest):
         username = request.session.get("username", None)
         if username:  # session存在，说明已在登录状态
             role_list = get_role_list(username)
-            return gen_standard_response(200, {"result": "login success", "role_list": role_list, "message":"success"})
-        return gen_standard_response(200, {"result": "login fail", "role_list": [], "message":"fail"})
+            return gen_standard_response(200, {"result": "login success", "role_list": role_list, "message": "success"})
+        return gen_standard_response(200, {"result": "login fail", "role_list": [], "message": "fail"})
     else:  # 只接受GET请求
         return illegal_request_type_error_response()
 
