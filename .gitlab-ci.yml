@@ -48,10 +48,10 @@ style-test:
     - pycodestyle api/*.py --max-line-length=160 --ignore=E251,W503
     - PYCODESTYLE_RET=$?
     - exit $PYCODESTYLE_RET
-    - pylint api/*.py
-    - PYLINT_RET=$?
-    - if [ $PYCODESTYLE_RET \> 0 ]; then exit $PYCODESTYLE_RET; fi;
-    - exit $PYLINT_RET
+    # - pylint api/*.py
+    # - PYLINT_RET=$?
+    # - if [ $PYCODESTYLE_RET \> 0 ]; then exit $PYCODESTYLE_RET; fi;
+    # - exit $PYLINT_RET
 
 deploy:
   stage: deploy
