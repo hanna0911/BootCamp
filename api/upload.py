@@ -46,6 +46,10 @@ def create_program(request: HttpRequest):
         audience_id = 1
     else:
         audience_id = 0
+    if len(ProgramTable.objects.filter(name=name)) > 0:
+        return gen_standard_response(200, {"result": "failure",
+                                           "message": f"program {name} already exists",
+                                           "programID": ProgramTable.objects.filter(name=name).first().id})
     username = user_session['username']
     new_program_id = username + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
     user = PrivateInfo.objects.filter(username=username).first() # 外键
@@ -90,6 +94,13 @@ def create_content(request: HttpRequest):
     # 第3行 - audience字段校验
     # 第4行 - isTemplate字段校验
     # 第5行 - programID有效性校验
+    print(action)
+    print(name)
+    print(audience)
+    print(is_template)
+    print(content_type)
+    print(program_id)
+    print(len(ProgramTable.objects.filter(id=program_id)))
     if action is None or (action != "CreateContentTemplate" and action != "create content")\
             or name is None or name == ""\
             or content_type is None or (content_type != "course" and content_type != "exam" and content_type != "task")\
@@ -196,10 +207,88 @@ def create_lesson(request: HttpRequest):
     })
 
 
-# def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
+def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
+    file_ext = file.name.split(".")[-1].lower()
+    file_path = f"{dir_prefix}/{lesson_id}/"
+    file_dir = f"{dir_prefix}/{lesson_id}/{order}_{file.name}"
+    try:
+        if not os.path.exists(file_path):
+            os.makedirs(file_path)
+        with open(file_dir, "wb+") as dest:
+            for chunk in file.chunks():
+                dest.write(chunk)
+    except Exception:
+        return False, file_dir
+    return True, file_dir
+
+
+def upload_courseware_info(request: HttpRequest):
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return gen_response(400, 'Load json request failed')
+    order = data.get('order')
+    lesson_id = data.get('lessonID')
+    cover = data.get('cover')
+    if order not in range(1, MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON):
+        return gen_standard_response(400, {"result": "failed", "message": "too many coursewares"})
+    if len(LessonTable.objects.filter(id=lesson_id)) == 0:
+        return gen_standard_response(400, {"result": "failed", "message": "lesson not found"})
+    user_session = request.session
+    if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
+        return session_timeout_response()
+    username = user_session["username"]
+    cur_role = user_session["role"]
+    if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
+        return unauthorized_action_response()
+    user_session["upload_lesson_id"] = lesson_id
+    user_session["upload_courseware_order"] = order
+    user_session["upload_cover"] = cover
+    std_success_message = f"info of courseware for lesson {lesson_id} registered"
+    return gen_standard_response(200, {"result": "success", "message": std_success_message})
+
+
+def upload_courseware_file(request: HttpRequest):
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
+    user_session = request.session
+    if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
+        return session_timeout_response()
+    username = user_session["username"]
+    cur_role = user_session["role"]
+    lesson_id = user_session.get("upload_lesson_id")
+    order = user_session.get("upload_courseware_order")
+    cover = user_session.get("upload_cover")
+    if lesson_id is None or order is None or cover is None:  # 调用upload_courseware_info接口时没有存参数
+        return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
+    # 删除相关参数，防止被复用
+    user_session.delete("upload_lesson_id")
+    user_session.delete("upload_courseware_order")
+    user_session.delete("upload_cover")
+    if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
+        return unauthorized_action_response()
+    file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
+                                           request.FILES.get("content"))
+    if file_op_ret[0]:
+        new_courseware_id = username + "_cw_" + str(time.time())
+        lesson = LessonTable.objects.filter(id=lesson_id).first()
+        content = lesson.content
+        new_courseware = CoursewareTable(id=new_courseware_id, lesson=lesson_id, content=content,
+                                         name=request.FILES.get("content").name, cover=cover, url=file_op_ret[1])
+        new_courseware.save()
+        std_success_message = f"courseware for lesson {lesson_id} uploaded successfully"
+        return gen_standard_response(200, {"result": "success", "message": std_success_message})
+    else:
+        std_error_message = "file system failed to save uploaded file. better luck next time:("
+        return gen_standard_response(400, {"result": "success", "message": std_error_message})
+
+
+# def save_test_file(program_id, creator_username, dir_prefix, file):
 #     file_ext = file.name.split(".")[-1].lower()
-#     file_path = f"{dir_prefix}/{lesson_id}/"
-#     file_dir = f"{dir_prefix}/{lesson_id}/{order}_{file.name}"
+#     file_path = f"{dir_prefix}/{program_id}/"
+#     file_dir = f"{dir_prefix}/{program_id}/{file.name}"
 #     try:
 #         if not os.path.exists(file_path):
 #             os.makedirs(file_path)
@@ -211,32 +300,26 @@ def create_lesson(request: HttpRequest):
 #     return True, file_dir
 #
 #
-# def upload_courseware(request: HttpRequest):
+# def upload_test_file(request: HttpRequest):
 #     if request.method != "POST":  # 只接受POST请求
 #         return illegal_request_type_error_response()
-#     try:
-#         data = json.loads(request.body)
-#     except Exception:
-#         return gen_response(400, 'Load json request failed')
-#     order = data.get('order')
-#     lesson_id = data.get('lessonID')
-#     cover = data.get('cover')
-#     if order not in range(1, MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON):
-#         return gen_standard_response(400, {"result": "failed", "message": "too many coursewares"})
-#     if len(LessonTable.objects.filter(id=lesson_id)) == 0:
-#         return gen_standard_response(400, {"result": "failed", "message": "lesson not found"})
 #     user_session = request.session
 #     if user_session is None or "role" not in user_session.keys() or "user" not in user_session.keys():  # session不存在
 #         return session_timeout_response()
 #     username = user_session["username"]
 #     cur_role = user_session["role"]
+#     program_id = user_session.get("upload_program_id")
+#     cover = user_session.get("upload_cover")
+#     # 删除相关参数，防止被复用
+#     user_session.delete("upload_program_id")
+#     user_session.delete("upload_cover")
 #     if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
 #         return unauthorized_action_response()
-#     file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
+#     file_op_ret = save_test_file(program_id, username, 'files/test',
 #                                            request.FILES.get("content"))
 #     if file_op_ret[0]:
-#         new_courseware_id = username + "_cw_" + str(time.time())
-#         lesson = LessonTable.objects.filter(id=lesson_id).first()
+#         new_test_id = username + "_t_" + str(time.time())
+#         program = ProgramTable.objects.filter(id=program_id).first()
 #         content = lesson.content
 #         new_courseware = CoursewareTable(id=new_courseware_id, lesson=lesson_id, content=content,
 #                                          name=request.FILES.get("content").name, cover=cover, url=file_op_ret[1])
@@ -246,6 +329,3 @@ def create_lesson(request: HttpRequest):
 #     else:
 #         std_error_message = "file system failed to save uploaded file. better luck next time:("
 #         return gen_standard_response(400, {"result": "success", "message": std_error_message})
-
-
-
