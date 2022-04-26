@@ -9,6 +9,7 @@ from typing import Tuple
 from django.http import HttpRequest
 from .api_util import *
 from .models import *
+from django.db.models import QuerySet, Avg
 
 
 def check_day(date: datetime.datetime, day_start: bool) -> bool:
@@ -28,6 +29,16 @@ def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime, delta:
         endList.append(endList[-1] - delta)
     endList.reverse()
     return list(zip(startList, endList))
+
+
+def average_score(users: QuerySet) -> float:
+    userprograms = [user.ProgramsAsUser.all() for user in users]
+    if len(userprograms) == 0: return 0.0
+    if len(userprograms) == 1:
+        userprograms = userprograms[0]
+    else:
+        userprograms = userprograms[0].union(*userprograms[1:])
+    return userprograms.aggregate(Avg("score"))["score__avg"]
 
 
 def bootcamp_attend(request: HttpRequest):
@@ -95,3 +106,42 @@ def newcomer_average_score(request: HttpRequest):
     """
     新人平均分
     """
+    if request.method != "POST":
+        return illegal_request_type_error_response()
+
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return gen_response(400, "JSON format error")
+
+    try:
+        session = request.session
+        role = session["role"]
+        username = session["username"]
+    except KeyError:
+        return session_timeout_response()
+
+    if role not in ["admin", "HRBP"]:
+        return unauthorized_action_response()
+
+    try:
+        dept = PrivateInfo.objects.get(username = username).dept
+    except Exception:
+        return session_timeout_response()
+
+    try:
+        startDate = data["dateRangeStart"]
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
+        endDate = data["dateRangeEnd"]
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
+    except KeyError:
+        return gen_response(400, "JSON format error")
+
+    if not (check_day(startDate, True) and check_day(endDate, False)):
+        return gen_response(400, "Invalid date range")
+
+    users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (startDate, endDate))
+    score = average_score(users)
+    print(score)
+
+    return gen_response(200, "fuck")
