@@ -21,4 +21,4 @@ from django.conf.urls.static import static  # 文件
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include("api.urls")),  # 暂时全部用api存储接口，后续请按照功能的不同类进行分类
-] + static(settings.UPLOAD_URL, document_root=settings.UPLOAD_ROOT)  # 上传的文件
+] + static(settings.FILES_URL, document_root=settings.FILES_ROOT)  # 上传的文件

@@ -179,7 +179,7 @@ class ContentTable(models.Model):
     # course相关
     lessonCount = models.IntegerField()  # lesson数
     # exam相关
-    questions = models.FileField()  # 考题csv
+    questions = models.CharField(max_length=1000)  # 考题csv的地址
     beginTime = models.DateTimeField(null=True)  # 官方提供的开始时间
     endTime = models.DateTimeField(null=True)  # 官方提供的结束时间
     # task相关

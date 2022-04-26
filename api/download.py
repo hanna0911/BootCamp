@@ -1,11 +1,14 @@
 """
 下载相关接口
 """
-from django.http import HttpRequest, StreamingHttpResponse
+from django.http import HttpRequest, StreamingHttpResponse, HttpResponse
 from wsgiref.util import FileWrapper
 import re
 import os
 import mimetypes
+import csv
+from api.models import ContentTable
+from api.api_util import *
 
 
 def file_iterator(file_name, chunk_size=8192, offset=0, length=None):
@@ -52,3 +55,73 @@ def stream_video(request: HttpRequest):
     resp['Accept-Ranges'] = 'bytes'
     resp.status_code = 200
     return resp
+
+
+def retrieve_test_info_by_id(request: HttpRequest):
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return gen_response(400, 'Load json request failed')
+    user_session = request.session
+    if user_session is None or "role" not in user_session.keys():  # session不存在
+        return session_timeout_response()
+    action = data.get("action")
+    test_content_id = data.get("testID")
+    if action is None or action != "retrieve test info"\
+       or test_content_id is None:
+        return gen_standard_response(400, {"result": "failure", "message": "Bad Arguments"})
+    if len(ContentTable.objects.filter(id=test_content_id)) == 0:
+        return item_not_found_error_response()
+    test = ContentTable.objects.filter(id=test_content_id).first()
+    print(test.type)
+    if test.type != 1:
+        return item_not_found_error_response()
+    return gen_standard_response(200, {
+        "name": test.name,
+        "intro": test.intro,
+        "time": test.recommendedTime,
+        "tag": test.tag,
+        "author": test.author.name
+    })
+
+
+def retrieve_test_paper_by_id(request: HttpRequest):
+    """
+    文件功能测试接口
+    接收POST请求
+    格式：{action: "retrieve test paper", testID: __CONTENT_ID__}
+    """
+    if request.method != "POST":  # 只接受POST请求
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception:
+        return gen_response(400, 'Load json request failed')
+    user_session = request.session
+    if user_session is None or "role" not in user_session.keys():  # session不存在
+        return session_timeout_response()
+    action = data.get("action")
+    test_content_id = data.get("testID")
+    if action is None or action != "retrieve test paper"\
+       or test_content_id is None:
+        return gen_standard_response(400, {"result": "failure", "message": "Bad Arguments"})
+    if len(ContentTable.objects.filter(id=test_content_id)) == 0:
+        return item_not_found_error_response()
+    test = ContentTable.objects.filter(id=test_content_id).first()
+    if test.type != 1:
+        return item_not_found_error_response()
+    response = HttpResponse(content_type="text/csv")
+    response['Content-Disposition'] = 'attachment; filename=test_paper.csv'
+    try:
+        fp = open(test.questions, "r", encoding="UTF-8")
+    except Exception as e:
+        print(e)
+        return item_not_found_error_response()
+    csv_reader = csv.reader(fp)
+    csv_writer = csv.writer(response)
+    csv_writer.writerows(csv_reader)
+    response.status_code = 200
+    return response
+

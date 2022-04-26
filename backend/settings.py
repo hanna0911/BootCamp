@@ -131,5 +131,5 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-UPLOAD_URL = '/upload/' 
-UPLOAD_ROOT = os.path.join(BASE_DIR, 'upload')
+FILES_URL = '/files/' 
+FILES_ROOT = os.path.join(BASE_DIR, 'files')
