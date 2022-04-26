@@ -4,14 +4,19 @@
 """
 import os.path
 import time
+from re import split
 
 import django.core.files.uploadedfile
+from django.core.files import File
+from django.core.files.base import ContentFile
 from django.http import HttpRequest
 from .api_util import *
 from .models import *
 import json
 
 MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON = 10
+EXAM_FILE_CACHE_MAX= 50
+exam_file_cache = dict()
 
 
 def create_program(request: HttpRequest):
@@ -63,6 +68,27 @@ def create_program(request: HttpRequest):
                                        "programID": new_program_id})
 
 
+# def upload_test_file(request: HttpRequest):
+#     #print(1)
+#     print(request)
+#     if request.method != "POST":  # 只接受POST请求
+#         return illegal_request_type_error_response()
+#     if len(exam_file_cache.keys()) > EXAM_FILE_CACHE_MAX:
+#         return gen_standard_response(400, {"result": "failed",
+#                                            "message": "Max Cache Size Reached"})
+#     user_session = request.session
+#     if user_session is None or "role" not in user_session.keys() or "username" not in user_session.keys():  # session不存在
+#         return session_timeout_response()
+#     if user_session.get("username") in exam_file_cache.keys():
+#         return gen_standard_response(400, {"result": "failed",
+#                                            "message": "Cannot Cache Duplicate Files"})
+#     file = File(request.FILES.get("file"))
+#     exam_file_cache[user_session.get("username")] = file
+#     #print(user_session.get("username"))
+#     #print(file)
+#     return gen_standard_response(200, {"file status": "received"})
+
+
 def create_content(request: HttpRequest):
     """
     创建一个content(课程/考试/任务)
@@ -95,13 +121,13 @@ def create_content(request: HttpRequest):
     # 第3行 - audience字段校验
     # 第4行 - isTemplate字段校验
     # 第5行 - programID有效性校验
-    print(action)
-    print(name)
-    print(audience)
-    print(is_template)
-    print(content_type)
-    print(program_id)
-    print(len(ProgramTable.objects.filter(id=program_id)))
+    # print(action)
+    # print(name)
+    # print(audience)
+    # print(is_template)
+    # print(content_type)
+    # print(program_id)
+    # print(len(ProgramTable.objects.filter(id=program_id)))
     if action is None or (action != "CreateContentTemplate" and action != "create content")\
             or name is None or name == ""\
             or content_type is None or (content_type != "course" and content_type != "exam" and content_type != "task")\
@@ -143,13 +169,17 @@ def create_content(request: HttpRequest):
         content_type_id = 1
     else:
         content_type_id = 2
+    with open(csv, 'r', encoding="UTF-8") as file:
+        csv_file = ContentFile(file.read())
+    # print(csv_file)
     new_content = ContentTable(id=new_content_id, name=name, author=user,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
                                audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template, programId=program,
-                               lessonCount=0, questions=csv, taskType=task_type,
-                               text=task_text, link=task_link, taskFile=task_file)
+                               lessonCount=0, questions=csv_file, taskType=task_type,
+                               text=task_text, link=task_link, taskFile=File(task_file))
     new_content.save()
+    print(new_content.questions)
     new_program_content_relation = ProgramContentTable(program=program, content=new_content)  # 和父program创建关联信息
     new_program_content_relation.save()
     program.contentCount += 1  # 父program的content数量累加
