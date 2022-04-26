@@ -298,3 +298,10 @@ def illegal_request_type_error_response():
                                            "message": "illegal request type"})
     response.status_code = 400
     return response
+
+
+def item_not_found_error_response():
+    response: JsonResponse = JsonResponse({"result": "failure",
+                                           "message": "requested item not found in database"})
+    response.status_code = 400
+    return response
