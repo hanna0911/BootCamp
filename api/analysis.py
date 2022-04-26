@@ -19,7 +19,7 @@ def check_day(date: datetime.datetime, day_start: bool) -> bool:
 
 
 def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime, delta: datetime.timedelta = datetime.timedelta(seconds = 86400)) \
-    -> Tuple[(datetime.datetime, datetime.datetime)]:
+        -> Tuple[(datetime.datetime, datetime.datetime)]:
     days_minus1 = (endDate - startDate).days
     startList = [startDate]
     endList = [endDate]
@@ -49,7 +49,7 @@ def bootcamp_attend(request: HttpRequest):
     except KeyError:
         return session_timeout_response()
 
-    if not role in ["admin", "HRBP"]:
+    if role not in ["admin", "HRBP"]:
         return unauthorized_action_response()
 
     try:
