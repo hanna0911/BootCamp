@@ -1,0 +1,84 @@
+- name: 分配导师-成功
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      teacher: t1
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 分配导师-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /assign_teacher
+    data:
+      teacher: admin
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 分配导师-字段缺失
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 分配导师-不是导师的导师
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      teacher: nwecomer
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 分配导师-用户找不到
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      teacher: nwecomerdihosg
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 分配导师-导师不在岗
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      teacher: t2
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 分配导师-权限错误
+  ident:
+    - HRBP
+    - teacher
+    - newcomer
+  request:
+    method: POST
+    url: /assign_teacher
+    data:
+      teacher: admin
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }

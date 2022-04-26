@@ -7,7 +7,7 @@ import json
 import logging
 import django
 import requests
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import PrivateInfo, UserProgramTable, ProgramTable
@@ -18,7 +18,12 @@ from .api_util import *
 @ensure_csrf_cookie
 def get_token(request: HttpRequest):
     if request.method == "GET":
-        return gen_standard_response(200, {})
+        # session = request.session  # 获取session
+        username = request.session.get("username", None)
+        if username:  # session存在，说明已在登录状态
+            role_list = get_role_list(username)
+            return gen_standard_response(200, {"result": "login success", "role_list": role_list, "message": "success"})
+        return gen_standard_response(200, {"result": "login fail", "role_list": [], "message": "fail"})
     else:  # 只接受GET请求
         return illegal_request_type_error_response()
 
@@ -39,8 +44,8 @@ def login(request: HttpRequest):  # 登录
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
-    if "username" in request.session.keys():
-        return gen_response(400, {}, "dup login")
+    # if "username" in request.session.keys():
+    #     return gen_response(400, {}, "dup login")
     if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
@@ -48,13 +53,49 @@ def login(request: HttpRequest):  # 登录
     else:
         # 设置session信息并保存 TODO: 在身份系统实现之后引入身份的存储
         request.session['username'] = username  # 在session中保存username
-        # request.seesion['role'] = 'newcomer'  # 在session中保存当前身份，默认新人 TODO: 根据用户偏好设置默认身份,统一根据最高权级设置身份
+        request.session["role"] = get_highest_role(username)
         session_key = request.session.session_key
+        role_list = get_role_list(username)
         # 返回成功信息
-        # 返回成功信息
+        # res = HttpResponseRedirect("/newcomer-board")
+        # res.set_cookie("SessionID", session_key)
+        # return res
         return gen_set_cookie_response(code=200,
-                                       data={"result": "success", "message": "account created"},
+                                       data={"result": "success", "message": "login successful", "role_list": role_list},
                                        cookie={"SessionID": session_key})
+
+
+def get_user_info(req: HttpRequest):
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(400, message="no username in session porbly not login")
+    user = PrivateInfo.objects.get(username=username)
+    res = load_private_info(user)
+    positions = get_positions(user)
+    res["userPositions"] = positions
+    res["selectedPosition"] = chinese_role_trans[get_highest_role(username)]
+    return gen_response(200, res)
+
+
+def avatar(req: HttpRequest):
+    username = req.session.get("username", None)
+    if username is None:
+        return gen_response(400, message="no username in session porbly not login")
+    pic = PrivateInfo.objects.get(username=username).avatar
+    return HttpResponse(pic, content_type="image/png")
+
+
+def avatar_by_name(req: HttpRequest):
+    if not check_method(req, "GET"):
+        return gen_response(400, message="invalid method")
+    username = req.GET.get("username", None)
+    users = PrivateInfo.objects.filter(username=username)
+    if len(users) < 1:
+        return gen_response(400, "user not found")
+    pic = users.first().avatar
+    return HttpResponse(pic, content_type="image/png")
 
 
 def join(request):  # 注册
@@ -103,6 +144,13 @@ def join(request):  # 注册
     return gen_set_cookie_response(code=200,
                                    data={"result": "success", "message": "account created"},
                                    cookie={"SessionID": session_key})
+
+
+def logout(request: HttpRequest):
+    if request.method != "GET":
+        return illegal_request_type_error_response()
+    request.session.clear()
+    return gen_standard_response(200, data={"result": "success", "message": "logged out"})
 
 
 def switch_role(request: HttpRequest):

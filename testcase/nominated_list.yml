@@ -1,5 +1,6 @@
-- name: HRBP获取待审核导师列表
+- name: HRBP获取待审核导师列表(暂时更改）
   ident:
+    - admin
     - HRBP
   request:
     method: GET
@@ -11,7 +12,6 @@
 
 - name: 其他身份获取待审核导师列表
   ident:
-    - admin
     - newcomer
     - teacher
   request:

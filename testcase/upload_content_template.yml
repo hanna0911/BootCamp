@@ -1,0 +1,129 @@
+- name: admin上传content
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /admin_create_content_template
+    data:
+      action: CreateContentTemplate
+      name: test content
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      recommendTime: 120
+      audience: newcomer
+      cover: NotARealBMP
+      type: course
+      isTemplate: true
+      csv: PLACEHOLDER
+      taskType: 0
+      taskText: PLACEHOLDER
+      taskLink: PLACEHOLDER
+      taskFile: PLACEHOLDER
+      programID: 1
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: ProgramID不存在
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /admin_create_content_template
+    data:
+      action: CreateContentTemplate
+      name: test content
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      recommendTime: 120
+      audience: newcomer
+      cover: NotARealBMP
+      type: course
+      isTemplate: true
+      csv: PLACEHOLDER
+      taskType: 0
+      taskText: PLACEHOLDER
+      taskLink: PLACEHOLDER
+      taskFile: PLACEHOLDER
+      programID: 3
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 身份错误 - teacher试图上传模板
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /admin_create_content_template
+    data:
+      action: CreateContentTemplate
+      name: test content
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      recommendTime: 120
+      audience: newcomer
+      cover: NotARealBMP
+      type: course
+      isTemplate: true
+      csv: PLACEHOLDER
+      taskType: 0
+      taskText: PLACEHOLDER
+      taskLink: PLACEHOLDER
+      taskFile: PLACEHOLDER
+      programID: 1
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: teacher上传非模板content
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /admin_create_content_template
+    data:
+      action: CreateContentTemplate
+      name: test content
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      recommendTime: 120
+      audience: newcomer
+      cover: NotARealBMP
+      type: course
+      isTemplate: false
+      csv: PLACEHOLDER
+      taskType: 0
+      taskText: PLACEHOLDER
+      taskLink: PLACEHOLDER
+      taskFile: PLACEHOLDER
+      programID: 1
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 身份错误 - 无上传权限
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /admin_create_content_template
+    data:
+      action: CreateContentTemplate
+      name: test content
+      intro: this is a test
+      tag: test_tag_1 test_tag_2 test_tag_3
+      recommendTime: 120
+      audience: newcomer
+      cover: NotARealBMP
+      type: course
+      isTemplate: false
+      csv: PLACEHOLDER
+      taskType: 0
+      taskText: PLACEHOLDER
+      taskLink: PLACEHOLDER
+      taskFile: PLACEHOLDER
+      programID: 1
+    headers:
+  validate:
+    - equals: { status_code: 400 }

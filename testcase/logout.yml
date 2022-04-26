@@ -1,0 +1,10 @@
+- name: 退出登录测试
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /logout
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }

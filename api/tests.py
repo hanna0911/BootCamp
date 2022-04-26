@@ -67,7 +67,10 @@ class Tests(TestCase):
             if "equals" in validate[i].keys():
                 equ_assert = validate[i]["equals"]
                 if "status_code" in equ_assert.keys():
-                    logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
+                    if res.headers['Content-Type'] == "application/json":
+                        logging.debug("status code:{}  message:{}".format(res.status_code, res.json()["message"]))
+                    elif res.headers['Content-Type'] == "text/html":
+                        logging.debug("status code{} text/html format".format(res.status_code))
                     self.assertEqual(res.status_code, equ_assert["status_code"])
                     logging.info("OK")
 
@@ -95,6 +98,24 @@ class Tests(TestCase):
     def test_blanck(self):
         assert 1, 1
 
+    def test_get_token(self):
+        self.process("/testcase/get_token.yml")
+
+    def test_write_db(self):
+        PrivateInfo.objects.all().delete()
+        Honor.objects.all().delete()
+        TeacherNewcomerTable.objects.all().delete()
+        NewcomerRecode.objects.all().delete()
+        ProgramTable.objects.all().delete()
+        ContentTable.objects.all().delete()
+        LessonTable.objects.all().delete()
+        CoursewareTable.objects.all().delete()
+        ProgramContentTable.objects.all().delete()
+        UserProgramTable.objects.all().delete()
+        UserContentTable.objects.all().delete()
+        UserLessonTable.objects.all().delete()
+        self.process("/testcase/write_db.yml")
+
     def test_join(self):
         self.process("/testcase/join.yml")
 
@@ -110,16 +131,43 @@ class Tests(TestCase):
     def test_duty_teacher_list(self):
         self.process("/testcase/duty_teacher_list.yml")
 
-
-    def test_admin_newcomer_list(self  ):
+    def test_admin_newcomer_list(self):
         self.process("/testcase/admin_newcomer_list.yml")
-
 
     def test_nominate_process(self):
         self.process("/testcase/nominate_process.yml")
 
+    def test_get_user_info(self):
+        self.process("/testcase/get_user_info.yml")
+
+    def test_logout(self):
+        self.process("/testcase/logout.yml")
+
     def test_nominated_list(self):
         self.process("/testcase/nominated_list.yml")
 
-    # def test_get_newcomer_info(self):
-    #     self.process("/testcase/get_newcomer_info.yml")
+    def test_get_newcomer_info(self):
+        self.process("/testcase/get_newcomer_info.yml")
+
+    def test_nominate_accept_reject(self):
+        self.process("/testcase/nominate_accept_reject.yml")
+
+    def test_assign_teacher(self):
+        self.process("/testcase/assign_teacher.yml")
+
+    def test_upload_program(self):
+        self.process("/testcase/upload_program.yml")
+
+    def test_upload_content_template(self):
+        self.process("/testcase/upload_content_template.yml")
+
+    def test_upload_lesson_template(self):
+        self.process("/testcase/upload_lesson_template.yml")
+
+    def test_video(self):
+        logging.info("测试video接口")
+        res = self.client.get("/api/video")
+        assert res.status_code, 200
+
+    def test_avatar_and_by_name(self):
+        self.process("/testcase/avatar.yml")

@@ -1,0 +1,20 @@
+- name: 获取自己的头像
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /avatar
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取别人的头像
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /avatar_by_name
+    data:
+      username: admin
+  validate:
+    - equals: { status_code: 301 }

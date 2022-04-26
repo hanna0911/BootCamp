@@ -1,0 +1,93 @@
+- name: 通过提名
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /accept_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 通过提名-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /accept_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 通过提名-角色错误
+  ident:
+    - teacher
+    - newcomer
+  request:
+    method: POST
+    url: /accept_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 通过提名-找不到用户
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /accept_nominate
+    data:
+      username: t1daiohgd
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 拒绝提名
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /reject_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 拒绝提名-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /reject_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 拒绝提名-角色错误
+  ident:
+    - teacher
+    - newcomer
+  request:
+    method: POST
+    url: /reject_nominate
+    data:
+      username: t1
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 拒绝提名-找不到用户
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /reject_nominate
+    data:
+      username: t1eidhioag
+  validate:
+    - equals: { status_code: 400 }
