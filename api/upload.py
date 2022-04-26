@@ -68,25 +68,45 @@ def create_program(request: HttpRequest):
                                        "programID": new_program_id})
 
 
-# def upload_test_file(request: HttpRequest):
-#     #print(1)
-#     print(request)
-#     if request.method != "POST":  # 只接受POST请求
-#         return illegal_request_type_error_response()
-#     if len(exam_file_cache.keys()) > EXAM_FILE_CACHE_MAX:
-#         return gen_standard_response(400, {"result": "failed",
-#                                            "message": "Max Cache Size Reached"})
-#     user_session = request.session
-#     if user_session is None or "role" not in user_session.keys() or "username" not in user_session.keys():  # session不存在
-#         return session_timeout_response()
-#     if user_session.get("username") in exam_file_cache.keys():
-#         return gen_standard_response(400, {"result": "failed",
-#                                            "message": "Cannot Cache Duplicate Files"})
-#     file = File(request.FILES.get("file"))
-#     exam_file_cache[user_session.get("username")] = file
-#     #print(user_session.get("username"))
-#     #print(file)
-#     return gen_standard_response(200, {"file status": "received"})
+def upload_test_file(request: HttpRequest):
+    '''
+    尝试上传csv文件
+    '''
+    # 获取相对路径
+    print('enter upload_test_file')
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if request.method == 'POST':
+        username = request.session.get('username')
+        role = request.session.get('role')
+        if username is None or role is None:
+            return session_timeout_response()
+        if role != "teacher" and role != "admin":
+            return unauthorized_action_response()
+        file = request.FILES.get('file', None)
+        # 设置文件上传文件夹
+        head_path = BASE_DIR + "/files/test"
+        print("head_path", head_path)
+        # 判断是否存在文件夹, 如果没有就创建文件路径
+        if not os.path.exists(head_path):
+            os.makedirs(head_path)
+        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        file_name = file.name.split(".")[0] + f"_{username}_ex_{time.time()}"  # 获取文件名字
+        # TODO: 后续应用classID_lessonID替代目前的file_name!!!
+        # 储存路径
+        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
+        file_path = file_path.replace(" ", "")
+        # 上传文件
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        message = {}
+        message['code'] = 200
+        # 返回图片路径
+        message['fileurl'] = file_path
+        return JsonResponse(message)
+    else:
+        return illegal_request_type_error_response()
 
 
 def create_content(request: HttpRequest):
@@ -169,14 +189,17 @@ def create_content(request: HttpRequest):
         content_type_id = 1
     else:
         content_type_id = 2
-    with open(csv, 'r', encoding="UTF-8") as file:
-        csv_file = ContentFile(file.read())
-    # print(csv_file)
+    if content_type == "exam":
+        try:
+            file = open(csv, 'r', encoding="UTF-8")
+        except Exception as e:
+            print(e)
+            return item_not_found_error_response()
     new_content = ContentTable(id=new_content_id, name=name, author=user,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
                                audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template, programId=program,
-                               lessonCount=0, questions=csv_file, taskType=task_type,
+                               lessonCount=0, questions=csv, taskType=task_type,
                                text=task_text, link=task_link, taskFile=File(task_file))
     new_content.save()
     print(new_content.questions)
@@ -362,35 +385,4 @@ def upload_courseware_file(request: HttpRequest):
 #         return gen_standard_response(400, {"result": "success", "message": std_error_message})
 
 
-def upload_test_file(request):
-    '''
-    尝试上传csv文件
-    '''
-    # 获取相对路径
-    print('enter upload_test_file')
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if request.method == 'POST':
-        file = request.FILES.get('file', None)
-        # 设置文件上传文件夹
-        head_path = BASE_DIR + "/upload/test"
-        print("head_path", head_path)
-        # 判断是否存在文件夹, 如果没有就创建文件路径
-        if not os.path.exists(head_path):
-            os.makedirs(head_path)
-        file_suffix = file.name.split(".")[1]  # 获取文件后缀
-        file_name = file.name.split(".")[0]  # 获取文件名字
-        # TODO: 后续应用classID_lessonID替代目前的file_name!!!
-        # 储存路径
-        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
-        file_path = file_path.replace(" ", "")
-        # 上传文件
-        with open(file_path, 'wb') as f:
-            for chunk in file.chunks():
-                f.write(chunk)
 
-        message = {}
-        message['code'] = 200
-        # 返回图片路径
-        message['fileurl'] = file_path
-
-        return JsonResponse(message)
