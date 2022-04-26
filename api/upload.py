@@ -330,3 +330,35 @@ def upload_courseware_file(request: HttpRequest):
 #     else:
 #         std_error_message = "file system failed to save uploaded file. better luck next time:("
 #         return gen_standard_response(400, {"result": "success", "message": std_error_message})
+
+
+def upload_test_file(request):
+    '''
+    尝试上传csv文件
+    '''
+    # 获取相对路径
+    print('enter upload_test_file')
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if request.method == 'POST':
+        file = request.FILES.get('file', None)
+        # 设置文件上传文件夹
+        head_path = BASE_DIR + "\\upload\\json"
+        print("head_path", head_path)
+        # 判断是否存在文件夹, 如果没有就创建文件路径
+        if not os.path.exists(head_path):
+            os.makedirs(head_path)
+        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        # 储存路径
+        file_path = head_path + "\\{}".format("head." + file_suffix)
+        file_path = file_path.replace(" ", "")
+        # 上传文件
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        message = {}
+        message['code'] = 200
+        # 返回图片路径
+        message['fileurl'] = file_path
+
+        return JsonResponse(message)
