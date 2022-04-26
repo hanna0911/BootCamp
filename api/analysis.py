@@ -89,3 +89,9 @@ def bootcamp_attend(request: HttpRequest):
         "unselect": unselect,
         "joinBootcamp": joinBootcamp,
     })
+
+
+def newcomer_average_score(request: HttpRequest):
+    """
+    新人平均分
+    """

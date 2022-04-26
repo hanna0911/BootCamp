@@ -28,4 +28,5 @@ urlpatterns = [
     path("accept_nominate", status.accept_nominate, name="accept_nominate"),
     path("assign_teacher", status.assign_teacher, name="assign_teacher"),
     path("bootcamp_attend", analysis.bootcamp_attend, name="bootcamp_attend"),
+    path("newcomer_average_score", analysis.newcomer_average_score, name="newcomer_average_score"),
 ]
