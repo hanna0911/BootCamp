@@ -189,11 +189,12 @@ def create_content(request: HttpRequest):
         content_type_id = 1
     else:
         content_type_id = 2
-    try:
-        file = open(csv, 'r', encoding="UTF-8")
-    except Exception as e:
-        print(e)
-        return item_not_found_error_response()
+    if content_type == "exam":
+        try:
+            file = open(csv, 'r', encoding="UTF-8")
+        except Exception as e:
+            print(e)
+            return item_not_found_error_response()
     new_content = ContentTable(id=new_content_id, name=name, author=user,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
                                audience=audience_id, cover=cover, type=content_type_id,
