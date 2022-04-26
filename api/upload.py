@@ -1,6 +1,6 @@
 """
 所有上传新内容相关的接口
-此文件全部接口作者：@yzt
+接口作者：@yzt @whh
 """
 import os.path
 import time
@@ -364,7 +364,7 @@ def upload_courseware_file(request: HttpRequest):
 
 def upload_test_file(request):
     '''
-    尝试上传csv文件
+    上传csv文件
     '''
     # 获取相对路径
     print('enter upload_test_file')
@@ -373,6 +373,40 @@ def upload_test_file(request):
         file = request.FILES.get('file', None)
         # 设置文件上传文件夹
         head_path = BASE_DIR + "/upload/test"
+        print("head_path", head_path)
+        # 判断是否存在文件夹, 如果没有就创建文件路径
+        if not os.path.exists(head_path):
+            os.makedirs(head_path)
+        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        file_name = file.name.split(".")[0]  # 获取文件名字
+        # TODO: 后续应用testID替代目前的file_name!!!
+        # 储存路径
+        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
+        file_path = file_path.replace(" ", "")
+        # 上传文件
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        message = {}
+        message['code'] = 200
+        # 返回图片路径
+        message['fileurl'] = file_path
+
+        return JsonResponse(message)
+
+
+def upload_lesson_file(request):
+    '''
+    上传pptx文件
+    '''
+    # 获取相对路径
+    print('enter upload_lesson_file')
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if request.method == 'POST':
+        file = request.FILES.get('file', None)
+        # 设置文件上传文件夹
+        head_path = BASE_DIR + "/upload/lesson"
         print("head_path", head_path)
         # 判断是否存在文件夹, 如果没有就创建文件路径
         if not os.path.exists(head_path):
@@ -394,3 +428,4 @@ def upload_test_file(request):
         message['fileurl'] = file_path
 
         return JsonResponse(message)
+

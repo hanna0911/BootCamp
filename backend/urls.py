@@ -15,8 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings  # 文件
+from django.conf.urls.static import static  # 文件
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include("api.urls")),  # 暂时全部用api存储接口，后续请按照功能的不同类进行分类
-]
+] + static(settings.UPLOAD_URL, document_root=settings.UPLOAD_ROOT)  # 上传的文件
