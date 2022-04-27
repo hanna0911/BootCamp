@@ -33,7 +33,8 @@ def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime, delta:
 
 def average_score(users: QuerySet) -> float:
     userprograms = [user.ProgramsAsUser.all() for user in users]
-    if len(userprograms) == 0: return 0.0
+    if len(userprograms) == 0:
+        return 0.0
     if len(userprograms) == 1:
         userprograms = userprograms[0]
     else:
