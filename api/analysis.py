@@ -151,7 +151,7 @@ def newcomer_average_score(request: HttpRequest):
 
 def teacher_average_score(request: HttpRequest):
     """
-    新人平均分
+    导师平均分
     """
     if request.method != "POST":
         return illegal_request_type_error_response()
@@ -192,4 +192,55 @@ def teacher_average_score(request: HttpRequest):
     return gen_response(200, {
         "group": average_score(users),
         "all": average_score(users.filter(dept__exact = dept)),
+    })
+
+
+def camp_completion(request: HttpRequest):
+    """
+    培训完成情况
+    """
+    if request.method != "POST":
+        return illegal_request_type_error_response()
+
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return gen_response(400, "JSON format error")
+
+    try:
+        session = request.session
+        role = session["role"]
+    except KeyError:
+        return session_timeout_response()
+
+    if role not in ["admin", "HRBP"]:
+        return unauthorized_action_response()
+
+    try:
+        startDate = data["dateRangeStart"]
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
+        endDate = data["dateRangeEnd"]
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
+    except KeyError:
+        return gen_response(400, "JSON format error")
+
+    if not (check_day(startDate, True) and check_day(endDate, False)):
+        return gen_response(400, "Invalid date range")
+
+    days = []
+    normalGraduate = []
+    totalGraduate = []
+    for dayStart, dayEnd in date_ranges(startDate, endDate):
+        users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (dayStart, dayEnd))
+        days.append(dayStart.date().isoformat()[5:])
+        normalNum = users.filter(newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate).count()
+        abnormalNum = users.filter(newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.AbnormalGraduate).count()
+
+        normalGraduate.append(normalNum)
+        totalGraduate.append(normalNum + abnormalNum)
+
+    return gen_response(200, {
+        "days": days,
+        "normalGraduate": normalGraduate,
+        "totalGraduate": totalGraduate,
     })
