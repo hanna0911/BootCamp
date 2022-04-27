@@ -94,6 +94,7 @@ def parse_test_for_student(csv_file_path):
             ret.append(row[0: len(row) - 1])
     return ret
 
+
 def parse_test_for_grader(csv_file_path):
     ret = []
     with open(csv_file_path, "r") as csv_file:
@@ -103,8 +104,39 @@ def parse_test_for_grader(csv_file_path):
     return ret
 
 
-def grade_test(answer_sheet, test_content_id):
-    test = ContentTable.objects.filter(id=test_content_id).first()
+def upload_answers(request: HttpRequest):
+    """
+    TODO: 在判卷后更改UserContentTable
+    判卷，格式：
+    {action: "grade test", testID: __TEST_ID__, answer: ['A', 'BD', 'C', ...]}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    test_id = data.get('testID')
+    answer_sheet = data.get('answer')
+    if action != "grade test" or test_id is None or answer_sheet is None:
+        return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
+    test = ContentTable.objects.filter(id=test_id).first()
+    if test is None or test.type != ContentTable.EnumType.Exam:
+        return item_not_found_error_response()
+    valid, result = grade_test(answer_sheet, test)
+    if not valid:
+        return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
+    return gen_standard_response(200, {"result": "success",
+                                       "message": "Test paper successfully graded",
+                                       "results": result})
+
+
+def grade_test(answer_sheet, test):
+    """
+    在线判卷，需要一个content_id
+    """
     if test is None:
         return False, []
     if test.type != ContentTable.EnumType.Exam:
@@ -127,9 +159,9 @@ def grade_test(answer_sheet, test_content_id):
                 correct = False
                 break
         if correct:
-            res.append(True)
+            res.append([answer_stu[j], answer_std[j], True])
         else:
-            res.append(False)
+            res.append([answer_stu[j], answer_std[j], False])
     return True, res
 
 
