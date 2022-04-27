@@ -141,7 +141,8 @@ def newcomer_average_score(request: HttpRequest):
         return gen_response(400, "Invalid date range")
 
     users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (startDate, endDate))
-    score = average_score(users)
-    print(score)
 
-    return gen_response(200, "fuck")
+    return gen_response(200, {
+        "group": average_score(users),
+        "all": average_score(users.filter(dept__exact = dept)),
+    })
