@@ -66,7 +66,7 @@ class PrivateInfo(models.Model):
 
     # 新人相关
     newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
-    newcomerGraduateState = models.BooleanField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
+    newcomerGraduateState = models.IntegerField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
     newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
 
     # 导师相关
