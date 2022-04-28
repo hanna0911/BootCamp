@@ -1,7 +1,7 @@
 """
 描述数据库结构的文件
 """
-
+import datetime
 from email.policy import default
 from random import choice
 from django.db import models
@@ -253,7 +253,7 @@ class UserContentTable(models.Model):
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
     userBeginTime = models.DateTimeField(auto_now_add=True)  # 开始时间 这个时间属于个人
-    userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
+    userEndTime = models.DateTimeField(default=datetime.datetime.fromisoformat("2000-01-01 00:00"))  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
 
