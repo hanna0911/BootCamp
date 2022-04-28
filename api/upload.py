@@ -135,6 +135,7 @@ def upload_answers(request: HttpRequest):
     if test is None or test.type != ContentTable.EnumType.Exam:
         return item_not_found_error_response()
     valid, result = grade_test(answer_sheet, test)
+    # print(valid, result)
     if not valid:
         return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
     return gen_standard_response(200, {"result": "success",
@@ -150,15 +151,20 @@ def grade_test(answer_sheet, test):
         return False, []
     if test.type != ContentTable.EnumType.Exam:
         return False, []
-    correct_answers = parse_test_for_grader(test.questions)
+    if test.questions == '' or test.questions is None:
+        csv_dir = './files/test/SampleTestPaper.csv'
+    else:
+        csv_dir = test.questions
+    correct_answers = parse_test_for_grader(csv_dir)
     if len(answer_sheet) != len(correct_answers):
         return False, []
     res = []
     for i in range(len(answer_sheet)):
-        answer_stu = [ans for ans in answer_sheet[i].split('')]
-        answer_std = [ans for ans in correct_answers[i].split('')]
+        answer_stu = list(answer_sheet[i])
+        answer_std = list(correct_answers[i])
         answer_stu.sort()
         answer_std.sort()
+        # print(answer_stu, answer_std)
         if len(answer_std) != len(answer_stu):
             res.append(False)
             continue
@@ -168,9 +174,9 @@ def grade_test(answer_sheet, test):
                 correct = False
                 break
         if correct:
-            res.append([answer_stu[j], answer_std[j], True])
+            res.append([answer_sheet[i], correct_answers[i], True])
         else:
-            res.append([answer_stu[j], answer_std[j], False])
+            res.append([answer_sheet[i], correct_answers[i], False])
     return True, res
 
 
