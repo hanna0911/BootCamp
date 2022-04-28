@@ -1,0 +1,9 @@
+- name: 导师查看自己的学生列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /teacher_newcomer_list
+    data:
+  validate:
+    - equals: { status_code: 200 }

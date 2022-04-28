@@ -12,8 +12,11 @@ NAME_LEN = 50
 SHORT_INFO_LEN = 20
 LONG_INFO_LEN = 200
 COMMENT_LEN = 500
-
-
+JoinStatusToText = ["待入职","在职","离职"]
+EmployeeTypeToText = ["校招","社招","实习","未选择"]
+GraduateStatusToTest = ["未毕业","正常毕业","非正常毕业"]
+TeacherExaminedStatusToTest = ["未审核","审核通过","审核拒绝"]
+HonorToTest = ["奖章","证书","奖项"]
 class PrivateInfo(models.Model):
     """
     user table
