@@ -2,8 +2,9 @@ import json
 import logging
 
 from django.http import HttpRequest
-from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check
+from .api_util import *
 from .models import *
+from .upload import parse_test_for_student, parse_test_for_admin
 
 
 def admin_newcomer_list(request: HttpRequest):
@@ -150,3 +151,109 @@ def nominated_list(req: HttpRequest):
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
     return gen_response(200, data=return_list)
+
+
+def available_test_list(request: HttpRequest):
+    """
+    获取一个用户自己可见的所有考试
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role == 'admin':
+        available_tests = ContentTable.objects.all()
+        test_list = []
+        for test in available_tests:
+            test_info = [
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name
+            ]
+            try:
+                fp = open(test.questions, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(test.questions)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'available tests retrieved for admin user {username}',
+                                           'tests': test_list})
+    elif role == 'teacher':
+        test_templates = ContentTable.objects.filter(isTemplate=True, audience='newcomer')
+        my_tests = ContentTable.objects.filter(author__username=username, audience='newcomer')
+        available_tests = test_templates + my_tests
+        test_list = []
+        for test in available_tests:
+            test_info = [
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name
+            ]
+            try:
+                fp = open(test.questions, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(test.questions)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'available tests retrieved for teacher user {username}',
+                                           'tests': test_list})
+    elif role == 'hrbp':
+        test_templates = ContentTable.objects.filter(isTemplate=True, audience='teacher')
+        my_tests = ContentTable.objects.filter(author__username=username, audience='teacher')
+        available_tests = test_templates + my_tests
+        test_list = []
+        for test in available_tests:
+            test_info = [
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name
+            ]
+            try:
+                fp = open(test.questions, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(test.questions)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'available tests retrieved for hrbp user {username}',
+                                           'tests': test_list})
+    else:  # newcomer
+        target_tests = UserContentTable.objects.filter(user=username, content__type=ContentTable.EnumType.Exam)
+        test_list = []
+        for test_relation in target_tests:
+            test = test_relation.content
+            test_info = [
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name
+            ]
+            try:
+                fp = open(test.questions, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_student(test.questions)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {"result": "success",
+                                           "message": f'available tests retrieved for hrbp user {username}',
+                                           "tests": test_list})

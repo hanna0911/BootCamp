@@ -104,6 +104,15 @@ def parse_test_for_grader(csv_file_path):
     return ret
 
 
+def parse_test_for_admin(csv_file_path):
+    ret = []
+    with open(csv_file_path, "r") as csv_file:
+        for row in csv_file.readlines():
+            row = [item for item in row.split(',')]
+            ret.append(row)
+    return ret
+
+
 def upload_answers(request: HttpRequest):
     """
     TODO: 在判卷后更改UserContentTable

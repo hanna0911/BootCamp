@@ -35,4 +35,5 @@ urlpatterns = [
     path('download_test_info', download.retrieve_test_info_by_id, name="download_test_info"),
     path('download_test_paper', download.retrieve_test_paper_by_id, name="download_test_paper"),
     path('upload_answers', upload.upload_answers, name="upload_answers"),
+    path('my_test_list', lists.available_test_list, name="my_test_list"),
 ]
