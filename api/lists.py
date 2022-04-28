@@ -154,6 +154,7 @@ def nominated_list(req: HttpRequest):
 
 
 def assignable_test_list(request: HttpRequest):
+    print(1)
     """
     获取一个用户自己可给他人分配的所有考试
     """
@@ -183,11 +184,15 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                fp = open(test.questions, "r", encoding="UTF-8")
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
-            test_paper = parse_test_for_admin(test.questions)
+            test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for admin user {username}',
@@ -200,7 +205,7 @@ def assignable_test_list(request: HttpRequest):
                                                      audience=0,
                                                      type=ContentTable.EnumType.Exam,
                                                      isTemplate=False)
-        available_tests = test_templates + authored_tests
+        available_tests = test_templates.union(authored_tests)
         test_list = []
         for test in available_tests:
             if test.audience == 0:
@@ -218,16 +223,20 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                fp = open(test.questions, "r", encoding="UTF-8")
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
-            test_paper = parse_test_for_admin(test.questions)
+            test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
                                            'tests': test_list})
-    elif role == 'hrbp':
+    elif role == 'HRBP':
         test_templates = ContentTable.objects.filter(isTemplate=True,
                                                      audience=1,
                                                      type=ContentTable.EnumType.Exam)
@@ -235,7 +244,7 @@ def assignable_test_list(request: HttpRequest):
                                                      audience=1,
                                                      type=ContentTable.EnumType.Exam,
                                                      isTemplate=False)
-        available_tests = test_templates + authored_tests
+        available_tests = test_templates.union(authored_tests)
         test_list = []
         for test in available_tests:
             if test.audience == 0:
@@ -253,11 +262,15 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                fp = open(test.questions, "r", encoding="UTF-8")
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
-            test_paper = parse_test_for_admin(test.questions)
+            test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for hrbp user {username}',
@@ -279,7 +292,7 @@ def my_test_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_tests = UserContentTable.objects.filter(user=username, content__type=ContentTable.EnumType.Exam)
+    target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
     test_list = []
     for test_relation in target_tests:
         test = test_relation.content
@@ -298,11 +311,15 @@ def my_test_list(request: HttpRequest):
             test.releaseTime
         ]
         try:
-            fp = open(test.questions, "r", encoding="UTF-8")
+            if test.questions == '' or test.questions is None:
+                csv_dir = './files/test/SampleTestPaper.csv'
+            else:
+                csv_dir = test.questions
+            fp = open(csv_dir, "r", encoding="UTF-8")
         except Exception as e:
             print(e)
             return item_not_found_error_response()
-        test_paper = parse_test_for_student(test.questions)
+        test_paper = parse_test_for_student(csv_dir)
         test_list.append([test_info, test_paper])
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
@@ -331,8 +348,8 @@ def assignable_course_list(request: HttpRequest):
                                                        isTemplate=False,
                                                        audience=0,
                                                        author__username=username)
-        available_courses = course_templates + course_list
-    elif role == 'hrbp':
+        available_courses = course_templates.union(authored_courses)
+    elif role == 'HRBP':
         course_templates = ContentTable.objects.filter(type=ContentTable.EnumType.Course,
                                                        isTemplate=True,
                                                        audience=1)
@@ -340,7 +357,7 @@ def assignable_course_list(request: HttpRequest):
                                                        isTemplate=False,
                                                        audience=1,
                                                        author__username=username)
-        available_courses = course_templates + course_list
+        available_courses = course_templates.union(authored_courses)
     else:  # newcomer
         return unauthorized_action_response()
     for course in available_courses:
@@ -374,7 +391,7 @@ def my_courses_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_courses = UserContentTable.objects.filter(user=username, content__type=ContentTable.EnumType.Course)
+    target_courses = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Course)
     course_list = []
     for course_relation in target_courses:
         course = course_relation.content

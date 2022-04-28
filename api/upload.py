@@ -88,7 +88,7 @@ def parse_test_for_student(csv_file_path):
     返回不带答案的试卷
     """
     ret = []
-    with open(csv_file_path, "r") as csv_file:
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
             row = [item for item in row.split(',')]
             ret.append(row[0: len(row) - 1])
@@ -97,7 +97,7 @@ def parse_test_for_student(csv_file_path):
 
 def parse_test_for_grader(csv_file_path):
     ret = []
-    with open(csv_file_path, "r") as csv_file:
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
             row = [item for item in row.split(',')]
             ret.append(row[-1])
@@ -106,7 +106,7 @@ def parse_test_for_grader(csv_file_path):
 
 def parse_test_for_admin(csv_file_path):
     ret = []
-    with open(csv_file_path, "r") as csv_file:
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
             row = [item for item in row.split(',')]
             ret.append(row)
