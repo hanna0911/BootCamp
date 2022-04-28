@@ -160,11 +160,14 @@ def grade_test(answer_sheet, test):
         return False, []
     res = []
     for i in range(len(answer_sheet)):
-        answer_stu = list(answer_sheet[i])
-        answer_std = list(correct_answers[i])
+        # print(answer_sheet)
+        answer_stu = answer_sheet[i]
+        for j in range(len(answer_stu)):
+            answer_stu[j] = chr(ord('A') + answer_stu[j])
+        answer_std = correct_answers[i].split(" ")
         answer_stu.sort()
         answer_std.sort()
-        # print(answer_stu, answer_std)
+        print("student answer:", answer_stu, "standard answer:", answer_std)
         if len(answer_std) != len(answer_stu):
             res.append(False)
             continue

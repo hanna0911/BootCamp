@@ -1,0 +1,95 @@
+- name: admin分配content
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: teacher分配content
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: HRBP分配content
+  ident:
+    - HRBP
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer试图分配content
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图分配不存在的content
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 233
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图给不存在的user分配content
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: I_DO_NOT_EXIST
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 400 }
