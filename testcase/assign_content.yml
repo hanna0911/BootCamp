@@ -1,0 +1,15 @@
+- name: admin分配content
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_content
+    data:
+      action: assign content
+      assigneeID: p0001
+      contentID: 2
+      deadline: 2022-12-31 00:00
+      obligatory: True
+    headers:
+  validate:
+    - equals: { status_code: 200 }

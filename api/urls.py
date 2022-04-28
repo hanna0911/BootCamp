@@ -42,6 +42,7 @@ urlpatterns = [
     path('my_test_list', lists.my_test_list, name="my_test_list"),
     path('assignable_course_list', lists.assignable_course_list, name="assignable_course_list"),
     path('my_course_list', lists.my_courses_list, name="my_course_list"),
-    path("teacher_newcomer_list", lists.teacher_newcomer_list,name="teacher_newcomer_list"),
+    #path('assign_content', status.assign_content, name="assign content"),
+    path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
     path("get_honor", views.get_honor, name="get_honor")
 ]
