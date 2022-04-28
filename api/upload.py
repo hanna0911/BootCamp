@@ -148,19 +148,21 @@ def upload_answers(request: HttpRequest):
         return item_not_found_error_response()
     # grade test paper
     valid, result = grade_test(answer_sheet, test)
+    if not valid:
+        return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
     # calculate score
     correct = 0
     for question in result:
         if question[2] is True:
             correct += 1
-    score = correct / len(result)
+    score = correct / len(result) * 100
     # print(valid, result)
-    if not valid:
-        return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
     relation.finished = True
     relation.userEndTime = datetime.datetime.now()
-    relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds / 60)
+    relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds)
     relation.score = score
+    relation.save()
+    # print(relation.finished, relation.userBeginTime, relation.userEndTime, relation.examUsedTime, relation.score)
     return gen_standard_response(200, {"result": "success",
                                        "message": "Test paper successfully graded",
                                        "results": [score, result]})
@@ -186,6 +188,7 @@ def begin_test(request: HttpRequest):
     # check login session
     session = request.session
     username = session.get('username')
+    print('username', username)
     role = session.get('role')
     if username is None or role is None:
         return unauthorized_action_response()
@@ -200,6 +203,7 @@ def begin_test(request: HttpRequest):
         return item_not_found_error_response()
     # log begin time
     relation.userBeginTime = datetime.datetime.now()
+    relation.save()
     # load test paper
     try:
         if test.questions == '' or test.questions is None:

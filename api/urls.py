@@ -40,6 +40,7 @@ urlpatterns = [
     path('download_test_paper', download.retrieve_test_paper_by_id, name="download_test_paper"),
     path("teacher_newcomer_list", lists.teacher_newcomer_list,name="teacher_newcomer_list"),
     path("teacher_summary_info",views.teacher_summary_info, name="teacher_summary_info"), # 查看导师带了几个人
+    path('begin_test', upload.begin_test, name="begin_test"),
     path('upload_answers', upload.upload_answers, name="upload_answers"),
     path('assignable_test_list', lists.assignable_test_list, name="assignable_test_list"),
     path('my_test_list', lists.my_test_list, name="my_test_list"),
