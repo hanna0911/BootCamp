@@ -344,3 +344,42 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: newcomer完成本人任务
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /finish_task
+    data:
+      action: finish task
+      taskID: 3
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer试图完成别人的任务
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /finish_task
+    data:
+      action: finish task
+      taskID: 4
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图完成任务
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /finish_task
+    data:
+      action: finish task
+      taskID: 3
+    headers:
+  validate:
+    - equals: { status_code: 400 }

@@ -136,6 +136,8 @@ def upload_answers(request: HttpRequest):
     username = session.get('username')
     role = session.get('role')
     if username is None or role is None:
+        return session_timeout_response()
+    if role != 'newcomer' and role != 'teacher':
         return unauthorized_action_response()
     # check database
     relation_filter = UserContentTable.objects.filter(content__id=test_id, user__username=username)
@@ -191,6 +193,8 @@ def begin_test(request: HttpRequest):
     print('username', username)
     role = session.get('role')
     if username is None or role is None:
+        return session_timeout_response()
+    if role != 'newcomer' and role != 'teacher':
         return unauthorized_action_response()
     # check database
     relation_filter = UserContentTable.objects.filter(content__id=test_id, user__username=username)
@@ -299,6 +303,52 @@ def upload_test_file(request: HttpRequest):
         return JsonResponse(message)
     else:
         return illegal_request_type_error_response()
+
+
+def finish_task(request: HttpRequest):
+    """
+    结束任务
+    {action: "finish task", taskID: __TASK_ID__}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    # check arguments
+    action = data.get('action')
+    task_id = data.get('taskID')
+    if action != 'finish task' or task_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    # check login session
+    session = request.session
+    username = session.get('username')
+    print('username', username)
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'newcomer' and role != 'teacher':
+        return unauthorized_action_response()
+    # check database
+    relation_filter = UserContentTable.objects.filter(user__username=username, content__id=task_id)
+    task_filter = ContentTable.objects.filter(id=task_id)
+    if len(relation_filter) == 0 or len(task_filter) == 0:
+        return item_not_found_error_response()
+    relation = relation_filter.first()
+    task = task_filter.first()
+    if task.type != ContentTable.EnumType.Task:
+        return item_not_found_error_response()
+    if relation.finished is True:
+        return item_not_found_error_response()
+    # log task finished
+    relation.userEndTime = datetime.datetime.now()
+    relation.finished = True
+    relation.save()
+    std_message = f'user {username} marked task {task.name} with id {task.id} as finished'
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': std_message})
 
 
 def create_content(request: HttpRequest):
