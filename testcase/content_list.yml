@@ -86,9 +86,35 @@
   validate:
     - equals: { status_code: 200 }
 
-- name: 做题（有效答卷）
+- name: 开始考试（有效用户）
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /begin_test
+    data:
+      action: start test
+      testID: 2
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 开始考试（无效用户）
   ident:
     - newcomer
+  request:
+    method: POST
+    url: /begin_test
+    data:
+      action: start test
+      testID: 2
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 做题（有效答卷）
+  ident:
+    - teacher
   request:
     method: POST
     url: /upload_answers
@@ -102,11 +128,12 @@
 
 - name: 做题（无效答卷，答卷list长度不匹配）
   ident:
-    - newcomer
+    - teacher
   request:
     method: POST
     url: /upload_answers
     data:
+      username: t5
       action: grade test
       testID: 2
       answer: [[2], [0], [1, 3], [0, 1, 2], [3, 2, 1]]
@@ -115,6 +142,20 @@
     - equals: { status_code: 400 }
 
 - name: 做题（无效答卷，testID并非一个test的contentID）
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 3
+      answer: [[2], [0], [1, 3], [2, 0, 1]]
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 做题（无效答卷，该用户没有此项考试）
   ident:
     - newcomer
   request:

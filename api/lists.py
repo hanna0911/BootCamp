@@ -526,8 +526,8 @@ def my_task_list(request: HttpRequest):
             task_relation.finished
         ])
     return gen_standard_response(200, {'result': 'success',
-                                'message': f'my tasks retrieved for {role} user {username}',
-                                'tasks': task_list})
+                                 'message': f'my tasks retrieved for {role} user {username}',
+                                 'tasks': task_list})
 
 
 def teacher_newcomer_list(req: HttpRequest):
