@@ -115,7 +115,6 @@ def parse_test_for_admin(csv_file_path):
 
 def upload_answers(request: HttpRequest):
     """
-    TODO: 在判卷后更改UserContentTable
     判卷，格式：
     {action: "grade test", testID: __TEST_ID__, answer: ['A', 'BD', 'C', ...]}
     """
@@ -126,21 +125,95 @@ def upload_answers(request: HttpRequest):
     except Exception as e:
         print(e)
         return unknown_error_response()
+    # check arguments
     action = data.get('action')
     test_id = data.get('testID')
     answer_sheet = data.get('answer')
     if action != "grade test" or test_id is None or answer_sheet is None:
         return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
-    test = ContentTable.objects.filter(id=test_id).first()
+    # check login session
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return unauthorized_action_response()
+    # check database
+    relation_filter = UserContentTable.objects.filter(content__id=test_id, user__username=username)
+    test_filter = ContentTable.objects.filter(id=test_id)
+    if len(relation_filter) == 0 or len(test_filter) == 0:
+        return item_not_found_error_response()
+    relation = relation_filter.first()
+    test = test_filter.first()
     if test is None or test.type != ContentTable.EnumType.Exam:
         return item_not_found_error_response()
+    # grade test paper
     valid, result = grade_test(answer_sheet, test)
+    # calculate score
+    correct = 0
+    for question in result:
+        if question[2] is True:
+            correct += 1
+    score = correct / len(result)
     # print(valid, result)
     if not valid:
         return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
+    relation.finished = True
+    relation.userEndTime = datetime.datetime.now()
+    relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds / 60)
+    relation.score = score
     return gen_standard_response(200, {"result": "success",
                                        "message": "Test paper successfully graded",
-                                       "results": result})
+                                       "results": [score, result]})
+
+
+def begin_test(request: HttpRequest):
+    """
+    开始考试，记录开始时间
+    {action: "start test", testID: __TEST_ID__}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    # check arguments
+    action = data.get('action')
+    test_id = data.get('testID')
+    if action != 'start test' or test_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    # check login session
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return unauthorized_action_response()
+    # check database
+    relation_filter = UserContentTable.objects.filter(content__id=test_id, user__username=username)
+    test_filter = ContentTable.objects.filter(id=test_id)
+    if len(relation_filter) == 0 or len(test_filter) == 0:
+        return item_not_found_error_response()
+    test = test_filter.first()
+    relation = relation_filter.first()
+    if test is None or test.type != ContentTable.EnumType.Exam:
+        return item_not_found_error_response()
+    # log begin time
+    relation.userBeginTime = datetime.datetime.now()
+    # load test paper
+    try:
+        if test.questions == '' or test.questions is None:
+            csv_dir = './files/test/SampleTestPaper.csv'
+        else:
+            csv_dir = test.questions
+        fp = open(csv_dir, "r", encoding="UTF-8")
+    except Exception as e:
+        print(e)
+        return item_not_found_error_response()
+    test_paper = parse_test_for_student(csv_dir)
+    return gen_standard_response(200, {"result": "success",
+                                       "message": f"test for test {test.name} with id {test.id} started by {username}",
+                                       "test": test_paper})
 
 
 def grade_test(answer_sheet, test):
@@ -256,13 +329,6 @@ def create_content(request: HttpRequest):
     # 第3行 - audience字段校验
     # 第4行 - isTemplate字段校验
     # 第5行 - programID有效性校验
-    # print(action)
-    # print(name)
-    # print(audience)
-    # print(is_template)
-    # print(content_type)
-    # print(program_id)
-    # print(len(ProgramTable.objects.filter(id=program_id)))
     if action is None or (action != "CreateContentTemplate" and action != "create content")\
             or name is None or name == ""\
             or content_type is None or (content_type != "course" and content_type != "exam" and content_type != "task")\
