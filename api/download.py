@@ -153,12 +153,19 @@ def retrieve_test_by_user_id(request: HttpRequest):
     test_list = []
     for test_relation in target_tests:
         test = test_relation.content
+        if test.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
         test_info = [
+            audience,
+            test.isTemplate,
             test.name,
             test.intro,
             test.recommendedTime,
             test.tag,
-            test.author.name
+            test.author.name,
+            test.releaseTime
         ]
         try:
             fp = open(test.questions, "r", encoding="UTF-8")
