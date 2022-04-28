@@ -35,7 +35,7 @@
   ident:
     - newcomer
   request:
-    methon: GET
+    method: GET
     url: /assignable_test_list
     data:
     headers:
@@ -79,7 +79,7 @@
   ident:
     - newcomer
   request:
-    methon: GET
+    method: GET
     url: /my_test_list
     data:
     headers:

@@ -90,7 +90,7 @@ def parse_test_for_student(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row.split(',')]
+            row = [item for item in row[:-1].split(',')]
             ret.append(row[0: len(row) - 1])
     return ret
 
@@ -99,7 +99,7 @@ def parse_test_for_grader(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row.split(',')]
+            row = [item for item in row[:-1].split(',')]
             ret.append(row[-1])
     return ret
 
@@ -108,7 +108,7 @@ def parse_test_for_admin(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row.split(',')]
+            row = [item for item in row[:-1].split(',')]
             ret.append(row)
     return ret
 

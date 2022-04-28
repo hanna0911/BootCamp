@@ -154,7 +154,6 @@ def nominated_list(req: HttpRequest):
 
 
 def assignable_test_list(request: HttpRequest):
-    print(1)
     """
     获取一个用户自己可给他人分配的所有考试
     """
@@ -272,6 +271,7 @@ def assignable_test_list(request: HttpRequest):
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
+        print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for hrbp user {username}',
                                            'tests': test_list})
@@ -321,6 +321,7 @@ def my_test_list(request: HttpRequest):
             return item_not_found_error_response()
         test_paper = parse_test_for_student(csv_dir)
         test_list.append([test_info, test_paper])
+    print(test_list)
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
                                        "tests": test_list})
