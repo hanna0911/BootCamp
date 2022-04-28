@@ -329,7 +329,7 @@ def my_test_list(request: HttpRequest):
 
 def assignable_course_list(request: HttpRequest):
     """
-    获取一个用户可见的全部课程
+    获取一个用户可分配给其他用户的全部课程
     """
     if request.method != 'GET':
         return illegal_request_type_error_response()
@@ -383,6 +383,9 @@ def assignable_course_list(request: HttpRequest):
 
 
 def my_courses_list(request: HttpRequest):
+    """
+    获取一个用户可以学习的全部课程
+    """
     if request.method != 'GET':
         return illegal_request_type_error_response()
     session = request.session
@@ -410,10 +413,121 @@ def my_courses_list(request: HttpRequest):
             course.author.name,
             course.releaseTime,
             course.lessonCount,
+            course_relation.finished
         ])
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my courses retrieved for {role} user {username}',
                                        'courses': course_list})
+
+
+def assignable_task_list(request: HttpRequest):
+    """
+    获取一个用户可以分配给其他用户的全部任务
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    task_list = []
+    if role == 'admin':
+        available_tasks = ContentTable.objects.filter(type=ContentTable.EnumType.Task)
+    elif role == 'HRBP':
+        task_templates = ContentTable.objects.filter(type=ContentTable.EnumType.Task,
+                                                     isTemplate=True,
+                                                     audience=1)
+        authored_tasks = ContentTable.objects.filter(type=ContentTable.EnumType.Task,
+                                                     isTemplate=False,
+                                                     audience=1,
+                                                     author__username=username)
+        available_tasks = task_templates.union(authored_tasks)
+    elif role == 'teacher':
+        task_templates = ContentTable.objects.filter(type=ContentTable.EnumType.Task,
+                                                     isTemplate=True,
+                                                     audience=0)
+        authored_tasks = ContentTable.objects.filter(type=ContentTable.EnumType.Task,
+                                                     isTemplate=False,
+                                                     audience=0,
+                                                     author__username=username)
+        available_tasks = task_templates.union(authored_tasks)
+    else:  # newcomer
+        return unauthorized_action_response()
+    for task in available_tasks:
+        if task.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        if task.taskType == 0:
+            task_type = 'text'
+        elif task.taskType == 1:
+            task_type = 'link'
+        else:
+            task_type = 'file'
+        task_list.append([
+            audience,
+            task.isTemplate,
+            task.name,
+            task.intro,
+            task.recommendedTime,
+            task.tag,
+            task.author.name,
+            task.releaseTime,
+            task_type,
+            task.text,
+            task.link
+        ])
+    return gen_standard_response(200, {'result': 'success',
+                                'message': f'assignable tasks retrieved for {role} user {username}',
+                                'tasks': task_list})
+
+
+def my_task_list(request: HttpRequest):
+    """
+    获取一个用户可以完成的全部任务
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'teacher' and role != 'newcomer':
+        return unauthorized_action_response()
+    target_tasks = UserContentTable.objects.filter(user__username=username,
+                                                   content__type=ContentTable.EnumType.Task)
+    task_list = []
+    for task_relation in target_tasks:
+        task = task_relation.content
+        if task.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        if task.taskType == 0:
+            task_type = 'text'
+        elif task.taskType == 1:
+            task_type = 'link'
+        else:
+            task_type = 'file'
+        task_list.append([
+            audience,
+            task.isTemplate,
+            task.name,
+            task.intro,
+            task.recommendedTime,
+            task.tag,
+            task.author.name,
+            task.releaseTime,
+            task_type,
+            task.text,
+            task.link,
+            task_relation.finished
+        ])
+    return gen_standard_response(200, {'result': 'success',
+                                'message': f'my tasks retrieved for {role} user {username}',
+                                'tasks': task_list})
 
 
 def teacher_newcomer_list(req: HttpRequest):

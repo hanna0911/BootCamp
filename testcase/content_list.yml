@@ -127,3 +127,179 @@
     headers:
   validate:
     - equals: { status_code: 400 }
+
+- name: admin获取本人可分配课程列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /assignable_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: hrbp获取本人可分配课程列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /assignable_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: teacher获取本人可分配课程列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /assignable_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer试图获取本人可分配课程列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /assignable_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图获取本人可做课程列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /my_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: hrbp试图获取本人可做课程列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /my_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: teacher获取本人可做课程列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /my_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer获取本人可做课程列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /my_course_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: admin获取本人可分配课程列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /assignable_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: hrbp获取本人可分配任务列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /assignable_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: teacher获取本人可分配任务列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /assignable_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer试图获取本人可分配任务列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /assignable_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图获取本人可做任务列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /my_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: hrbp试图获取本人可做任务列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /my_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: teacher获取本人可做任务列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /my_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer获取本人可做任务列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /my_task_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
