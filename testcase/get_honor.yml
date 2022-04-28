@@ -1,0 +1,9 @@
+- name: 获取自己的荣誉
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /get_honor
+    data:
+  validate:
+    - equals: { status_code: 200 }

@@ -10,7 +10,7 @@ import requests
 from django.http import HttpRequest, HttpResponse
 from django.views.decorators.csrf import ensure_csrf_cookie
 
-from .models import PrivateInfo, UserProgramTable, ProgramTable
+from .models import *
 from .api_util import *
 
 
@@ -61,7 +61,8 @@ def login(request: HttpRequest):  # 登录
         # res.set_cookie("SessionID", session_key)
         # return res
         return gen_set_cookie_response(code=200,
-                                       data={"result": "success", "message": "login successful", "role_list": role_list},
+                                       data={"result": "success", "message": "login successful",
+                                             "role_list": role_list},
                                        cookie={"SessionID": session_key})
 
 
@@ -253,3 +254,26 @@ def newcomer_info(request: HttpRequest):
         })
     print(response_data)
     return gen_standard_response(200, response_data)
+
+
+def get_honor(req: HttpRequest):
+    """
+    获取个人荣誉
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+    })
+    if not ok:
+        return res
+    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    honor_list = Honor.objects.filter(owner=user)
+    ret_list = []
+    for honor in honor_list:
+        tmp = {}
+        tmp["type"] = HonorToTest[honor.type]
+        tmp["text"] = honor.text
+        ret_list.append(tmp )
+    return gen_response(200,data=ret_list)

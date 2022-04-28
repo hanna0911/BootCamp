@@ -2,7 +2,7 @@ import json
 import logging
 
 from django.http import HttpRequest
-from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check
+from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check, quick_check
 from .models import *
 
 
@@ -149,4 +149,34 @@ def nominated_list(req: HttpRequest):
         tmp["teacherNominationDate"] = teacher.teacherNominationDate
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
+    return gen_response(200, data=return_list)
+
+
+def teacher_newcomer_list(req: HttpRequest):
+    """
+    获得老师自己带的学生列表(已经毕业的不算)
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["teacher"],
+    })
+    if not ok:
+        return res
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
+    learning_list = []
+    for entry in student_list:  # 还在学习的学生
+        if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
+            learning_list.append(entry.newcomer)
+    return_list = []
+    for newcomer in learning_list:
+        tmp = load_private_info(newcomer)
+        tmp["graduated"] = GraduateStatusToTest[newcomer.newcomerGraduateState]  # temp
+        tmp["evaluate"] = "暂无"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
+        return_list.append(tmp)
+
     return gen_response(200, data=return_list)

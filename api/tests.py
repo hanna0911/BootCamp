@@ -13,12 +13,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 sessions = {}
 
-Clients = {
-    'admin': Client(),
-    "HRBP": Client(),
-    "teacher": Client(),
-    "newcomer": Client()
-}
 
 
 class Tests(TestCase):
@@ -171,3 +165,9 @@ class Tests(TestCase):
 
     def test_avatar_and_by_name(self):
         self.process("/testcase/avatar.yml")
+
+    def test_teacher_newcomer_list(self):
+        self.process("/testcase/teacher_newcomer_list.yml")
+
+    def test_get_honor(self):
+        self.process("/testcase/get_honor.yml")
