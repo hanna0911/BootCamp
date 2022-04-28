@@ -396,3 +396,33 @@ def my_courses_list(request: HttpRequest):
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my courses retrieved for {role} user {username}',
                                        'courses': course_list})
+
+
+def teacher_newcomer_list(req: HttpRequest):
+    """
+    获得老师自己带的学生列表(已经毕业的不算)
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["teacher"],
+    })
+    if not ok:
+        return res
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
+    learning_list = []
+    for entry in student_list:  # 还在学习的学生
+        if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
+            learning_list.append(entry.newcomer)
+    return_list = []
+    for newcomer in learning_list:
+        tmp = load_private_info(newcomer)
+        tmp["graduated"] = GraduateStatusToTest[newcomer.newcomerGraduateState]  # temp
+        tmp["evaluate"] = "暂无"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
+        return_list.append(tmp)
+
+    return gen_response(200, data=return_list)

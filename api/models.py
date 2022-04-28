@@ -12,8 +12,11 @@ NAME_LEN = 50
 SHORT_INFO_LEN = 20
 LONG_INFO_LEN = 200
 COMMENT_LEN = 500
-
-
+JoinStatusToText = ["待入职","在职","离职"]
+EmployeeTypeToText = ["校招","社招","实习","未选择"]
+GraduateStatusToTest = ["未毕业","正常毕业","非正常毕业"]
+TeacherExaminedStatusToTest = ["未审核","审核通过","审核拒绝"]
+HonorToTest = ["奖章","证书","奖项"]
 class PrivateInfo(models.Model):
     """
     user table
@@ -66,7 +69,7 @@ class PrivateInfo(models.Model):
 
     # 新人相关
     newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
-    newcomerGraduateState = models.BooleanField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
+    newcomerGraduateState = models.IntegerField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
     newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
 
     # 导师相关
