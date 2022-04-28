@@ -85,3 +85,45 @@
     headers:
   validate:
     - equals: { status_code: 200 }
+
+- name: 做题（有效答卷）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 2
+      answer: [C, A, BD, ABC]
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 做题（无效答卷，答卷list长度不匹配）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 2
+      answer: [C, A, BD, ABC, BAD]
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 做题（无效答卷，testID并非一个test的contentID）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 3
+      answer: [C, A, BD, ABC]
+    headers:
+  validate:
+    - equals: { status_code: 400 }
