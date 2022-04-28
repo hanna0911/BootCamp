@@ -7,8 +7,9 @@ import re
 import os
 import mimetypes
 import csv
-from api.models import ContentTable
+from api.models import ContentTable, PrivateInfo, UserContentTable
 from api.api_util import *
+from api.upload import parse_test_for_grader, parse_test_for_student, grade_test
 
 
 def file_iterator(file_name, chunk_size=8192, offset=0, length=None):
@@ -125,3 +126,54 @@ def retrieve_test_paper_by_id(request: HttpRequest):
     response.status_code = 200
     return response
 
+
+def retrieve_test_by_user_id(request: HttpRequest):
+    """
+    文件功能正式接口
+    接收POST请求
+    {action: "retrieve tests by user id", "username": __USER_ID__}
+    """
+    if request.method != 'action':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    session = request.session
+    action = data.get('action')
+    target_username = data.get('username')
+    if action != 'retrieve tests by user id' is None or target_username is None:
+        return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
+    target_user_filter = PrivateInfo.objects.filter(username=target_username)
+    if len(target_user_filter) == 0:
+        return item_not_found_error_response()
+    target_user = target_user_filter.first()
+    target_tests = UserContentTable.objects.filter(user=target_user, content__type=ContentTable.EnumType.Exam)
+    test_list = []
+    for test_relation in target_tests:
+        test = test_relation.content
+        if test.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        test_info = [
+            audience,
+            test.isTemplate,
+            test.name,
+            test.intro,
+            test.recommendedTime,
+            test.tag,
+            test.author.name,
+            test.releaseTime
+        ]
+        try:
+            fp = open(test.questions, "r", encoding="UTF-8")
+        except Exception as e:
+            print(e)
+            return item_not_found_error_response()
+        test_paper = parse_test_for_student(test.questions)
+        test_list.append([test_info, test_paper])
+    return gen_standard_response(200, {"result": "success",
+                                       "message": f"tests retrieved for {target_username}",
+                                       "tests": test_list})

@@ -1,10 +1,12 @@
 """
 切换状态，切换关系相关的接口
 """
+
 from django.http import HttpRequest
 from .api_util import *
-from .models import TeacherNewcomerTable
+from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable
 import json
+import datetime
 
 
 def reject_nominate(req: HttpRequest):
@@ -69,3 +71,55 @@ def assign_teacher(req: HttpRequest):
     teacher.currentMembers = teacher.currentMembers + 1
     teacher.save()
     return gen_response(200)
+
+
+def assign_content(request: HttpRequest):
+    """
+    POST{
+        "action": "assign content",
+        "assigneeID": 被分配内容的用户id
+        "contentID": 被分配内容的id
+        "deadline": "yyyy-MM-dd HH:mm"
+        "obligatory": true/false
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    assignee_id = data.get('assigneeID')
+    content_id = data.get('contentID')
+    deadline = data.get('deadline')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    obligatory = session.get('obligatory')
+    if action != 'assign content' or assignee_id is None or content_id is None \
+       or deadline is None or obligatory is None:
+        return gen_standard_response(400, {"message": "Bad Arguments"})
+    assignee_filter = PrivateInfo.objects.filter(id=assignee_id)
+    content_filter = ContentTable.objects.filter(id=content_id)
+    assigner_filter = PrivateInfo.objects.filter(username=username)
+    if len(assignee_filter) == 0 or len(content_filter) == 0 or len(assigner_filter) == 0:
+        return item_not_found_error_response()
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'teacher':
+        return unauthorized_action_response()
+    assignee = assignee_filter.first()
+    content = content_filter.first()
+    username = assigner_filter.first()
+    try:
+        deadline_datetime = datetime.datetime.fromisoformat(deadline)
+    except Exception as e:
+        print(e)
+        return gen_standard_response(400, {"message": "Bad Arguments"})
+    entry = UserContentTable(user=assignee, content=content, deadline=deadline_datetime,
+                             isObligatory=obligatory)
+    entry.save()
+    return gen_standard_response(200, {"result": "success",
+                                       "message": f"content {content.name} of type {content.type}\
+                                        assigned to {assignee.username} with real name {assignee.name}"})

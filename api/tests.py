@@ -171,3 +171,6 @@ class Tests(TestCase):
 
     def test_get_honor(self):
         self.process("/testcase/get_honor.yml")
+
+    def test_content_list_apis(self):
+        self.process("/testcase/content_list.yml")

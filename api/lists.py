@@ -2,8 +2,9 @@ import json
 import logging
 
 from django.http import HttpRequest
-from .api_util import gen_response, role_authentication, load_private_info, check_method, role_list_check, quick_check
+from .api_util import *
 from .models import *
+from .upload import parse_test_for_student, parse_test_for_admin
 
 
 def admin_newcomer_list(request: HttpRequest):
@@ -150,6 +151,269 @@ def nominated_list(req: HttpRequest):
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(teacher.username)
         return_list.append(tmp)
     return gen_response(200, data=return_list)
+
+
+def assignable_test_list(request: HttpRequest):
+    """
+    获取一个用户自己可给他人分配的所有考试
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role == 'admin':
+        available_tests = ContentTable.objects.filter(type=ContentTable.EnumType.Exam)
+        test_list = []
+        for test in available_tests:
+            if test.audience == 0:
+                audience = 'newcomer'
+            else:
+                audience = 'teacher'
+            test_info = [
+                audience,
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name,
+                test.releaseTime
+            ]
+            try:
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(csv_dir)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'assignable tests retrieved for admin user {username}',
+                                           'tests': test_list})
+    elif role == 'teacher':
+        test_templates = ContentTable.objects.filter(isTemplate=True,
+                                                     audience=0,
+                                                     type=ContentTable.EnumType.Exam)
+        authored_tests = ContentTable.objects.filter(author__username=username,
+                                                     audience=0,
+                                                     type=ContentTable.EnumType.Exam,
+                                                     isTemplate=False)
+        available_tests = test_templates.union(authored_tests)
+        test_list = []
+        for test in available_tests:
+            if test.audience == 0:
+                audience = 'newcomer'
+            else:
+                audience = 'teacher'
+            test_info = [
+                audience,
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name,
+                test.releaseTime
+            ]
+            try:
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(csv_dir)
+            test_list.append([test_info, test_paper])
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'assignable tests retrieved for teacher user {username}',
+                                           'tests': test_list})
+    elif role == 'HRBP':
+        test_templates = ContentTable.objects.filter(isTemplate=True,
+                                                     audience=1,
+                                                     type=ContentTable.EnumType.Exam)
+        authored_tests = ContentTable.objects.filter(author__username=username,
+                                                     audience=1,
+                                                     type=ContentTable.EnumType.Exam,
+                                                     isTemplate=False)
+        available_tests = test_templates.union(authored_tests)
+        test_list = []
+        for test in available_tests:
+            if test.audience == 0:
+                audience = 'newcomer'
+            else:
+                audience = 'teacher'
+            test_info = [
+                audience,
+                test.isTemplate,
+                test.name,
+                test.intro,
+                test.recommendedTime,
+                test.tag,
+                test.author.name,
+                test.releaseTime
+            ]
+            try:
+                if test.questions == '' or test.questions is None:
+                    csv_dir = './files/test/SampleTestPaper.csv'
+                else:
+                    csv_dir = test.questions
+                fp = open(csv_dir, "r", encoding="UTF-8")
+            except Exception as e:
+                print(e)
+                return item_not_found_error_response()
+            test_paper = parse_test_for_admin(csv_dir)
+            test_list.append([test_info, test_paper])
+        print(test_list)
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'assignable tests retrieved for hrbp user {username}',
+                                           'tests': test_list})
+    else:  # newcomer
+        return unauthorized_action_response()
+
+
+def my_test_list(request: HttpRequest):
+    """
+    获取一个用户要参加的全部考试
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'teacher' and role != 'newcomer':
+        return unauthorized_action_response()
+    target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
+    test_list = []
+    for test_relation in target_tests:
+        test = test_relation.content
+        if test.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        test_info = [
+            audience,
+            test.isTemplate,
+            test.name,
+            test.intro,
+            test.recommendedTime,
+            test.tag,
+            test.author.name,
+            test.releaseTime
+        ]
+        try:
+            if test.questions == '' or test.questions is None:
+                csv_dir = './files/test/SampleTestPaper.csv'
+            else:
+                csv_dir = test.questions
+            fp = open(csv_dir, "r", encoding="UTF-8")
+        except Exception as e:
+            print(e)
+            return item_not_found_error_response()
+        test_paper = parse_test_for_student(csv_dir)
+        test_list.append([test_info, test_paper])
+    print(test_list)
+    return gen_standard_response(200, {"result": "success",
+                                       "message": f'my tests retrieved for {role} user {username}',
+                                       "tests": test_list})
+
+
+def assignable_course_list(request: HttpRequest):
+    """
+    获取一个用户可见的全部课程
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    course_list = []
+    if role == 'admin':
+        available_courses = ContentTable.objects.filter(type=ContentTable.EnumType.Course)
+    elif role == 'teacher':
+        course_templates = ContentTable.objects.filter(type=ContentTable.EnumType.Course,
+                                                       isTemplate=True,
+                                                       audience=0)
+        authored_courses = ContentTable.objects.filter(type=ContentTable.EnumType.Course,
+                                                       isTemplate=False,
+                                                       audience=0,
+                                                       author__username=username)
+        available_courses = course_templates.union(authored_courses)
+    elif role == 'HRBP':
+        course_templates = ContentTable.objects.filter(type=ContentTable.EnumType.Course,
+                                                       isTemplate=True,
+                                                       audience=1)
+        authored_courses = ContentTable.objects.filter(type=ContentTable.EnumType.Course,
+                                                       isTemplate=False,
+                                                       audience=1,
+                                                       author__username=username)
+        available_courses = course_templates.union(authored_courses)
+    else:  # newcomer
+        return unauthorized_action_response()
+    for course in available_courses:
+        if course.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        course_list.append([
+            audience,
+            course.isTemplate,
+            course.name,
+            course.intro,
+            course.recommendedTime,
+            course.tag,
+            course.author.name,
+            course.releaseTime,
+            course.lessonCount,
+        ])
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': f'assignable courses retrieved for {role} user {username}',
+                                       'courses': course_list})
+
+
+def my_courses_list(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'teacher' and role != 'newcomer':
+        return unauthorized_action_response()
+    target_courses = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Course)
+    course_list = []
+    for course_relation in target_courses:
+        course = course_relation.content
+        if course.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        course_list.append([
+            audience,
+            course.isTemplate,
+            course.name,
+            course.intro,
+            course.recommendedTime,
+            course.tag,
+            course.author.name,
+            course.releaseTime,
+            course.lessonCount,
+        ])
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': f'my courses retrieved for {role} user {username}',
+                                       'courses': course_list})
 
 
 def teacher_newcomer_list(req: HttpRequest):
