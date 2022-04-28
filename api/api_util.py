@@ -87,6 +87,16 @@ def check_method(req: HttpRequest, method: str):
         return False
 
 
+def str_to_boolean(s: str):
+    s = s.lower()
+    if s == 'true':
+        return True
+    elif s == 'false':
+        return False
+    else:
+        return None
+
+
 def quick_check(req: HttpRequest, check_points: dict):
     for key in check_points.keys():
         if key == "method" and not check_method(req, check_points[key]):

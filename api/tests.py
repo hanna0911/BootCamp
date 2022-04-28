@@ -152,8 +152,8 @@ class Tests(TestCase):
     def test_upload_program(self):
         self.process("/testcase/upload_program.yml")
 
-    def test_upload_content_template(self):
-        self.process("/testcase/upload_content_template.yml")
+    # def test_upload_content_template(self):
+    #     self.process("/testcase/upload_content_template.yml")
 
     def test_upload_lesson_template(self):
         self.process("/testcase/upload_lesson_template.yml")
