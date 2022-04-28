@@ -177,3 +177,9 @@ class Tests(TestCase):
 
     def test_nominate_teachers(self):
         self.process("/testcase/nominate_teachers.yml")
+
+    def test_content_list_apis(self):
+        self.process("/testcase/content_list.yml")
+
+    def test_assign_content(self):
+        self.process("/testcase/assign_content.yml")

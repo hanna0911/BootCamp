@@ -7,6 +7,7 @@ import time
 from re import split
 
 import django.core.files.uploadedfile
+import pandas as pd
 from django.core.files import File
 from django.core.files.base import ContentFile
 from django.http import HttpRequest
@@ -68,6 +69,120 @@ def create_program(request: HttpRequest):
                                        "programID": new_program_id})
 
 
+def check_test_format(csv_file_path):
+    with open(csv_file_path, "r") as csv_file:
+        for row in csv_file.readlines():
+            row = [item for item in row.split(',')]
+            if len(row) < 3 or len(row) > 28:
+                return False
+            choice_cnt = len(row) - 2
+            answers = [ans for ans in row[-1].split('')]
+            for answer in answers:
+                if ord(answer) - ord('A') >= choice_cnt:
+                    return False
+    return True
+
+
+def parse_test_for_student(csv_file_path):
+    """
+    返回不带答案的试卷
+    """
+    ret = []
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
+        for row in csv_file.readlines():
+            row = [item for item in row[:-1].split(',')]
+            ret.append(row[0: len(row) - 1])
+    return ret
+
+
+def parse_test_for_grader(csv_file_path):
+    ret = []
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
+        for row in csv_file.readlines():
+            row = [item for item in row[:-1].split(',')]
+            ret.append(row[-1])
+    return ret
+
+
+def parse_test_for_admin(csv_file_path):
+    ret = []
+    with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
+        for row in csv_file.readlines():
+            row = [item for item in row[:-1].split(',')]
+            ret.append(row)
+    return ret
+
+
+def upload_answers(request: HttpRequest):
+    """
+    TODO: 在判卷后更改UserContentTable
+    判卷，格式：
+    {action: "grade test", testID: __TEST_ID__, answer: ['A', 'BD', 'C', ...]}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    test_id = data.get('testID')
+    answer_sheet = data.get('answer')
+    if action != "grade test" or test_id is None or answer_sheet is None:
+        return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
+    test = ContentTable.objects.filter(id=test_id).first()
+    if test is None or test.type != ContentTable.EnumType.Exam:
+        return item_not_found_error_response()
+    valid, result = grade_test(answer_sheet, test)
+    # print(valid, result)
+    if not valid:
+        return gen_standard_response(400, {"result": "failed", "message": "Answer sheet does not match exam"})
+    return gen_standard_response(200, {"result": "success",
+                                       "message": "Test paper successfully graded",
+                                       "results": result})
+
+
+def grade_test(answer_sheet, test):
+    """
+    在线判卷，需要一个content_id
+    """
+    if test is None:
+        return False, []
+    if test.type != ContentTable.EnumType.Exam:
+        return False, []
+    if test.questions == '' or test.questions is None:
+        csv_dir = './files/test/SampleTestPaper.csv'
+    else:
+        csv_dir = test.questions
+    correct_answers = parse_test_for_grader(csv_dir)
+    if len(answer_sheet) != len(correct_answers):
+        return False, []
+    res = []
+    for i in range(len(answer_sheet)):
+        # print(answer_sheet)
+        answer_stu = answer_sheet[i]
+        for j in range(len(answer_stu)):
+            answer_stu[j] = chr(ord('A') + answer_stu[j])
+        answer_std = correct_answers[i].split(" ")
+        answer_stu.sort()
+        answer_std.sort()
+        print("student answer:", answer_stu, "standard answer:", answer_std)
+        if len(answer_std) != len(answer_stu):
+            res.append(False)
+            continue
+        correct = True
+        for j in range(len(answer_stu)):
+            if answer_stu[j] != answer_std[j]:
+                correct = False
+                break
+        if correct:
+            res.append([answer_sheet[i], correct_answers[i], True])
+        else:
+            res.append([answer_sheet[i], correct_answers[i], False])
+    return True, res
+
+
 def upload_test_file(request: HttpRequest):
     '''
     上传csv文件
@@ -99,7 +214,7 @@ def upload_test_file(request: HttpRequest):
         with open(file_path, 'wb') as f:
             for chunk in file.chunks():
                 f.write(chunk)
-
+        check_test_format(file_path)
         message = {}
         message['code'] = 200
         # 返回图片路径
@@ -206,6 +321,7 @@ def create_content(request: HttpRequest):
     new_program_content_relation = ProgramContentTable(program=program, content=new_content)  # 和父program创建关联信息
     new_program_content_relation.save()
     program.contentCount += 1  # 父program的content数量累加
+    program.save()
     return gen_standard_response(200, {
         "result": "success",
         "message": f"content {name} created successfully",
@@ -254,6 +370,7 @@ def create_lesson(request: HttpRequest):
                              intro=intro, recommendedTime=recommend_time, cover=cover)
     new_lesson.save()
     content.lessonCount += 1
+    content.save()
     return gen_standard_response(200, {
         "result": "success",
         "message": f"lesson {name} created successfully",
@@ -323,8 +440,8 @@ def upload_courseware_file(request: HttpRequest):
     user_session.delete("upload_cover")
     if cur_role != "admin" or cur_role != "teacher":  # 身份不是管理员或者导师
         return unauthorized_action_response()
-    file_op_ret = save_courseware_file(lesson_id, order, username, 'files/courseware',
-                                       request.FILES.get("content"))
+    file_op_ret = save_courseware_file(lesson_id, order, username, 'files/lesson',
+                                       request.FILES.get("file"))
     if file_op_ret[0]:
         new_courseware_id = username + "_cw_" + str(time.time())
         lesson = LessonTable.objects.filter(id=lesson_id).first()

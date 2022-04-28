@@ -1,0 +1,129 @@
+- name: admin获取本人可分配考试列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /assignable_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: hrbp获取本人可分配考试列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /assignable_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: teacher获取本人可分配考试列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /assignable_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer试图获取本人可分配考试列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /assignable_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin试图获取本人可做考试列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /my_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: hrbp试图获取本人可做考试列表
+  ident:
+    - HRBP
+  request:
+    method: GET
+    url: /my_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: teacher获取本人可做考试列表
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /my_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: newcomer获取本人可做考试列表
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /my_test_list
+    data:
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 做题（有效答卷）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 2
+      answer: [[2], [0], [1, 3], [2, 0, 1]]
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 做题（无效答卷，答卷list长度不匹配）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 2
+      answer: [[2], [0], [1, 3], [0, 1, 2], [3, 2, 1]]
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 做题（无效答卷，testID并非一个test的contentID）
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /upload_answers
+    data:
+      action: grade test
+      testID: 3
+      answer: [[2], [0], [1, 3], [2, 0, 1]]
+    headers:
+  validate:
+    - equals: { status_code: 400 }
