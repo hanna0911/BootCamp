@@ -270,10 +270,39 @@ def get_honor(req: HttpRequest):
         return res
     user = PrivateInfo.objects.get(username=req.session.get("username"))
     honor_list = Honor.objects.filter(owner=user)
-    ret_list = []
+    medals_list = []
+    certificates_list = []
+    award_list = []
     for honor in honor_list:
-        tmp = {}
-        tmp["type"] = HonorToTest[honor.type]
-        tmp["text"] = honor.text
-        ret_list.append(tmp )
-    return gen_response(200,data=ret_list)
+        tmp = {"name": honor.text, "avator": "/api/avatar_by_name/?username={}".format(user.username)}
+        if honor.type == Honor.EnumType.Certificate:
+            certificates_list.append(tmp)
+        elif honor.type == Honor.EnumType.Medal:
+            medals_list.append(tmp)
+        else:
+            award_list.append(tmp)
+    ret_dic = {"medals": medals_list, "certificates": certificates_list, "awards": award_list}
+    return gen_response(200, data=ret_dic)
+
+
+def teacher_summary_info(req: HttpRequest):
+    """
+    导师查看带新概览,自己带了几个新人,已经带过几个新人
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["teacher"],
+    })
+    if not ok:
+        return res
+    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = {
+        "current": user.currentMembers,
+        "historical": user.historicalMembers,
+        "dutyDate": user.teacherDutyDate,
+        "total":user.currentMembers +user.historicalMembers,
+    }
+    return gen_response(200,data=data)
