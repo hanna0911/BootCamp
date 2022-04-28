@@ -27,6 +27,7 @@ urlpatterns = [
     path("upload_courseware_file", upload.upload_courseware_file, name="upload_courseware_file"),
     path("reject_nominate", status.reject_nominate, name="reject_nominate"),
     path("accept_nominate", status.accept_nominate, name="accept_nominate"),
+    path("nominate_teachers", status.nominate_teachers,name="nominate_teachers"),
     path("assign_teacher", status.assign_teacher, name="assign_teacher"),
     path("bootcamp_attend", analysis.bootcamp_attend, name="bootcamp_attend"),
     path("newcomer_average_score", analysis.newcomer_average_score, name="newcomer_average_score"),

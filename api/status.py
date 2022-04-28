@@ -1,7 +1,10 @@
 """
 切换状态，切换关系相关的接口
 """
+import logging
+
 from django.http import HttpRequest
+from django.utils import timezone
 from .api_util import *
 from .models import TeacherNewcomerTable
 import json
@@ -45,6 +48,25 @@ def accept_nominate(req: HttpRequest):
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Pass
     user.save()
     return gen_response(200)
+
+
+def nominate_teachers(req: HttpRequest):
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["admin"],
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data: dict = json.loads(req.body)
+    for item in data:
+        print(item["username"])
+        user = PrivateInfo.objects.get(username=item["username"])
+        user.isTeacher =True
+        user.teacherNominationDate = timezone.now()
+        user.save()
+    return gen_response(200, message="success")
 
 
 def assign_teacher(req: HttpRequest):

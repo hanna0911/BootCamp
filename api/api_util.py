@@ -90,25 +90,25 @@ def check_method(req: HttpRequest, method: str):
 def quick_check(req: HttpRequest, check_points: dict):
     for key in check_points.keys():
         if key == "method" and not check_method(req, check_points[key]):
-            logging.error("invalid method")
+            # logging.error("invalid method")
             return False, gen_response(400, message="invalid method")
         elif key == "username":
             if req.session.get("username", None) is None:
-                logging.error("no username in session, probly not login")
+                # logging.error("no username in session, probly not login")
                 return False, gen_response(
                     400, message="no username in session, probly not login")
         elif key == "role" and not role_list_check(req.session.get("username"), check_points[key]):
-            logging.error("no permission")
+            # logging.error("no permission")
             return False, gen_response(400, message="no permission")
         elif key == "data_field":
             try:
                 data: dict = json.loads(req.body)
             except Exception:
-                logging.error("load fail")
+                # logging.error("load fail")
                 return False, gen_response(400, message='Load json request failed')
             for field in check_points[key]:
                 if field not in data.keys():
-                    logging.error("lack of arguments")
+                    # logging.error("lack of arguments")
                     return False, gen_response(400, message="lack of arguments")
 
     return True, gen_response(200)
