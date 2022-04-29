@@ -1,0 +1,60 @@
+- name: bootcamp参与率-成功
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /bootcamp_attend
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 200 }
+
+- name: bootcamp参与率-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /bootcamp_attend
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: bootcamp参与率-权限错误
+  ident:
+    - newcomer
+    - teacher
+  request:
+    method: POST
+    url: /bootcamp_attend
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: bootcamp参与率-字段缺失
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /bootcamp_attend
+    data:
+      dateRangeStart: 1651334400000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: bootcamp参与率-时间错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /bootcamp_attend
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939200000
+  validate:
+    - equals: { status_code: 400 }

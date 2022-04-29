@@ -17,7 +17,7 @@ from .models import *
 import json
 
 MAX_ALLOWED_COURSEWARES_FOR_ONE_LESSON = 10
-EXAM_FILE_CACHE_MAX= 50
+EXAM_FILE_CACHE_MAX = 50
 exam_file_cache = dict()
 
 
@@ -60,7 +60,7 @@ def create_program(request: HttpRequest):
                                            "programID": ProgramTable.objects.filter(name=name).first().id})
     username = user_session['username']
     new_program_id = username + "_p_" + str(time.time())  # 生成ProgramID 规则: username_p_time
-    user = PrivateInfo.objects.filter(username=username).first() # 外键
+    user = PrivateInfo.objects.filter(username=username).first()  # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
                                intro=intro, tag=tag, contentCount=0, recommendTime=recommend_time,
                                audience=audience_id, cover=cover)
@@ -112,22 +112,22 @@ def parse_test_for_admin(csv_file_path):
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
             row = [item for item in row[:-1].split(',')]  # excel没一行
-            
+
             choices = []  # 候选项
             for num in range(1, len(row) - 1):
                 choices.append(row[num])
-            
+
             answer_list = []  # 所有正确答案（因为可能是多选，所以需要存list）
             for answer in row[len(row) - 1].split(' '):
                 answer_list.append(ord(answer) - ord('A'))  # 字母转数字：如字母'A'为0，'C'为2
-            
+
             dict = {  # 每一个题目以一个字典格式传回
                 'question': row[0],
                 'choices': choices,
-                'answer': answer_list, 
+                'answer': answer_list,
             }
             ret.append(dict)
-            
+
     return ret
 
 
@@ -468,9 +468,9 @@ def create_content(request: HttpRequest):
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     program = ProgramTable.objects.filter(id=program_id).first()
-    if is_template == True and cur_role != "admin":
+    if is_template is True and cur_role != "admin":
         return unauthorized_action_response()
-    if is_template == False and cur_role != "admin" and cur_role != "teacher":
+    if is_template is False and cur_role != "admin" and cur_role != "teacher":
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"

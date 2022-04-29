@@ -303,6 +303,6 @@ def teacher_summary_info(req: HttpRequest):
         "current": user.currentMembers,
         "historical": user.historicalMembers,
         "dutyDate": user.teacherDutyDate,
-        "total":user.currentMembers +user.historicalMembers,
+        "total": user.currentMembers + user.historicalMembers,
     }
-    return gen_response(200,data=data)
+    return gen_response(200, data=data)

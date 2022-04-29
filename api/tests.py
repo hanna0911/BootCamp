@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.DEBUG)
 sessions = {}
 
 
-
 class Tests(TestCase):
     def setUp(self):
         # create_data_yml("/testcase/init_data.yml")
@@ -183,3 +182,21 @@ class Tests(TestCase):
 
     def test_assign_content(self):
         self.process("/testcase/assign_content.yml")
+
+    def test_bootcamp_attend(self):
+        self.process("/testcase/bootcamp_attend.yml")
+
+    def test_newcomer_average_score(self):
+        self.process("/testcase/newcomer_average_score.yml")
+
+    def test_teacher_average_score(self):
+        self.process("/testcase/teacher_average_score.yml")
+
+    def test_camp_completion(self):
+        self.process("/testcase/camp_completion.yml")
+
+    def test_graduate_time(self):
+        self.process("/testcase/graduate_time.yml")
+
+    def test_tutor_assignment_chart(self):
+        self.process("/testcase/tutor_assignment_chart.yml")
