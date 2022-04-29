@@ -3,6 +3,7 @@
 """
 
 import datetime
+import pytz
 from json import JSONDecodeError
 import logging
 from typing import Tuple
@@ -41,10 +42,11 @@ def analysis_precheck(request: HttpRequest):
 
     try:
         startDate = data["dateRangeStart"]
-        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000, pytz.timezone("Asia/Shanghai"))
         endDate = data["dateRangeEnd"]
-        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
-        logging.info("{}, {}".format(startDate, endDate))
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000, pytz.timezone("Asia/Shanghai"))
+        logging.info(startDate)
+        logging.info(endDate)
     except KeyError:
         return gen_response(400, "JSON format error")
 
