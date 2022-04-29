@@ -229,11 +229,12 @@ def tutor_assignment_chart(request: HttpRequest):
     导师分配率
     """
     result = analysis_precheck(request)
-    return gen_response(300)
 
     if isinstance(result, HttpResponse):
+        return gen_response(300)
         return result
     startDate, endDate, _ = result
+    return gen_response(301)
 
     days = []
     assignedNewcomers = []
