@@ -8,6 +8,7 @@
     data:
       dateRangeStart: 1651334400000
       dateRangeEnd: 1651939199000
+    headers:
   validate:
     - equals: { status_code: 200 }
 
