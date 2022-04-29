@@ -48,7 +48,7 @@ def analysis_precheck(request: HttpRequest):
         return gen_response(400, "JSON format error")
 
     if not (check_day(startDate, True) and check_day(endDate, False)):
-        return gen_response(400, "Invalid date range")
+        return gen_response(401, "Invalid date range")
 
     return startDate, endDate, dept
 
