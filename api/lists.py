@@ -195,6 +195,7 @@ def assignable_test_list(request: HttpRequest):
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append({'test_info': test_info, 'test_paper': test_paper})
+        print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for admin user {username}',
                                            'tests': test_list})
@@ -236,6 +237,7 @@ def assignable_test_list(request: HttpRequest):
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append({'test_info': test_info, 'test_paper': test_paper})
+        print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
                                            'tests': test_list})
