@@ -191,7 +191,7 @@ class ContentTable(models.Model):
     taskType = models.IntegerField(choices = EnumTaskType.choices, default = EnumTaskType.Text)  # 任务类型(针对task类 0-text, 1-link, 2-file)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.URLField(max_length=LONG_INFO_LEN)  # 任务链接
-    taskFile = models.FileField()  # 任务文件
+    taskFile = models.CharField(max_length=1000)  # 任务文件
 
 
 class LessonTable(models.Model):
