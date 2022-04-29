@@ -22,7 +22,7 @@ def analysis_precheck(request: HttpRequest):
     try:
         data = json.loads(request.body)
     except JSONDecodeError:
-        return gen_response(400, "JSON format error")
+        return gen_response(401, "JSON format error")
 
     try:
         session = request.session
@@ -41,14 +41,15 @@ def analysis_precheck(request: HttpRequest):
 
     try:
         startDate = data["dateRangeStart"]
+        if not isinstance(startDate, int): return gen_response(300)
         startDate = datetime.datetime.fromtimestamp(startDate / 1000)
         endDate = data["dateRangeEnd"]
         endDate = datetime.datetime.fromtimestamp(endDate / 1000)
     except KeyError:
-        return gen_response(400, "JSON format error")
+        return gen_response(402, "JSON format error")
 
     if not (check_day(startDate, True) and check_day(endDate, False)):
-        return gen_response(400, "Invalid date range")
+        return gen_response(403, "Invalid date range")
 
     return startDate, endDate, dept
 
@@ -231,10 +232,8 @@ def tutor_assignment_chart(request: HttpRequest):
     result = analysis_precheck(request)
 
     if isinstance(result, HttpResponse):
-        return gen_response(300)
         return result
     startDate, endDate, _ = result
-    return gen_response(301)
 
     days = []
     assignedNewcomers = []
