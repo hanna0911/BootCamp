@@ -42,9 +42,9 @@ def analysis_precheck(request: HttpRequest):
 
     try:
         startDate = data["dateRangeStart"]
-        startDate = datetime.datetime.fromtimestamp(startDate / 1000, pytz.timezone("Asia/Shanghai"))
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
         endDate = data["dateRangeEnd"]
-        endDate = datetime.datetime.fromtimestamp(endDate / 1000, pytz.timezone("Asia/Shanghai"))
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
         logging.info(startDate)
         logging.info(endDate)
     except KeyError:
