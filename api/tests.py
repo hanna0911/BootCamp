@@ -183,3 +183,6 @@ class Tests(TestCase):
 
     def test_assign_content(self):
         self.process("/testcase/assign_content.yml")
+
+    def test_bootcamp_attend(self):
+        self.process("/testcase/bootcamp_attend.yml")
