@@ -229,6 +229,7 @@ def tutor_assignment_chart(request: HttpRequest):
     导师分配率
     """
     result = analysis_precheck(request)
+    return gen_response(300)
 
     if isinstance(result, HttpResponse):
         return result
