@@ -1,3 +1,4 @@
+import datetime
 import logging
 import re
 from django.http import JsonResponse, HttpRequest
@@ -321,3 +322,20 @@ def item_not_found_error_response():
                                            "message": "requested item not found in database"})
     response.status_code = 400
     return response
+
+
+def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
+    """
+    将timestamp转换成datetime类（无时区信息的北京本地时间）
+    如果你有上述需求，使用这个函数，而不是datetime.fromtimestamp
+
+    P.S.
+    我们构造的数据全是无时区信息的时间，所以要将USE_TZ设为False、且使用的datetime类也得是无时区的
+    而python把时间戳转化为datetime时，是采用系统自身的时区信息进行转化的
+    而服务器的时区信息是在芝加哥！！！
+    如果直接使用datetime.fromtimestamp，部署上去的所有时间会延迟11个小时
+    """
+    local = datetime.datetime.now().replace(tzinfo = datetime.timezone(datetime.timedelta(hours=8)))
+    beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+    delta = beijing - local
+    return datetime.datetime.fromtimestamp(timestamp) + delta
