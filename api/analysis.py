@@ -3,7 +3,6 @@
 """
 
 import datetime
-import pytz
 from json import JSONDecodeError
 import logging
 from typing import Tuple
@@ -41,17 +40,22 @@ def analysis_precheck(request: HttpRequest):
         return session_timeout_response()
 
     try:
+        beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+        local = datetime.datetime.now().replace(tzinfo = datetime.timezone(datetime.timedelta(hours=8)))
+        logging.info(local)
+        logging.info(beijing)
+        logging.info(local - beijing)
         startDate = data["dateRangeStart"]
-        startDate = datetime.datetime.fromtimestamp(startDate / 1000, pytz.timezone("Asia/Shanghai"))
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
         endDate = data["dateRangeEnd"]
-        endDate = datetime.datetime.fromtimestamp(endDate / 1000, pytz.timezone("Asia/Shanghai"))
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
         logging.info(startDate)
         logging.info(endDate)
     except KeyError:
         return gen_response(400, "JSON format error")
 
     if not (check_day(startDate, True) and check_day(endDate, False)):
-        return gen_response(401, "Invalid date range")
+        return gen_response(400, "Invalid date range")
 
     return startDate, endDate, dept
 
