@@ -226,7 +226,7 @@ def graduate_time(request: HttpRequest):
 
 def tutor_assignment_chart(request: HttpRequest):
     """
-    新人毕业时间跨度
+    导师分配率
     """
     result = analysis_precheck(request)
 
