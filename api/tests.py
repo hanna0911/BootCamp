@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.DEBUG)
 sessions = {}
 
 
-
 class Tests(TestCase):
     def setUp(self):
         # create_data_yml("/testcase/init_data.yml")

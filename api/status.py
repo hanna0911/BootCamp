@@ -64,7 +64,7 @@ def nominate_teachers(req: HttpRequest):
     for item in data:
         print(item["username"])
         user = PrivateInfo.objects.get(username=item["username"])
-        user.isTeacher =True
+        user.isTeacher = True
         user.teacherNominationDate = timezone.now()
         user.save()
     return gen_response(200, message="success")
