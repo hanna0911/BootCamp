@@ -136,7 +136,8 @@ def write_db(req: HttpRequest):
             beginTime=info["beginTime"],
             taskType=info["taskType"],
             text=info["text"],
-            link=info["link"]
+            link=info["link"],
+            questions=info['questions']
         ).save()
     # logging.info("{} contents info loaded".format(len(ContentTable.objects.all())))
 

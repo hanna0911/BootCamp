@@ -17,6 +17,8 @@ EmployeeTypeToText = ["校招","社招","实习","未选择"]
 GraduateStatusToTest = ["未毕业","正常毕业","非正常毕业"]
 TeacherExaminedStatusToTest = ["未审核","审核通过","审核拒绝"]
 HonorToTest = ["奖章","证书","奖项"]
+
+
 class PrivateInfo(models.Model):
     """
     user table
