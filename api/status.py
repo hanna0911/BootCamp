@@ -87,6 +87,8 @@ def assign_teacher(req: HttpRequest):
         return gen_response(400, "user not found")
     if not (teacher.isTeacher and teacher.teacherIsDuty):
         return gen_response(400, message="teacher field has no teacher permission or teacher not duty")
+    if len(TeacherNewcomerTable.objects.filter(newcomer=newcomer)) > 0:
+        return gen_response(400, message="muti teacher assigned")
     entry = TeacherNewcomerTable(teacher=teacher, newcomer=newcomer)
     entry.save()
     teacher.currentMembers = teacher.currentMembers + 1
