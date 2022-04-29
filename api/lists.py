@@ -172,16 +172,17 @@ def assignable_test_list(request: HttpRequest):
                 audience = 'newcomer'
             else:
                 audience = 'teacher'
-            test_info = [
-                audience,
-                test.isTemplate,
-                test.name,
-                test.intro,
-                test.recommendedTime,
-                test.tag,
-                test.author.name,
-                test.releaseTime
-            ]
+            test_info = {
+                'audience': audience,
+                'isTemplate': test.isTemplate,
+                'name': test.name,
+                'intro': test.intro,
+                'recommendedTime': test.recommendedTime,
+                'tag': test.tag,
+                'author_name': test.author.name,
+                'releaseTime': test.releaseTime,
+                'testID': test.id,
+            }
             try:
                 if test.questions == '' or test.questions is None:
                     csv_dir = './files/test/SampleTestPaper.csv'
@@ -192,7 +193,7 @@ def assignable_test_list(request: HttpRequest):
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append([test_info, test_paper])
+            test_list.append({'test_info': test_info, 'test_paper': test_paper})
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for admin user {username}',
                                            'tests': test_list})
@@ -211,16 +212,17 @@ def assignable_test_list(request: HttpRequest):
                 audience = 'newcomer'
             else:
                 audience = 'teacher'
-            test_info = [
-                audience,
-                test.isTemplate,
-                test.name,
-                test.intro,
-                test.recommendedTime,
-                test.tag,
-                test.author.name,
-                test.releaseTime
-            ]
+            test_info = {
+                'audience': audience,
+                'isTemplate': test.isTemplate,
+                'name': test.name,
+                'intro': test.intro,
+                'recommendedTime': test.recommendedTime,
+                'tag': test.tag,
+                'author_name': test.author.name,
+                'releaseTime': test.releaseTime,
+                'testID': test.id,
+            }
             try:
                 if test.questions == '' or test.questions is None:
                     csv_dir = './files/test/SampleTestPaper.csv'
@@ -231,7 +233,7 @@ def assignable_test_list(request: HttpRequest):
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append([test_info, test_paper])
+            test_list.append({'test_info': test_info, 'test_paper': test_paper})
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
                                            'tests': test_list})
@@ -250,16 +252,17 @@ def assignable_test_list(request: HttpRequest):
                 audience = 'newcomer'
             else:
                 audience = 'teacher'
-            test_info = [
-                audience,
-                test.isTemplate,
-                test.name,
-                test.intro,
-                test.recommendedTime,
-                test.tag,
-                test.author.name,
-                test.releaseTime
-            ]
+            test_info = {
+                'audience': audience,
+                'isTemplate': test.isTemplate,
+                'name': test.name,
+                'intro': test.intro,
+                'recommendedTime': test.recommendedTime,
+                'tag': test.tag,
+                'author_name': test.author.name,
+                'releaseTime': test.releaseTime,
+                'testID': test.id,
+            }
             try:
                 if test.questions == '' or test.questions is None:
                     csv_dir = './files/test/SampleTestPaper.csv'
@@ -270,7 +273,7 @@ def assignable_test_list(request: HttpRequest):
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append([test_info, test_paper])
+            test_list.append({'test_info': test_info, 'test_paper': test_paper})
         print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for hrbp user {username}',
@@ -288,6 +291,7 @@ def my_test_list(request: HttpRequest):
     session = request.session
     username = session.get('username')
     role = session.get('role')
+    print('my_test_list session:', username, role)
     if username is None or role is None:
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
@@ -300,16 +304,17 @@ def my_test_list(request: HttpRequest):
             audience = 'newcomer'
         else:
             audience = 'teacher'
-        test_info = [
-            audience,
-            test.isTemplate,
-            test.name,
-            test.intro,
-            test.recommendedTime,
-            test.tag,
-            test.author.name,
-            test.releaseTime
-        ]
+        test_info = {
+            'audience': audience,
+            'isTemplate': test.isTemplate,
+            'name': test.name,
+            'intro': test.intro,
+            'recommendedTime': test.recommendedTime,
+            'tag': test.tag,
+            'author_name': test.author.name,
+            'releaseTime': test.releaseTime,
+            'testID': test.id,
+        }
         try:
             if test.questions == '' or test.questions is None:
                 csv_dir = './files/test/SampleTestPaper.csv'
@@ -320,7 +325,7 @@ def my_test_list(request: HttpRequest):
             print(e)
             return item_not_found_error_response()
         test_paper = parse_test_for_student(csv_dir)
-        test_list.append([test_info, test_paper])
+        test_list.append({'test_info': test_info, 'test_paper': test_paper})
     print(test_list)
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
