@@ -184,10 +184,11 @@ def assignable_test_list(request: HttpRequest):
                 'testID': test.id,
             }
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
@@ -224,10 +225,11 @@ def assignable_test_list(request: HttpRequest):
                 'testID': test.id,
             }
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
@@ -264,10 +266,11 @@ def assignable_test_list(request: HttpRequest):
                 'testID': test.id,
             }
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
@@ -316,10 +319,11 @@ def my_test_list(request: HttpRequest):
             'testID': test.id,
         }
         try:
-            if test.questions == '' or test.questions is None:
-                csv_dir = './files/test/SampleTestPaper.csv'
-            else:
-                csv_dir = test.questions
+            # if test.questions == '' or test.questions is None:
+            #     csv_dir = './files/test/SampleTestPaper.csv'
+            # else:
+            #     csv_dir = test.questions
+            csv_dir = test.questions
             fp = open(csv_dir, "r", encoding="UTF-8")
         except Exception as e:
             print(e)

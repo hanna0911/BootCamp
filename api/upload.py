@@ -227,10 +227,11 @@ def begin_test(request: HttpRequest):
     relation.save()
     # load test paper
     try:
-        if test.questions == '' or test.questions is None:
-            csv_dir = './files/test/SampleTestPaper.csv'
-        else:
-            csv_dir = test.questions
+        # if test.questions == '' or test.questions is None:
+        #     csv_dir = './files/test/SampleTestPaper.csv'
+        # else:
+        #     csv_dir = test.questions
+        csv_dir = test.questions
         fp = open(csv_dir, "r", encoding="UTF-8")
     except Exception as e:
         print(e)
@@ -249,10 +250,11 @@ def grade_test(answer_sheet, test):
         return False, []
     if test.type != ContentTable.EnumType.Exam:
         return False, []
-    if test.questions == '' or test.questions is None:
-        csv_dir = './files/test/SampleTestPaper.csv'
-    else:
-        csv_dir = test.questions
+    # if test.questions == '' or test.questions is None:
+    #     csv_dir = './files/test/SampleTestPaper.csv'
+    # else:
+    #     csv_dir = test.questions
+    csv_dir = test.questions
     correct_answers = parse_test_for_grader(csv_dir)
     if len(answer_sheet) != len(correct_answers):
         return False, []
