@@ -103,7 +103,7 @@ def bootcamp_attend(request: HttpRequest):
 
     if isinstance(result, HttpResponse):
         return result
-    startDate, endDate, dept = result
+    startDate, endDate, _ = result
 
     days = []
     totalEmploy = []
@@ -177,7 +177,7 @@ def camp_completion(request: HttpRequest):
 
     if isinstance(result, HttpResponse):
         return result
-    startDate, endDate, dept = result
+    startDate, endDate, _ = result
 
     days = []
     normalGraduate = []
@@ -232,7 +232,7 @@ def tutor_assignment_chart(request: HttpRequest):
 
     if isinstance(result, HttpResponse):
         return result
-    startDate, endDate, dept = result
+    startDate, endDate, _ = result
 
     days = []
     assignedNewcomers = []
