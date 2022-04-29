@@ -48,5 +48,6 @@ urlpatterns = [
     path('my_task_list', lists.my_task_list, name="assignable_task_list"),
     path('assign_content', status.assign_content, name="assign content"),
     path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
-    path("get_honor", views.get_honor, name="get_honor")
+    path("get_honor", views.get_honor, name="get_honor"),
+    path('create_lesson', upload.create_lesson, name="create_lesson"),
 ]

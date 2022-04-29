@@ -2,6 +2,7 @@
 所有上传新内容相关的接口
 接口作者：@yzt @whh
 """
+import datetime
 import os.path
 import time
 from re import split
@@ -579,7 +580,7 @@ def save_courseware_files(coursewares: list, lesson_id: str, content_id: str, us
             raise Exception('unable to find corresponding content')
         cover = 'NOT_A_REAL_COVER'
         courseware = CoursewareTable(lesson=lesson, content=content, name=file.name.split('.')[0],
-                                     cover=cover, url=file_path)
+                                     cover=cover, url=file_path, uploadTime=datetime.datetime.now())
         courseware.save()
         file_paths.append(file_path)
     return file_paths
@@ -598,17 +599,18 @@ def create_lesson(request: HttpRequest):
         intro = request.POST.get("intro")
         recommend_time = request.POST.get("recommendTime")
         cover = request.POST.get("cover")
-        is_template = request.POST.get("isTemplate")
         content_id = request.POST.get("contentID")
         coursewares = []
         for key in request.FILES.keys():
             coursewares.append(request.FILES.get(key))
     except Exception:
         return gen_response(400, 'Failed to load formData')
-
+    print(action)
+    print(name)
+    print(content_id)
+    print(coursewares)
     if action is None or (action != "CreateLessonTemplate" and action != "create lesson")\
             or name is None or name == ""\
-            or is_template is None or (is_template is not True and is_template is not False)\
             or content_id is None or len(ContentTable.objects.filter(id=content_id)) == 0:
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     user_session = request.session
@@ -618,9 +620,7 @@ def create_lesson(request: HttpRequest):
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     content = ContentTable.objects.filter(id=content_id).first()
-    if is_template is True and cur_role != "admin":
-        return unauthorized_action_response()
-    if is_template is False and cur_role != "admin" and cur_role != "teacher":
+    if cur_role != "admin" and cur_role != "teacher":
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
