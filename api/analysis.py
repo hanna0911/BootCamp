@@ -44,8 +44,6 @@ def analysis_precheck(request: HttpRequest):
         startDate = cn_datetime_fromtimestamp(startDate / 1000)
         endDate = data["dateRangeEnd"]
         endDate = cn_datetime_fromtimestamp(endDate / 1000)
-        logging.info(startDate)
-        logging.info(endDate)
     except KeyError:
         return gen_response(400, "JSON format error")
 

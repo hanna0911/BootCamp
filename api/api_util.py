@@ -333,9 +333,9 @@ def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
     我们构造的数据全是无时区信息的时间，所以要将USE_TZ设为False、且使用的datetime类也得是无时区的
     而python把时间戳转化为datetime时，是采用系统自身的时区信息进行转化的
     而服务器的时区信息是在芝加哥！！！
-    如果直接使用datetime.fromtimestamp，会将所有时间延迟11个小时
+    如果直接使用datetime.fromtimestamp，部署上去的所有时间会延迟11个小时
     """
-    beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     local = datetime.datetime.now().replace(tzinfo = datetime.timezone(datetime.timedelta(hours=8)))
+    beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     delta = beijing - local
     return datetime.datetime.fromtimestamp(timestamp) + delta
