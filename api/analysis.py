@@ -6,10 +6,51 @@ import datetime
 from json import JSONDecodeError
 import logging
 from typing import Tuple
-from django.http import HttpRequest
+from django.http import HttpRequest, HttpResponse
 from .api_util import *
 from .models import *
 from django.db.models import QuerySet, Avg
+
+
+def analysis_precheck(request: HttpRequest):
+    """
+    为本页的所有请求做检查，并返回startDate, endDate, dept
+    """
+    if request.method != "POST":
+        return illegal_request_type_error_response()
+
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return gen_response(400, "JSON format error")
+
+    try:
+        session = request.session
+        role = session["role"]
+        username = session["username"]
+    except KeyError:
+        return session_timeout_response()
+
+    if role not in ["admin", "HRBP"]:
+        return unauthorized_action_response()
+
+    try:
+        dept = PrivateInfo.objects.get(username = username).dept
+    except Exception:
+        return session_timeout_response()
+
+    try:
+        startDate = data["dateRangeStart"]
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
+        endDate = data["dateRangeEnd"]
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
+    except KeyError:
+        return gen_response(400, "JSON format error")
+
+    if not (check_day(startDate, True) and check_day(endDate, False)):
+        return gen_response(400, "Invalid date range")
+
+    return startDate, endDate, dept
 
 
 def check_day(date: datetime.datetime, day_start: bool) -> bool:
@@ -315,39 +356,11 @@ def tutor_assignment_chart(request: HttpRequest):
     """
     新人毕业时间跨度
     """
-    if request.method != "POST":
-        return illegal_request_type_error_response()
+    result = analysis_precheck(request)
 
-    try:
-        data = json.loads(request.body)
-    except JSONDecodeError:
-        return gen_response(400, "JSON format error")
-
-    try:
-        session = request.session
-        role = session["role"]
-        username = session["username"]
-    except KeyError:
-        return session_timeout_response()
-
-    if role not in ["admin", "HRBP"]:
-        return unauthorized_action_response()
-
-    try:
-        dept = PrivateInfo.objects.get(username = username).dept
-    except Exception:
-        return session_timeout_response()
-
-    try:
-        startDate = data["dateRangeStart"]
-        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
-        endDate = data["dateRangeEnd"]
-        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
-    except KeyError:
-        return gen_response(400, "JSON format error")
-
-    if not (check_day(startDate, True) and check_day(endDate, False)):
-        return gen_response(400, "Invalid date range")
+    if isinstance(result, HttpResponse):
+        return result
+    startDate, endDate, dept = result
 
     days = []
     assignedNewcomers = []
