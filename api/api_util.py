@@ -160,6 +160,18 @@ def unauthorized_action_response():
     return response
 
 
+def save_file_error_response():
+    """
+    生成保存文件错误响应
+    """
+    response: JsonResponse = JsonResponse({
+        'result': 'failed',
+        'message': 'failed to save file on server'
+    })
+    response.status_code = 400
+    return  response
+
+
 def get_highest_role(username: str):
     """
     默认已经通过检查，则username必然存在，查询权限列表，返回最高权限的str

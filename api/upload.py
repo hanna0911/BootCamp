@@ -387,7 +387,27 @@ def save_test_file(file, username, test_id):
     with open(file_path, 'wb') as f:
         for chunk in file.chunks():
             f.write(chunk)
-    check_test_format(file_path)
+    if check_test_format(file_path):
+        return file_path
+    else:
+        raise Exception('wrong test file csv format')
+
+
+def save_task_file(file, username, task_id):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    head_path = base_dir + f"/files/task/{task_id}"
+    print("head_path", head_path)
+    # 判断是否存在文件夹, 如果没有就创建文件路径
+    if not os.path.exists(head_path):
+        os.makedirs(head_path)
+    file_suffix = file.name.split(".")[1]  # 获取文件后缀
+    file_name = file.name.split(".")[0] + f"_{username}_tsk_{time.time()}"  # 获取文件名字
+    file_path = head_path + "/{}".format(file_name + "." + file_suffix)
+    file_path = file_path.replace(" ", "")
+    # 上传文件
+    with open(file_path, 'wb') as f:
+        for chunk in file.chunks():
+            f.write(chunk)
     return file_path
 
 
@@ -413,7 +433,7 @@ def create_content(request: HttpRequest):
         task_type = request.POST.get("taskType")
         task_text = request.POST.get("taskText")
         task_link = request.POST.get("taskLink")
-        task_file = request.POST.get("taskFile")
+        task_file = request.FILES.get('taskFile')
     except Exception:
         return gen_response(400, 'Load json request failed')
     # 这个巨大的if用于校验请求信息是否合规
@@ -468,19 +488,27 @@ def create_content(request: HttpRequest):
         content_type_id = 1
     else:
         content_type_id = 2
-    # if content_type == "exam":
-    #     try:
-    #         file = open(csv, 'r', encoding="UTF-8")
-    #     except Exception as e:
-    #         print(e)
-    #         return item_not_found_error_response()
-    test_file_url = save_test_file(csv, username, new_content_id)
+    # 处理文件
+    test_file_url = 'PLACEHOLDER'
+    task_file_url = 'PLACEHOLDER'
+    if content_type == 'exam':
+        try:
+            test_file_url = save_test_file(csv, username, new_content_id)
+        except Exception as e:
+            print(e)
+            return save_file_error_response()
+    if content_type == 'task' and task_type == 2:
+        try:
+            task_file_url = save_task_file(task_file, username, new_content_id)
+        except Exception as e:
+            print(e)
+            return save_file_error_response()
     new_content = ContentTable(id=new_content_id, name=name, author=user,
                                intro=intro, tag=tag, recommendedTime=recommend_time,
                                audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template, programId=program, lessonCount=0,
                                questions=test_file_url, taskType=task_type,
-                               text=task_text, link=task_link, taskFile=File(task_file))
+                               text=task_text, link=task_link, taskFile=task_file_url)
     new_content.save()
     print(new_content.questions)
     new_program_content_relation = ProgramContentTable(program=program, content=new_content)  # 和父program创建关联信息
@@ -494,6 +522,69 @@ def create_content(request: HttpRequest):
     })
 
 
+def upload_lesson_file(request):
+    '''
+    上传pptx文件
+    '''
+    # 获取相对路径
+    print('enter upload_lesson_file')
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if request.method == 'POST':
+        file = request.FILES.get('file', None)
+        # 设置文件上传文件夹
+        head_path = BASE_DIR + "/files/lesson"
+        print("head_path", head_path)
+        # 判断是否存在文件夹, 如果没有就创建文件路径
+        if not os.path.exists(head_path):
+            os.makedirs(head_path)
+        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        file_name = file.name.split(".")[0]  # 获取文件名字
+        # TODO: 后续应用classID_lessonID替代目前的file_name!!!
+        # 储存路径
+        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
+        file_path = file_path.replace(" ", "")
+        # 上传文件
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+
+        message = {}
+        message['code'] = 200
+        # 返回图片路径
+        message['fileurl'] = file_path
+
+        return JsonResponse(message)
+
+
+def save_courseware_files(coursewares: list, lesson_id: str, content_id: str, username: str):
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    head_path = base_dir + "/files/lesson"
+    file_paths = []
+    for file in coursewares:
+        if not os.path.exists(head_path):
+            os.makedirs(head_path)
+        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        file_name = file.name.split(".")[0] + f"_{username}_tsk_{time.time()}"  # 获取文件名字
+        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
+        file_path = file_path.replace(" ", "")
+        # 上传文件
+        with open(file_path, 'wb') as f:
+            for chunk in file.chunks():
+                f.write(chunk)
+        lesson = LessonTable.objects.filter(id=lesson_id).first()
+        if lesson is None:
+            raise Exception('unable to find corresponding lesson')
+        content = ContentTable.objects.filter(id=content_id).first()
+        if content is None:
+            raise Exception('unable to find corresponding content')
+        cover = 'NOT_A_REAL_COVER'
+        courseware = CoursewareTable(lesson=lesson, content=content, name=file.name.split('.')[0],
+                                     cover=cover, url=file_path)
+        courseware.save()
+        file_paths.append(file_path)
+    return file_paths
+
+
 def create_lesson(request: HttpRequest):
     """
     创建一个Lesson
@@ -502,16 +593,19 @@ def create_lesson(request: HttpRequest):
     if request.method != "POST":  # 只接受POST请求
         return illegal_request_type_error_response()
     try:
-        data = json.loads(request.body)
+        action = request.POST.get("action")
+        name = request.POST.get("name")
+        intro = request.POST.get("intro")
+        recommend_time = request.POST.get("recommendTime")
+        cover = request.POST.get("cover")
+        is_template = request.POST.get("isTemplate")
+        content_id = request.POST.get("contentID")
+        coursewares = []
+        for key in request.FILES.keys():
+            coursewares.append(request.FILES.get(key))
     except Exception:
-        return gen_response(400, 'Load json request failed')
-    action = data.get("action")
-    name = data.get("name")
-    intro = data.get("intro")
-    recommend_time = data.get("recommendTime")
-    cover = data.get("cover")
-    is_template = data.get("isTemplate")
-    content_id = data.get("contentID")
+        return gen_response(400, 'Failed to load formData')
+
     if action is None or (action != "CreateLessonTemplate" and action != "create lesson")\
             or name is None or name == ""\
             or is_template is None or (is_template is not True and is_template is not False)\
@@ -524,9 +618,9 @@ def create_lesson(request: HttpRequest):
     cur_role = user_session["role"]
     user = PrivateInfo.objects.filter(username=username).first()
     content = ContentTable.objects.filter(id=content_id).first()
-    if is_template == True and cur_role != "admin":
+    if is_template is True and cur_role != "admin":
         return unauthorized_action_response()
-    if is_template == False and cur_role != "admin" and cur_role != "teacher":
+    if is_template is False and cur_role != "admin" and cur_role != "teacher":
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
@@ -534,12 +628,27 @@ def create_lesson(request: HttpRequest):
     new_lesson = LessonTable(id=new_lesson_id, name=name, author=user, content=content,
                              intro=intro, recommendedTime=recommend_time, cover=cover)
     new_lesson.save()
+    try:
+        file_paths = save_courseware_files(coursewares, new_lesson_id, content_id, username)
+        print('courseware file paths')
+        for path in file_paths:
+            print(path)
+    except Exception as e:
+        print(e)
+        """
+        删除刚刚写入的表项。这样写是因为CoursewareTable中必需有lesson外键,
+        需要先创建lesson表项，再进行文件存储。
+        故文件存储出错后需要删除lesson表项
+        """
+        LessonTable.objects.filter(id=new_lesson_id).delete()
+        return save_file_error_response()
     content.lessonCount += 1
     content.save()
     return gen_standard_response(200, {
         "result": "success",
         "message": f"lesson {name} created successfully",
-        "contentID": new_lesson_id
+        "contentID": new_lesson_id,
+        "filePaths": file_paths
     })
 
 
@@ -665,38 +774,4 @@ def create_lesson(request: HttpRequest):
 #     else:
 #         std_error_message = "file system failed to save uploaded file. better luck next time:("
 #         return gen_standard_response(400, {"result": "success", "message": std_error_message})
-
-
-def upload_lesson_file(request):
-    '''
-    上传pptx文件
-    '''
-    # 获取相对路径
-    print('enter upload_lesson_file')
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    if request.method == 'POST':
-        file = request.FILES.get('file', None)
-        # 设置文件上传文件夹
-        head_path = BASE_DIR + "/files/lesson"
-        print("head_path", head_path)
-        # 判断是否存在文件夹, 如果没有就创建文件路径
-        if not os.path.exists(head_path):
-            os.makedirs(head_path)
-        file_suffix = file.name.split(".")[1]  # 获取文件后缀
-        file_name = file.name.split(".")[0]  # 获取文件名字
-        # TODO: 后续应用classID_lessonID替代目前的file_name!!!
-        # 储存路径
-        file_path = head_path + "/{}".format(file_name + "." + file_suffix)
-        file_path = file_path.replace(" ", "")
-        # 上传文件
-        with open(file_path, 'wb') as f:
-            for chunk in file.chunks():
-                f.write(chunk)
-
-        message = {}
-        message['code'] = 200
-        # 返回图片路径
-        message['fileurl'] = file_path
-
-        return JsonResponse(message)
 
