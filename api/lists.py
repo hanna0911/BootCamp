@@ -183,16 +183,18 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
+        print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for admin user {username}',
                                            'tests': test_list})
@@ -222,16 +224,18 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append([test_info, test_paper])
+        print(test_list)
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
                                            'tests': test_list})
@@ -261,10 +265,11 @@ def assignable_test_list(request: HttpRequest):
                 test.releaseTime
             ]
             try:
-                if test.questions == '' or test.questions is None:
-                    csv_dir = './files/test/SampleTestPaper.csv'
-                else:
-                    csv_dir = test.questions
+                # if test.questions == '' or test.questions is None:
+                #     csv_dir = './files/test/SampleTestPaper.csv'
+                # else:
+                #     csv_dir = test.questions
+                csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
                 print(e)
@@ -311,10 +316,11 @@ def my_test_list(request: HttpRequest):
             test.releaseTime
         ]
         try:
-            if test.questions == '' or test.questions is None:
-                csv_dir = './files/test/SampleTestPaper.csv'
-            else:
-                csv_dir = test.questions
+            # if test.questions == '' or test.questions is None:
+            #     csv_dir = './files/test/SampleTestPaper.csv'
+            # else:
+            #     csv_dir = test.questions
+            csv_dir = test.questions
             fp = open(csv_dir, "r", encoding="UTF-8")
         except Exception as e:
             print(e)
