@@ -97,6 +97,7 @@ def parse_test_for_student(csv_file_path):
 
 
 def parse_test_for_grader(csv_file_path):
+    # TODO: 也需要改成和parse_test_for_admin一样的格式，等用到再改吧
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
@@ -109,8 +110,23 @@ def parse_test_for_admin(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row[:-1].split(',')]
-            ret.append(row)
+            row = [item for item in row[:-1].split(',')]  # excel没一行
+            
+            choices = []  # 候选项
+            for num in range(1, len(row) - 1):
+                choices.append(row[num])
+            
+            answer_list = []  # 所有正确答案（因为可能是多选，所以需要存list）
+            for answer in row[len(row) - 1].split(' '):
+                answer_list.append(ord(answer) - ord('A'))  # 字母转数字：如字母'A'为0，'C'为2
+            
+            dict = {  # 每一个题目以一个字典格式传回
+                'question': row[0],
+                'choices': choices,
+                'answer': answer_list, 
+            }
+            ret.append(dict)
+            
     return ret
 
 
