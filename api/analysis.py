@@ -49,7 +49,7 @@ def average_graduate_time(users: QuerySet) -> int:
 
     days = 0
     for user in users:
-        days += (user.newcomerGraduateState - user.newcomerStartDate).days + 1
+        days += (user.newcomerGraduateDate - user.newcomerStartDate).days + 1
     return days // n
 
 
@@ -308,4 +308,58 @@ def graduate_time(request: HttpRequest):
         "days": days,
         "totalAverageGraduateTime": totalAverageGraduateTime,
         "groupAverageGraduateTime": groupAverageGraduateTime,
+    })
+
+
+def tutor_assignment_chart(request: HttpRequest):
+    """
+    新人毕业时间跨度
+    """
+    if request.method != "POST":
+        return illegal_request_type_error_response()
+
+    try:
+        data = json.loads(request.body)
+    except JSONDecodeError:
+        return gen_response(400, "JSON format error")
+
+    try:
+        session = request.session
+        role = session["role"]
+        username = session["username"]
+    except KeyError:
+        return session_timeout_response()
+
+    if role not in ["admin", "HRBP"]:
+        return unauthorized_action_response()
+
+    try:
+        dept = PrivateInfo.objects.get(username = username).dept
+    except Exception:
+        return session_timeout_response()
+
+    try:
+        startDate = data["dateRangeStart"]
+        startDate = datetime.datetime.fromtimestamp(startDate / 1000)
+        endDate = data["dateRangeEnd"]
+        endDate = datetime.datetime.fromtimestamp(endDate / 1000)
+    except KeyError:
+        return gen_response(400, "JSON format error")
+
+    if not (check_day(startDate, True) and check_day(endDate, False)):
+        return gen_response(400, "Invalid date range")
+
+    days = []
+    assignedNewcomers = []
+    totalNewcomers = []
+    for dayStart, dayEnd in date_ranges(startDate, endDate):
+        users = PrivateInfo.objects.filter(newcomerStartDate__range = (dayStart, dayEnd))
+        days.append(dayStart.date().isoformat()[5:])
+        totalNewcomers.append(users.count())
+        assignedNewcomers.append(users.exclude(AsNewcomer = None).count())
+
+    return gen_response(200, {
+        "days": days,
+        "assignedNewcomers": assignedNewcomers,
+        "totalNewcomers": totalNewcomers,
     })

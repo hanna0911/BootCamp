@@ -32,6 +32,7 @@ urlpatterns = [
     path("teacher_average_score", analysis.teacher_average_score, name="teacher_average_score"),
     path("graduate_time", analysis.graduate_time, name="graduate_time"),
     path("camp_completion", analysis.camp_completion, name="camp_completion"),
+    path("tutor_assignment_chart", analysis.tutor_assignment_chart, name="tutor_assignment_chart"),
     path('upload_lesson_file', upload.upload_lesson_file, name="upload_lesson_file"),
     path('download_test_info', download.retrieve_test_info_by_id, name="download_test_info"),
     path('download_test_paper', download.retrieve_test_paper_by_id, name="download_test_paper"),
