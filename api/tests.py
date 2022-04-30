@@ -118,85 +118,85 @@ class Tests(TestCase):
     def test_switch_role(self):
         self.process("/testcase/switch_role.yml")
 
-    def test_teacher_wait_list(self):
-        self.process("/testcase/teacher_wait_list.yml")
+    # def test_teacher_wait_list(self):
+    #     self.process("/testcase/teacher_wait_list.yml")
 
-    def test_duty_teacher_list(self):
-        self.process("/testcase/duty_teacher_list.yml")
+    # def test_duty_teacher_list(self):
+    #     self.process("/testcase/duty_teacher_list.yml")
 
-    def test_admin_newcomer_list(self):
-        self.process("/testcase/admin_newcomer_list.yml")
+    # def test_admin_newcomer_list(self):
+    #     self.process("/testcase/admin_newcomer_list.yml")
 
-    def test_nominate_process(self):
-        self.process("/testcase/nominate_process.yml")
+    # def test_nominate_process(self):
+    #     self.process("/testcase/nominate_process.yml")
 
-    def test_get_user_info(self):
-        self.process("/testcase/get_user_info.yml")
+    # def test_get_user_info(self):
+    #     self.process("/testcase/get_user_info.yml")
 
-    def test_logout(self):
-        self.process("/testcase/logout.yml")
+    # def test_logout(self):
+    #     self.process("/testcase/logout.yml")
 
-    def test_nominated_list(self):
-        self.process("/testcase/nominated_list.yml")
+    # def test_nominated_list(self):
+    #     self.process("/testcase/nominated_list.yml")
 
-    def test_get_newcomer_info(self):
-        self.process("/testcase/get_newcomer_info.yml")
+    # def test_get_newcomer_info(self):
+    #     self.process("/testcase/get_newcomer_info.yml")
 
-    def test_nominate_accept_reject(self):
-        self.process("/testcase/nominate_accept_reject.yml")
+    # def test_nominate_accept_reject(self):
+    #     self.process("/testcase/nominate_accept_reject.yml")
 
-    def test_assign_teacher(self):
-        self.process("/testcase/assign_teacher.yml")
+    # def test_assign_teacher(self):
+    #     self.process("/testcase/assign_teacher.yml")
 
-    def test_upload_program(self):
-        self.process("/testcase/upload_program.yml")
+    # def test_upload_program(self):
+    #     self.process("/testcase/upload_program.yml")
 
-    # def test_upload_content_template(self):
-    #     self.process("/testcase/upload_content_template.yml")
+    # # def test_upload_content_template(self):
+    # #     self.process("/testcase/upload_content_template.yml")
 
-    def test_upload_lesson_template(self):
-        self.process("/testcase/upload_lesson_template.yml")
+    # def test_upload_lesson_template(self):
+    #     self.process("/testcase/upload_lesson_template.yml")
 
-    def test_video(self):
-        logging.info("测试video接口")
-        res = self.client.get("/api/video")
-        assert res.status_code, 200
+    # def test_video(self):
+    #     logging.info("测试video接口")
+    #     res = self.client.get("/api/video")
+    #     assert res.status_code, 200
 
-    def test_avatar_and_by_name(self):
-        self.process("/testcase/avatar.yml")
+    # def test_avatar_and_by_name(self):
+    #     self.process("/testcase/avatar.yml")
 
-    def test_teacher_newcomer_list(self):
-        self.process("/testcase/teacher_newcomer_list.yml")
+    # def test_teacher_newcomer_list(self):
+    #     self.process("/testcase/teacher_newcomer_list.yml")
 
-    def test_get_honor(self):
-        self.process("/testcase/get_honor.yml")
+    # def test_get_honor(self):
+    #     self.process("/testcase/get_honor.yml")
 
-    def test_teacher_summary_info(self):
-        self.process("/testcase/teacher_summary_info.yml")
+    # def test_teacher_summary_info(self):
+    #     self.process("/testcase/teacher_summary_info.yml")
 
-    def test_nominate_teachers(self):
-        self.process("/testcase/nominate_teachers.yml")
+    # def test_nominate_teachers(self):
+    #     self.process("/testcase/nominate_teachers.yml")
 
     def test_content_list_apis(self):
         self.process("/testcase/content_list.yml")
 
-    def test_assign_content(self):
-        self.process("/testcase/assign_content.yml")
+    # def test_assign_content(self):
+    #     self.process("/testcase/assign_content.yml")
 
-    def test_bootcamp_attend(self):
-        self.process("/testcase/bootcamp_attend.yml")
+    # def test_bootcamp_attend(self):
+    #     self.process("/testcase/bootcamp_attend.yml")
 
-    def test_newcomer_average_score(self):
-        self.process("/testcase/newcomer_average_score.yml")
+    # def test_newcomer_average_score(self):
+    #     self.process("/testcase/newcomer_average_score.yml")
 
-    def test_teacher_average_score(self):
-        self.process("/testcase/teacher_average_score.yml")
+    # def test_teacher_average_score(self):
+    #     self.process("/testcase/teacher_average_score.yml")
 
-    def test_camp_completion(self):
-        self.process("/testcase/camp_completion.yml")
+    # def test_camp_completion(self):
+    #     self.process("/testcase/camp_completion.yml")
 
-    def test_graduate_time(self):
-        self.process("/testcase/graduate_time.yml")
+    # def test_graduate_time(self):
+    #     self.process("/testcase/graduate_time.yml")
 
-    def test_tutor_assignment_chart(self):
-        self.process("/testcase/tutor_assignment_chart.yml")
+    # def test_tutor_assignment_chart(self):
+    #     self.process("/testcase/tutor_assignment_chart.yml")
