@@ -193,10 +193,6 @@ def assignable_test_list(request: HttpRequest):
                 csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
             except Exception as e:
-                print(os.path.dirname(os.path.abspath(__file__)))
-                print(os.getcwd())
-                print(os.listdir())
-                print(sys.argv)
                 print(e)
                 return item_not_found_error_response()
             print(csv_dir)
