@@ -389,7 +389,7 @@ def save_test_file(file, username, test_id):
         for chunk in file.chunks():
             f.write(chunk)
     if check_test_format(file_path):
-        return file_path
+        return path_converter(file_path)
     else:
         raise Exception('wrong test file csv format')
 
@@ -409,7 +409,7 @@ def save_task_file(file, username, task_id):
     with open(file_path, 'wb') as f:
         for chunk in file.chunks():
             f.write(chunk)
-    return file_path
+    return path_converter(file_path)
 
 
 def create_content(request: HttpRequest):

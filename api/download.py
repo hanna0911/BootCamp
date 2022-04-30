@@ -144,7 +144,7 @@ def retrieve_test_by_user_id(request: HttpRequest):
     session = request.session
     action = data.get('action')
     target_username = data.get('username')
-    if action != 'retrieve tests by user id' is None or target_username is None:
+    if action != 'retrieve tests by user id' or target_username is None:
         return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
     target_user_filter = PrivateInfo.objects.filter(username=target_username)
     if len(target_user_filter) == 0:

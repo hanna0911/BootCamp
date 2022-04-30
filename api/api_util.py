@@ -351,3 +351,7 @@ def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
     beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     delta = beijing - local
     return datetime.datetime.fromtimestamp(timestamp) + delta
+
+
+def path_converter(path: str = input):
+    return path.replace("\\", "/")
