@@ -170,7 +170,7 @@ def save_file_error_response():
         'message': 'failed to save file on server'
     })
     response.status_code = 400
-    return  response
+    return response
 
 
 def get_highest_role(username: str):

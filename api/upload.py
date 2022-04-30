@@ -774,4 +774,3 @@ def create_lesson(request: HttpRequest):
 #     else:
 #         std_error_message = "file system failed to save uploaded file. better luck next time:("
 #         return gen_standard_response(400, {"result": "success", "message": std_error_message})
-
