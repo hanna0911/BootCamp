@@ -50,4 +50,5 @@ urlpatterns = [
     path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
     path("get_honor", views.get_honor, name="get_honor"),
     path('create_lesson', upload.create_lesson, name="create_lesson"),
+    path('get_cur_role', views.get_cur_role, name="get_cur_role"),
 ]

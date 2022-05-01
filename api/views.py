@@ -28,6 +28,17 @@ def get_token(request: HttpRequest):
         return illegal_request_type_error_response()
 
 
+def get_cur_role(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    else:
+        return gen_standard_response(200, {'result': 'success', 'role': role})
+
+
 def login(request: HttpRequest):  # 登录
     """
     receive post '/login' from frontend
