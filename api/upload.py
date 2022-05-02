@@ -276,7 +276,7 @@ def grade_test(answer_sheet, test):
         answer_std.sort()
         print("student answer:", answer_stu, "standard answer:", answer_std)
         if len(answer_std) != len(answer_stu):
-            res.append(False)
+            res.append([answer_sheet[i], correct_answers[i], False])
             continue
         correct = True
         for j in range(len(answer_stu)):
@@ -287,6 +287,7 @@ def grade_test(answer_sheet, test):
             res.append([answer_sheet[i], correct_answers[i], True])
         else:
             res.append([answer_sheet[i], correct_answers[i], False])
+    print(res)
     return True, res
 
 
