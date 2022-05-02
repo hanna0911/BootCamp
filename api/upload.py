@@ -92,8 +92,19 @@ def parse_test_for_student(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row[:-1].split(',')]
-            ret.append(row[0: len(row) - 1])
+            row = [item for item in row[:-1].split(',')]  # excel每一行
+
+            choices = []  # 候选项
+            for num in range(1, len(row) - 1):
+                choices.append(row[num])
+
+            dict = {  # 每一个题目以一个字典格式传回
+                'question': row[0],
+                'choices': choices,
+                'radios': [],
+            }
+            ret.append(dict)
+
     return ret
 
 
@@ -111,7 +122,7 @@ def parse_test_for_admin(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row[:-1].split(',')]  # excel没一行
+            row = [item for item in row[:-1].split(',')]  # excel每一行
 
             choices = []  # 候选项
             for num in range(1, len(row) - 1):

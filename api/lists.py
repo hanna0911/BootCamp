@@ -464,6 +464,8 @@ def assignable_task_list(request: HttpRequest):
     if username is None or role is None:
         return session_timeout_response()
     task_list = []
+    recommend_time_list = []
+    tag_list = []
     if role == 'admin':
         available_tasks = ContentTable.objects.filter(type=ContentTable.EnumType.Task)
     elif role == 'HRBP':
@@ -502,7 +504,7 @@ def assignable_task_list(request: HttpRequest):
             'isTemplate': task.isTemplate,
             'name': task.name,
             'intro': task.intro,
-            'recommendTime': task.recommendedTime,
+            'recommendTime': str(task.recommendedTime),
             'tag': task.tag,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
@@ -511,9 +513,13 @@ def assignable_task_list(request: HttpRequest):
             'taskLink': task.link,
             'taskID': task.id
         })
+        recommend_time_list.append(str(task.recommendedTime))
+        tag_list.append(task.tag)
+    recommend_time_list = list(set(recommend_time_list))
+    tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'assignable tasks retrieved for {role} user {username}',
-                                       'tasks': task_list})
+                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list, 'task_tag_items': tag_list})
 
 
 def my_task_list(request: HttpRequest):
@@ -532,6 +538,8 @@ def my_task_list(request: HttpRequest):
     target_tasks = UserContentTable.objects.filter(user__username=username,
                                                    content__type=ContentTable.EnumType.Task)
     task_list = []
+    recommend_time_list = []
+    tag_list = []
     for task_relation in target_tasks:
         task = task_relation.content
         if task.audience == 0:
@@ -549,7 +557,7 @@ def my_task_list(request: HttpRequest):
             'isTemplate': task.isTemplate,
             'name': task.name,
             'intro': task.intro,
-            'recommendTime': task.recommendedTime,
+            'recommendTime': str(task.recommendedTime),
             'tag': task.tag,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
@@ -559,9 +567,13 @@ def my_task_list(request: HttpRequest):
             'isFinished': task_relation.finished,
             'taskID': task.id
         })
+        recommend_time_list.append(str(task.recommendedTime))
+        tag_list.append(task.tag)
+    recommend_time_list = list(set(recommend_time_list))
+    tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my tasks retrieved for {role} user {username}',
-                                       'tasks': task_list})
+                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list, 'task_tag_items': tag_list})
 
 
 def teacher_newcomer_list(req: HttpRequest):
