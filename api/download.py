@@ -134,7 +134,7 @@ def retrieve_test_by_user_id(request: HttpRequest):
     接收POST请求
     {action: "retrieve tests by user id", "username": __USER_ID__}
     """
-    if request.method != 'action':
+    if request.method != 'POST':
         return illegal_request_type_error_response()
     try:
         data = json.loads(request.body)
@@ -178,3 +178,35 @@ def retrieve_test_by_user_id(request: HttpRequest):
     return gen_standard_response(200, {"result": "success",
                                        "message": f"tests retrieved for {target_username}",
                                        "tests": test_list})
+
+
+def retrieve_task_file_by_id(request: HttpRequest):
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    session = request.session
+    action = data.get('action')
+    task_id = data.get('taskID')
+    if session.get('username') is None or session.get('role') is None:
+        return session_timeout_response()
+    if action != 'task file by id' or task_id is None:
+        return gen_standard_response(400, {'result': 'failed',
+                                           'message': 'Bad Arguments'})
+    task = ContentTable.objects.filter(id=task_id).first()
+    if task is None or task.taskType != 2:
+        return item_not_found_error_response()
+    try:
+        file = open(task.taskFile, 'r', encoding='UTF-8')
+    except Exception as e:
+        print(e)
+        return item_not_found_error_response()
+    response = StreamingHttpResponse(file_iterator(task.taskFile), status=206,
+                                     content_type='application/octet-stream')
+    response["Content-Disposition"] = 'attachment; filename={0}'.format(task.name)
+    response["Access-Control-Expose-Headers"] = "Content-Disposition"
+    return response
+
