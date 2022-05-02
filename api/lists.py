@@ -1,9 +1,3 @@
-import json
-import logging
-import sys
-
-from django.http import HttpRequest
-from platformdirs import os
 from .api_util import *
 from .models import *
 from .upload import parse_test_for_student, parse_test_for_admin
@@ -485,19 +479,20 @@ def assignable_task_list(request: HttpRequest):
             task_type = 'link'
         else:
             task_type = 'file'
-        task_list.append([
-            audience,
-            task.isTemplate,
-            task.name,
-            task.intro,
-            task.recommendedTime,
-            task.tag,
-            task.author.name,
-            task.releaseTime,
-            task_type,
-            task.text,
-            task.link
-        ])
+        task_list.append({
+            'audience': audience,
+            'isTemplate': task.isTemplate,
+            'name': task.name,
+            'intro': task.intro,
+            'recommendTime': task.recommendedTime,
+            'tag': task.tag,
+            'author': task.author.name,
+            'releaseTime': task.releaseTime,
+            'taskType': task_type,
+            'taskText': task.text,
+            'taskLink': task.link,
+            'taskID': task.id
+        })
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'assignable tasks retrieved for {role} user {username}',
                                        'tasks': task_list})
@@ -531,20 +526,21 @@ def my_task_list(request: HttpRequest):
             task_type = 'link'
         else:
             task_type = 'file'
-        task_list.append([
-            audience,
-            task.isTemplate,
-            task.name,
-            task.intro,
-            task.recommendedTime,
-            task.tag,
-            task.author.name,
-            task.releaseTime,
-            task_type,
-            task.text,
-            task.link,
-            task_relation.finished
-        ])
+        task_list.append({
+            'audience': audience,
+            'isTemplate': task.isTemplate,
+            'name': task.name,
+            'intro': task.intro,
+            'recommendTime': task.recommendedTime,
+            'tag': task.tag,
+            'author': task.author.name,
+            'releaseTime': task.releaseTime,
+            'taskType': task_type,
+            'taskText': task.text,
+            'taskLink': task.link,
+            'isFinished': task_relation.finished,
+            'taskID': task.id
+        })
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my tasks retrieved for {role} user {username}',
                                        'tasks': task_list})
