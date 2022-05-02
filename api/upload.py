@@ -113,8 +113,11 @@ def parse_test_for_grader(csv_file_path):
     ret = []
     with open(csv_file_path, "r", encoding="UTF-8") as csv_file:
         for row in csv_file.readlines():
-            row = [item for item in row[:-1].split(',')]
-            ret.append(row[-1])
+            row = [item for item in row[:-1].split(',')]  # excel没一行
+            answer_list = []  # 所有正确答案（因为可能是多选，所以需要存list）
+            for answer in row[len(row) - 1].split(' '):
+                answer_list.append(ord(answer) - ord('A'))  # 字母转数字：如字母'A'为0，'C'为2
+            ret.append(answer_list)
     return ret
 
 
@@ -277,7 +280,9 @@ def grade_test(answer_sheet, test):
         answer_stu = answer_sheet[i]
         for j in range(len(answer_stu)):
             answer_stu[j] = chr(ord('A') + answer_stu[j])
-        answer_std = correct_answers[i].split(" ")
+        answer_std = correct_answers[i]
+        for j in range(len(answer_std)):
+            answer_std[j] = chr(ord('A') + answer_std[j])
         answer_stu.sort()
         answer_std.sort()
         print("student answer:", answer_stu, "standard answer:", answer_std)
