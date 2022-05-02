@@ -218,6 +218,8 @@ def assignable_test_list(request: HttpRequest):
                                                      isTemplate=False)
         available_tests = test_templates.union(authored_tests)
         test_list = []
+        recommend_time_list = []
+        tag_list = []
         for test in available_tests:
             if test.audience == 0:
                 audience = 'newcomer'
@@ -225,15 +227,17 @@ def assignable_test_list(request: HttpRequest):
                 audience = 'teacher'
             test_info = {
                 'audience': audience,
-                'isTemplate': test.isTemplate,
+                'is_template': test.isTemplate,
                 'name': test.name,
                 'intro': test.intro,
-                'recommendedTime': test.recommendedTime,
+                'recommend_time': str(test.recommendedTime),
                 'tag': test.tag,
                 'author_name': test.author.name,
                 'releaseTime': test.releaseTime,
                 'testID': test.id,
             }
+            recommend_time_list.append(str(test.recommendedTime))
+            tag_list.append(test.tag)
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -247,9 +251,11 @@ def assignable_test_list(request: HttpRequest):
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append({'test_info': test_info, 'test_paper': test_paper})
         print(test_list)
+        recommend_time_list = list(set(recommend_time_list))
+        tag_list = list(set(tag_list))
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
-                                           'tests': test_list})
+                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
     elif role == 'HRBP':
         test_templates = ContentTable.objects.filter(isTemplate=True,
                                                      audience=1,
@@ -260,6 +266,8 @@ def assignable_test_list(request: HttpRequest):
                                                      isTemplate=False)
         available_tests = test_templates.union(authored_tests)
         test_list = []
+        recommend_time_list = []
+        tag_list = []
         for test in available_tests:
             if test.audience == 0:
                 audience = 'newcomer'
@@ -267,15 +275,17 @@ def assignable_test_list(request: HttpRequest):
                 audience = 'teacher'
             test_info = {
                 'audience': audience,
-                'isTemplate': test.isTemplate,
+                'is_template': test.isTemplate,
                 'name': test.name,
                 'intro': test.intro,
-                'recommendedTime': test.recommendedTime,
+                'recommend_time': str(test.recommendedTime),
                 'tag': test.tag,
                 'author_name': test.author.name,
                 'releaseTime': test.releaseTime,
                 'testID': test.id,
             }
+            recommend_time_list.append(str(test.recommendedTime))
+            tag_list.append(test.tag)
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -289,9 +299,11 @@ def assignable_test_list(request: HttpRequest):
             test_paper = parse_test_for_admin(csv_dir)
             test_list.append({'test_info': test_info, 'test_paper': test_paper})
         print(test_list)
+        recommend_time_list = list(set(recommend_time_list))
+        tag_list = list(set(tag_list))
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for hrbp user {username}',
-                                           'tests': test_list})
+                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
     else:  # newcomer
         return unauthorized_action_response()
 
@@ -312,6 +324,8 @@ def my_test_list(request: HttpRequest):
         return unauthorized_action_response()
     target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
     test_list = []
+    recommend_time_list = []
+    tag_list = []
     for test_relation in target_tests:
         test = test_relation.content
         if test.audience == 0:
@@ -320,15 +334,17 @@ def my_test_list(request: HttpRequest):
             audience = 'teacher'
         test_info = {
             'audience': audience,
-            'isTemplate': test.isTemplate,
+            'is_template': test.isTemplate,
             'name': test.name,
             'intro': test.intro,
-            'recommendedTime': test.recommendedTime,
+            'recommend_time': str(test.recommendedTime),
             'tag': test.tag,
             'author_name': test.author.name,
             'releaseTime': test.releaseTime,
             'testID': test.id,
         }
+        recommend_time_list.append(str(test.recommendedTime))
+        tag_list.append(test.tag)
         try:
             # if test.questions == '' or test.questions is None:
             #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -342,9 +358,11 @@ def my_test_list(request: HttpRequest):
         test_paper = parse_test_for_student(csv_dir)
         test_list.append({'test_info': test_info, 'test_paper': test_paper})
     print(test_list)
+    recommend_time_list = list(set(recommend_time_list))
+    tag_list = list(set(tag_list))
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
-                                       "tests": test_list})
+                                       "tests": test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
 
 
 def assignable_course_list(request: HttpRequest):
