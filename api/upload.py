@@ -125,6 +125,7 @@ def parse_test_for_admin(csv_file_path):
                 'question': row[0],
                 'choices': choices,
                 'answer': answer_list,
+                'radios': [],
             }
             ret.append(dict)
 
