@@ -96,6 +96,77 @@ def assign_teacher(req: HttpRequest):
     return gen_response(200)
 
 
+def newcomer_commit_teacher(req: HttpRequest):
+    """
+    新人给导师评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer"],
+        "data_field": ["content"]
+    })
+    if not ok:
+        return res
+
+    return gen_response(400, message="not sup")
+
+
+def teacher_commit_newcomer(req: HttpRequest):
+    """
+    导师给新人评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": ["content"]
+    })
+    if not ok:
+        return res
+
+    return gen_response(400, message="not sup")
+
+
+def newcomer_score_teacher(req: HttpRequest):
+    """
+    新人给导师评分
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer"],
+        "data_field": ["score"]
+    })
+    if not ok:
+        return res
+    return gen_response(400, message="not sup")
+
+
+def teacher_score_newcomer(req: HttpRequest):
+    """
+    导师给新人评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": ["score"]
+    })
+    if not ok:
+        return res
+
+    return gen_response(400, message="not sup")
+
+
 def assign_content(request: HttpRequest):
     """
     POST{
@@ -122,7 +193,7 @@ def assign_content(request: HttpRequest):
     role = session.get('role')
     # print(action, assignee_id, content_id, deadline, obligatory)
     if action != 'assign content' or assignee_id is None or content_id is None \
-       or deadline is None or obligatory is None:
+            or deadline is None or obligatory is None:
         return gen_standard_response(400, {"message": "Bad Arguments"})
     assignee_filter = PrivateInfo.objects.filter(username=assignee_id)
     content_filter = ContentTable.objects.filter(id=content_id)
