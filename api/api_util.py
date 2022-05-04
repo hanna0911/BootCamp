@@ -109,7 +109,7 @@ def find_people(username: str):
 def get_relation(teacher: str, newcomer: str):
     teachers = PrivateInfo.objects.filter(username=teacher)
     newcoemrs = PrivateInfo.objects.filter(username=newcomer)
-    if len(teachers) <= 0 or len(newcoemrs <= 0):
+    if len(teachers) <= 0 or len(newcoemrs) <= 0:
         return False, gen_response(400, message="teacher or newcomer not found")
     teacher = teachers.first()
     newcomer = newcoemrs.first()

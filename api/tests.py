@@ -200,3 +200,6 @@ class Tests(TestCase):
 
     def test_tutor_assignment_chart(self):
         self.process("/testcase/tutor_assignment_chart.yml")
+
+    def test_commits_and_scores(self):
+        self.process("/testcase/commits_and_scores.yml")

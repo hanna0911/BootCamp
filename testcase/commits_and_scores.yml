@@ -45,7 +45,7 @@
   validate:
     - equals: { status_code: 400 }
 
-- name: 导师评论新人-不存在的新人
+- name: 导师评论新人-不是自己的学生
   ident:
     - teacher
   request:
@@ -58,3 +58,82 @@
     - equals: { status_code: 400 }
 
 # 打分部分
+- name: 新人给导师打分
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_score_teacher
+    data:
+      score: 5
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 新人给导师打分-方法错误
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /newcomer_score_teacher
+    data:
+      score: 5
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 新人给导师打分-不是数字
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_score_teacher
+    data:
+      score: 你很好
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师给新人打分
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_score_newcomer
+    data:
+      newcomer: newcomer
+      score: 5
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师给新人打分-字段不存在
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_score_newcomer
+    data:
+      score: 5
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师给新人打分-新人找不到
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_score_newcomer
+    data:
+      newcomer: 这个人找不到
+      score: 5
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师给新人打分-不是浮点数
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_score_newcomer
+    data:
+      newcomer: newcomer
+      score: 不是浮点数
+  validate:
+    - equals: { status_code: 400 }

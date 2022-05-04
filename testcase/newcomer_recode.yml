@@ -1,0 +1,12 @@
+# 带新记录相关的接口测试
+- name: 导师写带新记录
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_recode
+    data:
+      newcomer: newcomer
+      content: 今天新人的表现很好
+  validate:
+    - equals: { status_code: 200 }

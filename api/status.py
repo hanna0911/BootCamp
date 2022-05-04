@@ -218,10 +218,12 @@ def newcomer_recode(req: HttpRequest):
         return res
     data = json.loads(req.body)
     teacher = PrivateInfo.objects.get(username=req.session.get("username"))
-    newcomer = PrivateInfo.objects.filter(username=data["newcomer"])
-    if len(newcomer) <= 0:
-        return gen_response(400, message="newcomer not found")
-    newcomer = newcomer.first()
+    ok, newcomer = find_people(data["newcomer"])
+    if not ok:
+        return newcomer
+    relation = TeacherNewcomerTable.objects.filter(teacher=teacher, newcomer=newcomer)
+    if len(relation) <= 0:
+        return gen_response(400, message="newcomer not belong to teacher")
     recode = NewcomerRecode(
         teacher=teacher,
         newcomer=newcomer,
