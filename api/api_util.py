@@ -390,7 +390,7 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type:int = Content
     if is_newcomer:
         audience = ContentTable.EnumAudience.newcomer
     else:
-        audience = ContentTable.EnumAudience.newcomer
+        audience = ContentTable.EnumAudience.teacher
     course = UserContentTable.objects.filter(
         user=user,
         content__audience=audience,
