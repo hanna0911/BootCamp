@@ -52,4 +52,11 @@ urlpatterns = [
     path("get_honor", views.get_honor, name="get_honor"),
     path('create_lesson', upload.create_lesson, name="create_lesson"),
     path('get_cur_role', views.get_cur_role, name="get_cur_role"),
+    path("newcomer_commit_teacher",status.newcomer_commit_teacher,name="newcomer_commit_teacher"),
+    path("teacher_commit_newcomer",status.teacher_commit_newcomer,name="teacher_commit_newcomer"),
+    path("newcomer_score_teacher",status.newcomer_score_teacher,name="newcomer_score_teacher"),
+    path("teacher_score_newcomer",status.teacher_score_newcomer,name="teacher_score_newcomer"),
+    path("newcomer_recode",status.newcomer_recode,name="newcomer_recode"),
+    path("get_newcomer_recode",status.get_newcomer_recode, name="get_newcomer_recode"),
+    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score")
 ]
