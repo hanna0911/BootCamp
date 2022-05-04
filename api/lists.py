@@ -10,14 +10,13 @@ def admin_newcomer_list(request: HttpRequest):
     仅限管理员使用
     TODO
     """
-    if not check_method(request, "GET"):
-        return gen_response(400, message="invalid method")
-    username = request.session.get("username", None)
-    if username is None:
-        return gen_response(400, message="no username in session, probly not login")
-    if not role_authentication(username, "admin"):
-        return gen_response(400, message="permission deny")
-
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",
+        "role": ["admin"],
+    })
+    if not ok:
+        return res
     newcomer_list = PrivateInfo.objects.filter(isNew=True, isTeacher=False, isAdmin=False, isHRBP=False)
     return_list = []
     for newcomer in newcomer_list:
@@ -44,17 +43,16 @@ def teacher_wait_list(req: HttpRequest):
     :param req:
     :return:
     """
-    if not check_method(req, "GET"):
-        return gen_response(400, message="invalid method")
-    username = req.session.get("username", None)
-    if username is None:
-        return gen_response(
-            400, message="no username in session, probly not login")
-    if not role_authentication(username, 'admin'):
-        return gen_response(400, message="no permission")
-    newcommer_list = PrivateInfo.objects.filter(isTeacher=False, isNew=True)
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["admin"],
+    })
+    if not ok:
+        return res
+    newcomer_list = PrivateInfo.objects.filter(isTeacher=False, isNew=True)
     return_list = []
-    for new in newcommer_list:
+    for new in newcomer_list:
         tmp = load_private_info(new)
         return_list.append(tmp)
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(new.username)
@@ -67,28 +65,20 @@ def nominate_process(req: HttpRequest):
     :param req:
     :return:
     """
-    username = req.session.get("username", None)
-    if not check_method(req, "GET"):
-        return gen_response(400, message="invalid method")
-    if username is None:
-        return gen_response(
-            400, message="no username in session, probly not login")
-    if not role_authentication(username, 'admin'):
-        return gen_response(400, message="no permission")
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["admin"],
+    })
+    if not ok:
+        return res
     teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
     return_list = []
     for teacher in teacher_list:
         tmp = load_private_info(teacher)
         tmp["teacherNominationDate"] = teacher.teacherNominationDate
         status = teacher.teacherExaminedStatus
-        if status == PrivateInfo.EnumTeacherExaminedStatus.NotYet:
-            tmp["teacherExaminedStatus"] = "未审核"
-        elif status == PrivateInfo.EnumTeacherExaminedStatus.Pass:
-            tmp["teacherExaminedStatus"] = "通过"
-        elif status == PrivateInfo.EnumTeacherExaminedStatus.Fail:
-            tmp["teacherExaminedStatus"] = "拒绝"
-        else:
-            raise Exception("数据可数据错误，请检查写入接口是否正确")
+        tmp["teacherExaminedStatus"] = TeacherExaminedStatusToTest[status]
         user_program = teacher.ProgramsAsUser.filter(program__audience=1).first()
         if user_program is None:
             tmp["learningStatus"] = "未参加"
@@ -102,14 +92,18 @@ def nominate_process(req: HttpRequest):
 
 
 def duty_teacher_list(req: HttpRequest):
-    if not check_method(req, "GET"):
-        return gen_response(400, message="invalid method")
-    username = req.session.get("username", None)
-    if username is None:
-        return gen_response(
-            400, message="no username in session, probly not login")
-    if not role_list_check(username, ["admin", "HRBP"]):
-        return gen_response(400, message="permission denied")
+    """
+    获取正在上岗的导师列表
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["admin", "HRBP"],
+    })
+    if not ok:
+        return res
     teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=True)
     return_list = []
     for teacher in teacher_list:

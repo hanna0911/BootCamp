@@ -209,3 +209,9 @@ class Tests(TestCase):
 
     def test_get_newcomer_recode(self):
         self.process("/testcase/get_newcomer_recode.yml")
+
+    def test_teacher_board_summary_info(self):
+        self.process("/testcase/teacher_board_summary_info.yml")
+
+    def test_newcomer_summary_info(self):
+        self.process("/testcase/newcomer_summary_info.yml")

@@ -1,0 +1,19 @@
+- name: 新人查看自己的培训摘要
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /newcomer_summary_info
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 新人查看自己的培训摘要-方法错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_summary_info
+    data:
+  validate:
+    - equals: { status_code: 400 }
