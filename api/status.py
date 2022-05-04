@@ -240,6 +240,7 @@ def get_newcomer_recode(req: HttpRequest):
     :param req:
     :return:
     """
+    logging.error(req.body)
     ok, res = quick_check(req, {
         "method": "GET",
         "username": "",
@@ -249,9 +250,9 @@ def get_newcomer_recode(req: HttpRequest):
     if not ok:
         return res
     data = json.loads(req.body)
-    if req.session.get("role") == "teacher":
+    if req.session.get("role") == "teacher":  # 如果是导师发出的请求，则默认导师是自己
         teacher = PrivateInfo.objects.get(username=req.session.get("username"))
-    else:
+    else:  # 如果是管理员发出的请求，则按照字段中的导师进行寻找
         found, teacher = find_people(data["teacher"])
         if not found:
             return teacher
