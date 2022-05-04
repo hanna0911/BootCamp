@@ -3,7 +3,8 @@ import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
-from .models import PrivateInfo
+from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable
+from .models import ContentTable
 import json
 
 chinese_role_trans = {
@@ -96,6 +97,27 @@ def str_to_boolean(s: str):
         return False
     else:
         return None
+
+
+def find_people(username: str):
+    users = PrivateInfo.objects.filter(username=username)
+    if len(users) <= 0:
+        return False, gen_response(400, message=f"{username} user not found")
+    else:
+        return True, users.first()
+
+
+def get_relation(teacher: str, newcomer: str):
+    teachers = PrivateInfo.objects.filter(username=teacher)
+    newcoemrs = PrivateInfo.objects.filter(username=newcomer)
+    if len(teachers) <= 0 or len(newcoemrs) <= 0:
+        return False, gen_response(400, message="teacher or newcomer not found")
+    teacher = teachers.first()
+    newcomer = newcoemrs.first()
+    relations = TeacherNewcomerTable.objects.filter(teacher=teacher, newcomer=newcomer)
+    if len(relations) <= 0:
+        return False, gen_response(400, message="not relation between teacher and newcomer")
+    return True, relations.first()
 
 
 def quick_check(req: HttpRequest, check_points: dict):
@@ -347,7 +369,7 @@ def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
     而服务器的时区信息是在芝加哥！！！
     如果直接使用datetime.fromtimestamp，部署上去的所有时间会延迟11个小时
     """
-    local = datetime.datetime.now().replace(tzinfo = datetime.timezone(datetime.timedelta(hours=8)))
+    local = datetime.datetime.now().replace(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
     beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
     delta = beijing - local
     return datetime.datetime.fromtimestamp(timestamp) + delta
@@ -355,3 +377,30 @@ def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
 
 def path_converter(path: str = input):
     return path.replace("\\", "/")
+
+
+def get_progress(user: PrivateInfo, is_newcomer: bool = True, type:int = ContentTable.EnumType.Course ):
+    """
+
+    :param user:
+    :param is_newcomer: True 为新人培训， False为导师培训
+    :param type: 分别为EnumType.Course， EnumType.Exam，EnumType.Task
+    :return:
+    """
+    if is_newcomer:
+        audience = ContentTable.EnumAudience.newcomer
+    else:
+        audience = ContentTable.EnumAudience.teacher
+    course = UserContentTable.objects.filter(
+        user=user,
+        content__audience=audience,
+        content__type=type
+    )
+    if len(course) <= 0:
+        return 100
+    else:
+        total_len = len(course)
+        complete_len = len(course.filter(finished=True))
+        return int(100*complete_len/total_len)
+
+

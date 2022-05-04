@@ -6,7 +6,7 @@ import logging
 from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
-from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable
+from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable, NewcomerRecode
 import json
 import datetime
 
@@ -96,6 +96,205 @@ def assign_teacher(req: HttpRequest):
     return gen_response(200)
 
 
+def newcomer_commit_teacher(req: HttpRequest):
+    """
+    新人给导师评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer"],
+        "data_field": ["content"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    # 因为每个新人只有一个导师，所以无需指明导师，也无需说明自己是谁
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="newcomer has no teacher")
+    relation = relations.first()
+    relation.newcomerToTeacher = data.get("content")
+    relation.save()
+    return gen_response(200)
+
+
+def teacher_commit_newcomer(req: HttpRequest):
+    """
+    导师给新人评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": ["content", "newcomer"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    ok, relation = get_relation(teacher=req.session.get("username"), newcomer=data["newcomer"])
+    if not ok:
+        return relation
+    relation.teacherToNewcomer = data["content"]
+    relation.save()
+    return gen_response(200)
+
+
+def newcomer_score_teacher(req: HttpRequest):
+    """
+    新人给导师评分
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer"],
+        "data_field": ["score"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    # 因为每个新人只有一个导师，所以无需指明导师，也无需说明自己是谁
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="newcomer has no teacher")
+    relation = relations.first()
+    try:
+        score = float(data.get("score"))
+    except:
+        return gen_response(400, message="score not a number")
+    relation.teacherScore = score
+    relation.save()
+    return gen_response(200)
+
+
+def teacher_score_newcomer(req: HttpRequest):
+    """
+    导师给新人评价
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": ["score", "newcomer"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    ok, relation = get_relation(teacher=req.session.get("username"), newcomer=data["newcomer"])
+    if not ok:
+        return relation
+    try:
+        score = float(data.get("score"))
+    except:
+        return gen_response(400, message="score not a number")
+    relation.newcomerScore = score
+    relation.save()
+    return gen_response(200)
+
+
+def newcomer_recode(req: HttpRequest):
+    """
+    导师写带新记录
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": ["content", "newcomer"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    ok, newcomer = find_people(data["newcomer"])
+    if not ok:
+        return newcomer
+    relation = TeacherNewcomerTable.objects.filter(teacher=teacher, newcomer=newcomer)
+    if len(relation) <= 0:
+        return gen_response(400, message="newcomer not belong to teacher")
+    recode = NewcomerRecode(
+        teacher=teacher,
+        newcomer=newcomer,
+        content=data["content"],
+        commitTime=timezone.now()
+    )
+    recode.save()
+    return gen_response(200)
+
+
+def get_newcomer_recode(req: HttpRequest):
+    """
+    获取某个导师和学生的带新记录
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher", "admin"],
+        "data_field": ["newcomer", "teacher"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    if req.session.get("role") == "teacher":  # 如果是导师发出的请求，则默认导师是自己
+        teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:  # 如果是管理员发出的请求，则按照字段中的导师进行寻找
+        found, teacher = find_people(data["teacher"])
+        if not found:
+            return teacher
+    found, newcomer = find_people(data["newcomer"])
+    if not found:
+        return newcomer
+    recodes = NewcomerRecode.objects.filter(teacher=teacher, newcomer=newcomer)
+    return_list = []
+    for recode in recodes:
+        return_list.append({
+            "content": recode.content,
+            "commitTime": recode.commitTime
+        })
+    return gen_response(200, return_list)
+
+
+def get_commits_and_score(req: HttpRequest):
+    """
+    获取导师和学生之间的相互评价和打分
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["admin"],
+        "data_field": ["newcomer", "teacher"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    ok, relation = get_relation(data["teacher"], data["newcomer"])
+    if not ok:
+        return relation
+    ret_data = {
+        "teacherScore": relation.teacherScore,
+        "newcomerScore": relation.newcomerScore,
+        "newcomerToTeacher": relation.newcomerToTeacher,
+        "teacherToNewcomer": relation.teacherToNewcomer
+    }
+    return gen_response(200, ret_data)
+
+
 def assign_content(request: HttpRequest):
     """
     POST{
@@ -122,7 +321,7 @@ def assign_content(request: HttpRequest):
     role = session.get('role')
     # print(action, assignee_id, content_id, deadline, obligatory)
     if action != 'assign content' or assignee_id is None or content_id is None \
-       or deadline is None or obligatory is None:
+            or deadline is None or obligatory is None:
         return gen_standard_response(400, {"message": "Bad Arguments"})
     assignee_filter = PrivateInfo.objects.filter(username=assignee_id)
     content_filter = ContentTable.objects.filter(id=content_id)

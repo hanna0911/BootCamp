@@ -154,8 +154,8 @@ class Tests(TestCase):
     # def test_upload_content_template(self):
     #     self.process("/testcase/upload_content_template.yml")
 
-    def test_upload_lesson_template(self):
-        self.process("/testcase/upload_lesson_template.yml")
+    # def test_upload_lesson_template(self):
+    #     self.process("/testcase/upload_lesson_template.yml")
 
     def test_video(self):
         logging.info("测试video接口")
@@ -200,3 +200,12 @@ class Tests(TestCase):
 
     def test_tutor_assignment_chart(self):
         self.process("/testcase/tutor_assignment_chart.yml")
+
+    def test_commits_and_scores(self):
+        self.process("/testcase/commits_and_scores.yml")
+
+    def test_newcomer_recode(self):
+        self.process("/testcase/newcomer_recode.yml")
+
+    def test_get_newcomer_recode(self):
+        self.process("/testcase/get_newcomer_recode.yml")

@@ -1,0 +1,47 @@
+# 查取带新记录相关的测试
+- name: 管理员查看某个导师的带新记录
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_newcomer_recode
+    data:
+      newcomer: newcomer
+      teacher: teacher
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 管理员获取某个导师的带新记录-字段缺失
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_newcomer_recode
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师获取自己对某个新人的带新记录
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_newcomer_recode
+    data:
+      newcomer: newcomer
+      teacher: teacher
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师获取自己对某个新人的带新记录-新人不存在
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_newcomer_recode
+    data:
+      newcomer: 查无此人
+      teacher: teacher
+  validate:
+    - equals: { status_code: 400 }

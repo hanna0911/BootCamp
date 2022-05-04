@@ -167,6 +167,9 @@ class ContentTable(models.Model):
         Text = 0    # text
         Link = 1    # link
         File = 2    # file
+    class EnumAudience(models.IntegerChoices):
+        teacher = 1  # 导师培训内容
+        newcomer = 0 # 新人培训内容
     # --------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
@@ -175,7 +178,7 @@ class ContentTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
-    audience = models.IntegerField()  # 受众
+    audience = models.IntegerField(choices=EnumAudience.choices)  # 受众
     cover = models.ImageField()  # 封面
     type = models.IntegerField(choices = EnumType.choices)  # content类型 0 代表course，1代表exam，2代表task
     isTemplate = models.BooleanField()  # 是否是模板

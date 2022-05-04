@@ -317,3 +317,93 @@ def teacher_summary_info(req: HttpRequest):
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
+
+
+def teacher_board_summary_info(req: HttpRequest):
+    """
+    导师培训查看个人各个任务的完成情况
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["teacher"]
+    })
+    if not ok:
+        return res
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    if teacher.teacherIsDuty:
+        is_graduate = "毕业"
+        graduate_date = teacher.teacherDutyDate
+    else:
+        is_graduate = "未毕业"
+        graduate_date = "未毕业"
+    course_progress = get_progress(teacher, False, ContentTable.EnumType.Course)
+    exam_progress = get_progress(teacher, False, ContentTable.EnumType.Exam)
+    task_progress = get_progress(teacher, False, ContentTable.EnumType.Task)
+    data = {
+        "startDate": teacher.teacherNominationDate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,
+        "taskProgress": task_progress,
+        "evaluateProgress": 50,
+        "graduateDate": graduate_date,
+        "idGraduate": is_graduate,
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+
+    }
+    return gen_response(200, data)
+
+
+def newcomer_summary_info(req: HttpRequest):
+    """
+    返回新人看板的概述
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["newcomer"]
+    })
+    if not ok:
+        return res
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        teacher_name = "无"
+        teacher_username = ""
+    else:
+        relation = relations.first()
+        teacher_name = relation.teacher.name
+        teacher_username = relation.teacher.username
+
+    is_graduate = GraduateStatusToTest[newcomer.newcomerGraduateState]
+    date_select = ["未毕业", newcomer.newcomerGraduateDate, newcomer.newcomerGraduateDate]
+    graduate_date = date_select[newcomer.newcomerGraduateState]
+
+    course_progress = get_progress(newcomer, True, ContentTable.EnumType.Course)
+    exam_progress = get_progress(newcomer, True, ContentTable.EnumType.Exam)
+    task_progress = get_progress(newcomer, True, ContentTable.EnumType.Task)
+    data = {
+        "startDate": newcomer.newcomerStartDate,
+        "tutor": teacher_name,
+        "teacherUsername": teacher_username,
+        "graduateDate": graduate_date,
+        "isGraduate": is_graduate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,
+        "taskProgress": task_progress,
+        "evaluateProgress": 50,  # TODO: !!!还没统计呢
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+    }
+    return gen_response(200, data)
