@@ -137,3 +137,40 @@
       score: 不是浮点数
   validate:
     - equals: { status_code: 400 }
+
+# 获取评论和打分
+- name: admin获取评论和打分
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_commits_and_score
+    data:
+      newcomer: newcomer
+      teacher: teacher
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 其他人获取评论和打分
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /get_commits_and_score
+    data:
+      newcomer: newcomer
+      teacher: teacher
+  validate:
+    - equals: { status_code: 400 }
+
+- name: admin获取评论和打分-师生关系不存在
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /get_commits_and_score
+    data:
+      newcomer: s1
+      teacher: teacher
+  validate:
+    - equals: { status_code: 400 }

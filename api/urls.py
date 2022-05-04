@@ -38,6 +38,7 @@ urlpatterns = [
     path('download_test_paper', download.retrieve_test_paper_by_id, name="download_test_paper"),
     path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
     path("teacher_summary_info", views.teacher_summary_info, name="teacher_summary_info"),  # 查看导师带了几个人
+    path("newcomer_summary_info", views.newcomer_summary_info, name="newcomer_summary_info"),
     path('begin_test', upload.begin_test, name="begin_test"),
     path('upload_answers', upload.upload_answers, name="upload_answers"),
     path('finish_task', upload.finish_task, name="finish_task"),

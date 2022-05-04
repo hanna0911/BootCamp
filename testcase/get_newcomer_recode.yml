@@ -3,11 +3,11 @@
   ident:
     - admin
   request:
-    method: GET
+    method: POST
     url: /get_newcomer_recode
     data:
       newcomer: newcomer
-      content: 今天新人的表现很好??
+      teacher: teacher
   validate:
     - equals: { status_code: 200 }
 
@@ -15,7 +15,7 @@
   ident:
     - admin
   request:
-    method: GET
+    method: POST
     url: /get_newcomer_recode
     data:
       newcomer: newcomer
@@ -26,7 +26,7 @@
   ident:
     - admin
   request:
-    method: GET
+    method: POST
     url: /get_newcomer_recode
     data:
       newcomer: newcomer
@@ -38,7 +38,7 @@
   ident:
     - admin
   request:
-    method: GET
+    method: POST
     url: /get_newcomer_recode
     data:
       newcomer: 查无此人

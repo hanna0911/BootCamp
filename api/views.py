@@ -317,3 +317,50 @@ def teacher_summary_info(req: HttpRequest):
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
+
+
+def newcomer_summary_info(req: HttpRequest):
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["newcomer"],
+    })
+    if not ok:
+        return res
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        teacher_name = "无"
+        teacher_username = ""
+    else:
+        relation = relations.first()
+        teacher_name = relation.teacher.name
+        teacher_username = relation.teacher.username
+
+    if newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
+        graduate_date = "尚未毕业"
+        is_graduate = "尚未毕业"
+    else:
+        is_graduate = "已毕业"
+        graduate_date = newcomer.newcomerGraduateDate
+    course_progress = get_progress(newcomer, True, ContentTable.EnumType.Course)
+    exam_progress = get_progress(newcomer, True, ContentTable.EnumType.Exam)
+    task_progress = get_progress(newcomer, True, ContentTable.EnumType.Task)
+    data = {
+        "startDate": newcomer.newcomerStartDate,
+        "tutor": teacher_name,
+        "teacherUsername": teacher_username,
+        "graduateDate": graduate_date,
+        "isGraduate": is_graduate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,
+        "taskProgress": task_progress,
+        "evaluateProgress": 50, # TODO: !!!还没统计呢
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+
+    }
+    return gen_response(200, data)

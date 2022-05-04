@@ -3,7 +3,8 @@ import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
-from .models import PrivateInfo, TeacherNewcomerTable
+from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable
+from .models import ContentTable
 import json
 
 chinese_role_trans = {
@@ -376,3 +377,30 @@ def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
 
 def path_converter(path: str = input):
     return path.replace("\\", "/")
+
+
+def get_progress(user: PrivateInfo, is_newcomer: bool = True, type:int = ContentTable.EnumType.Course ):
+    """
+
+    :param user:
+    :param is_newcomer: True 为新人培训， False为导师培训
+    :param type: 分别为EnumType.Course， EnumType.Exam，EnumType.Task
+    :return:
+    """
+    if is_newcomer:
+        audience = ContentTable.EnumAudience.newcomer
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    course = UserContentTable.objects.filter(
+        user=user,
+        content__audience=audience,
+        content__type=type
+    )
+    if len(course) <= 0:
+        return 100
+    else:
+        total_len = len(course)
+        complete_len = len(course.filter(finished=True))
+        return int(100*complete_len/total_len)
+
+

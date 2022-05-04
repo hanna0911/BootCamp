@@ -149,7 +149,7 @@ class Tests(TestCase):
         self.process("/testcase/assign_teacher.yml")
 
     def test_upload_program(self):
-    #     self.process("/testcase/upload_program.yml")
+        self.process("/testcase/upload_program.yml")
 
     # def test_upload_content_template(self):
     #     self.process("/testcase/upload_content_template.yml")
@@ -201,8 +201,11 @@ class Tests(TestCase):
     def test_tutor_assignment_chart(self):
         self.process("/testcase/tutor_assignment_chart.yml")
 
-    # def test_commits_and_scores(self):
-    #     self.process("/testcase/commits_and_scores.yml")
+    def test_commits_and_scores(self):
+        self.process("/testcase/commits_and_scores.yml")
 
     def test_newcomer_recode(self):
         self.process("/testcase/newcomer_recode.yml")
+
+    def test_get_newcomer_recode(self):
+        self.process("/testcase/get_newcomer_recode.yml")

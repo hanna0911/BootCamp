@@ -240,9 +240,8 @@ def get_newcomer_recode(req: HttpRequest):
     :param req:
     :return:
     """
-    logging.error(req.body)
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
         "role": ["teacher", "admin"],
         "data_field": ["newcomer", "teacher"]
@@ -276,7 +275,7 @@ def get_commits_and_score(req: HttpRequest):
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
         "role": ["admin"],
         "data_field": ["newcomer", "teacher"]
