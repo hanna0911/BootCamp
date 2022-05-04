@@ -98,6 +98,14 @@ def str_to_boolean(s: str):
         return None
 
 
+def find_people(username: str):
+    users = PrivateInfo.objects.filter(username=username)
+    if len(users) <= 0:
+        return False, gen_response(400, message=f"{username} user not found")
+    else:
+        return True, users.first()
+
+
 def get_relation(teacher: str, newcomer: str):
     teachers = PrivateInfo.objects.filter(username=teacher)
     newcoemrs = PrivateInfo.objects.filter(username=newcomer)

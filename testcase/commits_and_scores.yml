@@ -1,0 +1,60 @@
+# 评论部分
+- name: 新人评论导师
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_commit_teacher
+    data:
+      content: 我觉得导师很不错
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 新人评论导师-角色错误
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_commit_teacher
+    data:
+      content: 我觉得导师很不错
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师评论新人
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_commit_newcomer
+    data:
+      newcomer: newcomer
+      content: 我觉得新人很不错
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师评论新人-方法错误
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /teacher_commit_newcomer
+    data:
+      newcomer: newcomer
+      content: 我觉得新人很不错
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师评论新人-不存在的新人
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /teacher_commit_newcomer
+    data:
+      newcomer: s1
+      content: 我觉得新人很不错
+  validate:
+    - equals: { status_code: 400 }
+
+# 打分部分

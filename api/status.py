@@ -246,8 +246,24 @@ def get_newcomer_recode(req: HttpRequest):
     })
     if not ok:
         return res
-
-    return gen_response(400, message="not sup")
+    data = json.loads(req.body)
+    if req.session.get("role") == "teacher":
+        teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, teacher = find_people(data["teacher"])
+        if not found:
+            return teacher
+    found, newcomer = find_people(data["newcomer"])
+    if not found:
+        return newcomer
+    recodes = NewcomerRecode.objects.filter(teacher=teacher, newcomer=newcomer)
+    return_list = []
+    for recode in recodes:
+        return_list.append({
+            "content": recode.content,
+            "commitTime": recode.commitTime
+        })
+    return gen_response(200, return_list)
 
 
 def get_commits_and_score(req: HttpRequest):
@@ -264,7 +280,17 @@ def get_commits_and_score(req: HttpRequest):
     })
     if not ok:
         return res
-    return gen_response(400, message="not sup")
+    data = json.loads(req.body)
+    ok, relation = get_relation(data["teacher"], data["newcomer"])
+    if not ok:
+        return relation
+    ret_data = {
+        "teacherScore": relation.teacherScore,
+        "newcomerScore": relation.newcomerScore,
+        "newcomerToTeacher": relation.newcomerToTeacher,
+        "teacherToNewcomer": relation.teacherToNewcomer
+    }
+    return gen_response(200, ret_data)
 
 
 def assign_content(request: HttpRequest):
