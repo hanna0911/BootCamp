@@ -146,7 +146,20 @@ def newcomer_score_teacher(req: HttpRequest):
     })
     if not ok:
         return res
-    return gen_response(400, message="not sup")
+    data = json.loads(req.body)
+    # 因为每个新人只有一个导师，所以无需指明导师，也无需说明自己是谁
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="newcomer has no teacher")
+    relation = relations.first()
+    try:
+        score = float(data.get("score"))
+    except:
+        return gen_response(400, message="score not a number")
+    relation.teacherScore = score
+    relation.save()
+    return gen_response(200)
 
 
 def teacher_score_newcomer(req: HttpRequest):
@@ -159,12 +172,27 @@ def teacher_score_newcomer(req: HttpRequest):
         "method": "POST",
         "username": "",
         "role": ["teacher"],
-        "data_field": ["score"]
+        "data_field": ["score", "newcomer"]
     })
     if not ok:
         return res
-
-    return gen_response(400, message="not sup")
+    data = json.loads(req.body)
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    newcomers = PrivateInfo.objects.filter(username=data["newcomer"])
+    if len(newcomers) <= 0:
+        return gen_response(400, message="newcomer not found")
+    newcomer = newcomers.first()
+    relations = TeacherNewcomerTable.objects.filter(teacher=teacher, newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="not relation between teacher and newcomer")
+    relation = relations.first()
+    try:
+        score = float(data.get("score"))
+    except:
+        return gen_response(400, message="score not a number")
+    relation.newcomerScore = score
+    relation.save()
+    return gen_response(200)
 
 
 def assign_content(request: HttpRequest):
