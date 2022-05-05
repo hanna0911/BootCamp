@@ -29,7 +29,8 @@ def admin_newcomer_list(request: HttpRequest):
             tmp["teacher"] = teacher_queue.first().teacher.name
             tmp["tutor"] = teacher_queue.first().teacher.name
         tmp["joinBootcamp"] = True
-        tmp["graduated"] = newcomer.newcomerGraduateState  # temp
+        state_select = [False, True, True]
+        tmp["graduated"] = state_select[newcomer.newcomerGraduateState]
         tmp["evaluate"] = "暂无"
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
@@ -195,7 +196,8 @@ def assignable_test_list(request: HttpRequest):
         tag_list = list(set(tag_list))
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for admin user {username}',
-                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
+                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list,
+                                           'test_tag_items': tag_list})
     elif role == 'teacher':
         test_templates = ContentTable.objects.filter(isTemplate=True,
                                                      audience=0,
@@ -243,7 +245,8 @@ def assignable_test_list(request: HttpRequest):
         tag_list = list(set(tag_list))
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for teacher user {username}',
-                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
+                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list,
+                                           'test_tag_items': tag_list})
     elif role == 'HRBP':
         test_templates = ContentTable.objects.filter(isTemplate=True,
                                                      audience=1,
@@ -291,7 +294,8 @@ def assignable_test_list(request: HttpRequest):
         tag_list = list(set(tag_list))
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'assignable tests retrieved for hrbp user {username}',
-                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
+                                           'tests': test_list, 'test_recommend_time_items': recommend_time_list,
+                                           'test_tag_items': tag_list})
     else:  # newcomer
         return unauthorized_action_response()
 
@@ -350,7 +354,8 @@ def my_test_list(request: HttpRequest):
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
-                                       "tests": test_list, 'test_recommend_time_items': recommend_time_list, 'test_tag_items': tag_list})
+                                       "tests": test_list, 'test_recommend_time_items': recommend_time_list,
+                                       'test_tag_items': tag_list})
 
 
 def assignable_course_list(request: HttpRequest):
@@ -421,7 +426,8 @@ def my_courses_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_courses = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Course)
+    target_courses = UserContentTable.objects.filter(user__username=username,
+                                                     content__type=ContentTable.EnumType.Course)
     course_list = []
     for course_relation in target_courses:
         course = course_relation.content
@@ -513,7 +519,8 @@ def assignable_task_list(request: HttpRequest):
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'assignable tasks retrieved for {role} user {username}',
-                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list, 'task_tag_items': tag_list})
+                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list,
+                                       'task_tag_items': tag_list})
 
 
 def my_task_list(request: HttpRequest):
@@ -567,7 +574,8 @@ def my_task_list(request: HttpRequest):
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my tasks retrieved for {role} user {username}',
-                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list, 'task_tag_items': tag_list})
+                                       'tasks': task_list, 'task_recommend_time_items': recommend_time_list,
+                                       'task_tag_items': tag_list})
 
 
 def teacher_newcomer_list(req: HttpRequest):
@@ -598,3 +606,37 @@ def teacher_newcomer_list(req: HttpRequest):
         return_list.append(tmp)
 
     return gen_response(200, data=return_list)
+
+
+def teacher_newcomer_list_by_name(req: HttpRequest):
+    """
+    管理员通过姓名来获取导师的学生列表
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["admin"],
+        "data_field": ["teacher"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, teacher = find_people(data["teacher"])
+    if not found:
+        return teacher
+    student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
+    learning_list = []
+    print(len(student_list))
+    for entry in student_list:  # 还在学习的学生
+        if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
+            learning_list.append(entry.newcomer)
+    return_list = []
+    for newcomer in learning_list:
+        tmp = load_private_info(newcomer)
+        tmp["graduated"] = GraduateStatusToTest[newcomer.newcomerGraduateState]  # temp
+        tmp["evaluate"] = "暂无"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
+        return_list.append(tmp)
+    return gen_response(200, return_list)
