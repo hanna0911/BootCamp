@@ -111,7 +111,8 @@ def write_db(req: HttpRequest):
             contentCount=info["contentCount"],
             recommendTime=info["recommendTime"],
             audience=info["audience"],
-            releaseTime=info["releaseTime"]
+            releaseTime=info["releaseTime"],
+            isTemplate=info["isTemplate"],
         ).save()
     # logging.info("{} programs info loaded".format(len(ProgramTable.objects.all())))
 
