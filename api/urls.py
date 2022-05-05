@@ -59,7 +59,13 @@ urlpatterns = [
     path("teacher_commit_newcomer",status.teacher_commit_newcomer,name="teacher_commit_newcomer"),
     path("newcomer_score_teacher",status.newcomer_score_teacher,name="newcomer_score_teacher"),
     path("teacher_score_newcomer",status.teacher_score_newcomer,name="teacher_score_newcomer"),
-    path("newcomer_recode",status.newcomer_recode,name="newcomer_recode"), # 写带新记录
-    path("get_newcomer_recode",status.get_newcomer_recode, name="get_newcomer_recode"), # 查看带新记录
-    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score") # 查看相互的评价
+    path("newcomer_recode",status.newcomer_recode,name="newcomer_recode"),
+    path("get_newcomer_recode",status.get_newcomer_recode, name="get_newcomer_recode"),
+    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score"),
+    path('program_templates', lists.program_template_list, name="program_templates"),
+    path('assign_program', status.assign_program, name="assign_program"),
+    path('assignable_program_list', lists.assignable_program_list, name="assignable_program_list"),
+    path('my_program_list', lists.my_program_list, name="my_program_list"),
+    path('copy_program_template', upload.create_new_program_from_template, name="copy_program_template"),
+    path('program_content_list', lists.program_content_list, name="program_content_list"),
 ]

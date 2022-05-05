@@ -44,8 +44,9 @@ def create_program(request: HttpRequest):
     recommend_time = data.get("recommendTime")
     audience = data.get("audience")
     cover = data.get("cover")
+    isTemplate = data.get('isTemplate')
     # 校验action字段、name字段和audience字段是否合规
-    if action != "CreateProgram" or name is None or name == "" \
+    if action != "CreateProgram" or name is None or name == "" or not(isTemplate is True or isTemplate is False)\
             or audience is None or (audience != "newcomer" and audience != "teacher"):
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     if intro is None or intro == "":  # 无简介的话生成默认简介
@@ -63,7 +64,7 @@ def create_program(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()  # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
                                intro=intro, tag=tag, contentCount=0, recommendTime=recommend_time,
-                               audience=audience_id, cover=cover)
+                               audience=audience_id, cover=cover, isTemplate=isTemplate)
     new_program.save()
     return gen_standard_response(200, {"result": "success",
                                        "message": f"program {name} created successfully",
@@ -668,6 +669,51 @@ def create_lesson(request: HttpRequest):
         "contentID": new_lesson_id,
         "filePaths": file_paths
     })
+
+
+def create_new_program_from_template(request: HttpRequest):
+    """
+    {'action': 'copy program template', 'programID': __PROGRAM_ID__ }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    program_id = data.get('programID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'copy program template' or program_id is None:
+        return gen_standard_response(400, 'Bad Arguments')
+    program = ProgramTable.objects.filter(id=program_id, isTemplate=True).first()
+    if program is None:
+        return item_not_found_error_response()
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' or role != 'teacher':
+        return unauthorized_action_response()
+    author = PrivateInfo.objects.filter(username=username).first()
+    if author is None:
+        return unauthorized_action_response()
+    new_program_id = username + "_p_" + str(time.time())
+    new_program = ProgramTable(id=new_program_id, name=program.name, author=author, intro=program.intro,
+                               tag=program.tag, contentCount=program.contentCount, audience=program.audience,
+                               recommendTime=program.recommendTime, cover=program.cover, isTemplate=False)
+    new_program.save()
+    new_program = ProgramTable.objects.filter(id=new_program_id).first()
+    if new_program is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'failed to save new copy'})
+    program_content_relations = ProgramContentTable.objects.filter(program__id=program_id)
+    for relation in program_content_relations:
+        new_relation = ProgramContentTable(program=new_program, content=relation.content)
+        new_relation.save()
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': f'program template {program_id} copied into {new_program_id}',
+                                       'programID': new_program_id})
 
 
 # def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
