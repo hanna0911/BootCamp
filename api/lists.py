@@ -777,7 +777,8 @@ def program_content_list(request: HttpRequest):
             'endTime': content.endTime,
             'taskType': task_type,
             'text': content.text,
-            'link': content.link
+            'link': content.link,
+            'contentID': content.id
         }
         if content.type == 0:
             courses.append(content_info)
