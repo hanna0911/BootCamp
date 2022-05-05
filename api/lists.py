@@ -589,6 +589,10 @@ def program_template_list(request: HttpRequest):
     target_programs = []
     program_templates = ProgramTable.objects.filter(isTemplate=True)
     for program in program_templates:
+        if program.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
         program_info = dict()
         program_info['name'] = program.name
         program_info['author'] = program.author.username
@@ -604,6 +608,23 @@ def program_template_list(request: HttpRequest):
     return gen_standard_response(200, {'result': 'success',
                                        'message': 'all program templates retrieved',
                                        'program_templates': target_programs})
+
+
+def assignable_program_list(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'teacher' and role != 'HRBP':
+        return unauthorized_action_response()
+
+    program_templates = ProgramTable.objects.filter(isTemplate=True)
+    authored_programs = ProgramTable.objects.filter(isTemplate=False,
+                                                    author__username=username)
+
 
 
 def teacher_newcomer_list(req: HttpRequest):
