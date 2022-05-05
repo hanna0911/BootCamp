@@ -599,7 +599,7 @@ def program_template_list(request: HttpRequest):
         program_info['intro'] = program.intro
         program_info['contentCount'] = program.contentCount
         program_info['recommendTime'] = program.recommendTime
-        program_info['audience'] = program.audience
+        program_info['audience'] = audience
         program_info['cover'] = program.cover
         program_info['releaseTime'] = program.releaseTime
         program_info['isTemplate'] = program.isTemplate
@@ -624,7 +624,63 @@ def assignable_program_list(request: HttpRequest):
     program_templates = ProgramTable.objects.filter(isTemplate=True)
     authored_programs = ProgramTable.objects.filter(isTemplate=False,
                                                     author__username=username)
+    available_programs = program_templates.union(authored_programs)
+    target_programs = []
+    for program in available_programs:
+        if program.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        program_info = dict()
+        program_info['name'] = program.name
+        program_info['author'] = program.author.username
+        program_info['intro'] = program.intro
+        program_info['contentCount'] = program.contentCount
+        program_info['recommendTime'] = program.recommendTime
+        program_info['audience'] = audience
+        program_info['cover'] = program.cover
+        program_info['releaseTime'] = program.releaseTime
+        program_info['isTemplate'] = program.isTemplate
+        program_info['programID'] = program.id
+        target_programs.append(program_info)
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': 'all assignable programs retrieved',
+                                       'program_templates': target_programs})
 
+
+def my_program_list(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'teacher' and role != 'newcomer':
+        return unauthorized_action_response()
+    my_relations = UserProgramTable.objects.filter(user__username=username)
+    target_programs = []
+    for relation in my_relations:
+        program = relation.program
+        if program.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        program_info = dict()
+        program_info['name'] = program.name
+        program_info['author'] = program.author.username
+        program_info['intro'] = program.intro
+        program_info['contentCount'] = program.contentCount
+        program_info['recommendTime'] = program.recommendTime
+        program_info['audience'] = audience
+        program_info['cover'] = program.cover
+        program_info['releaseTime'] = program.releaseTime
+        program_info['isTemplate'] = program.isTemplate
+        program_info['programID'] = program.id
+        target_programs.append(program_info)
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': 'my programs retrieved',
+                                       'program_templates': target_programs})
 
 
 def teacher_newcomer_list(req: HttpRequest):
