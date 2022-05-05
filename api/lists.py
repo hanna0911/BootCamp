@@ -577,7 +577,7 @@ def my_task_list(request: HttpRequest):
 
 
 def program_template_list(request: HttpRequest):
-    if request.methon != 'GET':
+    if request.method != 'GET':
         return illegal_request_type_error_response()
     session = request.session
     username = session.get('username')
