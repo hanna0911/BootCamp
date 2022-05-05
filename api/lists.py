@@ -600,7 +600,7 @@ def program_template_list(request: HttpRequest):
         program_info['contentCount'] = program.contentCount
         program_info['recommendTime'] = program.recommendTime
         program_info['audience'] = audience
-        program_info['cover'] = program.cover
+        # program_info['cover'] = program.cover
         program_info['releaseTime'] = program.releaseTime
         program_info['isTemplate'] = program.isTemplate
         program_info['programID'] = program.id
@@ -638,7 +638,7 @@ def assignable_program_list(request: HttpRequest):
         program_info['contentCount'] = program.contentCount
         program_info['recommendTime'] = program.recommendTime
         program_info['audience'] = audience
-        program_info['cover'] = program.cover
+        # program_info['cover'] = program.cover
         program_info['releaseTime'] = program.releaseTime
         program_info['isTemplate'] = program.isTemplate
         program_info['programID'] = program.id
@@ -673,7 +673,7 @@ def my_program_list(request: HttpRequest):
         program_info['contentCount'] = program.contentCount
         program_info['recommendTime'] = program.recommendTime
         program_info['audience'] = audience
-        program_info['cover'] = program.cover
+        # program_info['cover'] = program.cover
         program_info['releaseTime'] = program.releaseTime
         program_info['isTemplate'] = program.isTemplate
         program_info['programID'] = program.id
