@@ -60,5 +60,7 @@ urlpatterns = [
     path("teacher_score_newcomer",status.teacher_score_newcomer,name="teacher_score_newcomer"),
     path("newcomer_recode",status.newcomer_recode,name="newcomer_recode"),
     path("get_newcomer_recode",status.get_newcomer_recode, name="get_newcomer_recode"),
-    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score")
+    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score"),
+    path('program_templates', lists.program_template_list, name="program_templates"),
+    path('assign_program', status.assign_program, name="assign_program")
 ]

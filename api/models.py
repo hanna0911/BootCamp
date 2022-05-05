@@ -149,6 +149,7 @@ class ProgramTable(models.Model):
     audience = models.IntegerField(choices = EnumAudience.choices)  # 项目受众，无默认值
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    isTemplate = models.BooleanField()  # 是否为模板（即管理员创建、所有导师可见）
 
 
 class ContentTable(models.Model):

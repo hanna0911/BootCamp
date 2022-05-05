@@ -44,8 +44,9 @@ def create_program(request: HttpRequest):
     recommend_time = data.get("recommendTime")
     audience = data.get("audience")
     cover = data.get("cover")
+    isTemplate = data.get('isTemplate')
     # 校验action字段、name字段和audience字段是否合规
-    if action != "CreateProgram" or name is None or name == "" \
+    if action != "CreateProgram" or name is None or name == "" or not(isTemplate is True or isTemplate is False)\
             or audience is None or (audience != "newcomer" and audience != "teacher"):
         return gen_standard_response(400, {"result": "failure", "message": "bad arguments"})
     if intro is None or intro == "":  # 无简介的话生成默认简介
@@ -63,7 +64,7 @@ def create_program(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()  # 外键
     new_program = ProgramTable(id=new_program_id, name=name, author=user,
                                intro=intro, tag=tag, contentCount=0, recommendTime=recommend_time,
-                               audience=audience_id, cover=cover)
+                               audience=audience_id, cover=cover, isTemplate=isTemplate)
     new_program.save()
     return gen_standard_response(200, {"result": "success",
                                        "message": f"program {name} created successfully",
