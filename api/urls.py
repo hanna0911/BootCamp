@@ -65,4 +65,5 @@ urlpatterns = [
     path('assign_program', status.assign_program, name="assign_program"),
     path('assignable_program_list', lists.assignable_program_list, name="assignable_program_list"),
     path('my_program_list', lists.my_program_list, name="my_program_list"),
+    path('copy_program_template', upload.create_new_program_from_template, name="copy_program_template"),
 ]
