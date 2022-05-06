@@ -295,59 +295,59 @@ def get_commits_and_score(req: HttpRequest):
     }
     return gen_response(200, ret_data)
 
-def assign_program(request: HttpRequest):
-    """
-    POST{
-        'action': 'assign program',
-        'assigneeID': 被分配program的用户id,
-        'programID': 被分配program的id,
-        'deadline': "yyyy-MM-dd HH:mm"
-    }
-    """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
-    action = data.get('action')
-    assignee_id = data.get('assigneeID')
-    program_id = data.get('programID')
-    deadline_str = data.get('deadline')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
-    if action != 'assign program' or assignee_id is None or program_id is None or deadline_str is None:
-        return gen_standard_response(400, {"message": "Bad Arguments"})
-    assignee_filter = PrivateInfo.objects.filter(username=assignee_id)
-    program_filter = ProgramTable.objects.filter(id=program_id)
-    assigner_filter = PrivateInfo.objects.filter(username=username)
-    if len(assignee_filter) == 0 or len(program_filter) == 0 or len(assigner_filter) == 0:
-        return item_not_found_error_response()
-    if username is None or role is None:
-        return session_timeout_response()
-    if role != 'admin' and role != 'teacher' and role != 'HRBP':
-        return unauthorized_action_response()
-    assignee = assignee_filter.first()
-    program = program_filter.first()
-    assigner = assigner_filter.first()
-    print(deadline_str)
-    try:
-        deadline_datetime = datetime.datetime.fromisoformat(deadline_str)
-    except Exception as e:
-        print(e)
-        return gen_standard_response(400, {"message": "Bad Arguments"})
-    entry = UserProgramTable(user=assignee, program=program,\
-                             deadline=deadline_datetime, assigner=assigner)
-    entry.save()
-    if program.isTemplate:
-        ack = 'a'
-    else:
-        ack = 'not a'
-    res = f"program {program.name} which is {ack} template assigned to {assignee.username} with real name {assignee.name}"
-    return gen_standard_response(200, {"result": "success",
-                                       "message": res})
+# def assign_program(request: HttpRequest):
+#     """
+#     POST{
+#         'action': 'assign program',
+#         'assigneeID': 被分配program的用户id,
+#         'programID': 被分配program的id,
+#         'deadline': "yyyy-MM-dd HH:mm"
+#     }
+#     """
+#     if request.method != 'POST':
+#         return illegal_request_type_error_response()
+#     try:
+#         data = json.loads(request.body)
+#     except Exception as e:
+#         print(e)
+#         return unknown_error_response()
+#     action = data.get('action')
+#     assignee_id = data.get('assigneeID')
+#     program_id = data.get('programID')
+#     deadline_str = data.get('deadline')
+#     session = request.session
+#     username = session.get('username')
+#     role = session.get('role')
+#     if action != 'assign program' or assignee_id is None or program_id is None or deadline_str is None:
+#         return gen_standard_response(400, {"message": "Bad Arguments"})
+#     assignee_filter = PrivateInfo.objects.filter(username=assignee_id)
+#     program_filter = ProgramTable.objects.filter(id=program_id)
+#     assigner_filter = PrivateInfo.objects.filter(username=username)
+#     if len(assignee_filter) == 0 or len(program_filter) == 0 or len(assigner_filter) == 0:
+#         return item_not_found_error_response()
+#     if username is None or role is None:
+#         return session_timeout_response()
+#     if role != 'admin' and role != 'teacher' and role != 'HRBP':
+#         return unauthorized_action_response()
+#     assignee = assignee_filter.first()
+#     program = program_filter.first()
+#     assigner = assigner_filter.first()
+#     print(deadline_str)
+#     try:
+#         deadline_datetime = datetime.datetime.fromisoformat(deadline_str)
+#     except Exception as e:
+#         print(e)
+#         return gen_standard_response(400, {"message": "Bad Arguments"})
+#     entry = UserProgramTable(user=assignee, program=program,\
+#                              deadline=deadline_datetime, assigner=assigner)
+#     entry.save()
+#     if program.isTemplate:
+#         ack = 'a'
+#     else:
+#         ack = 'not a'
+#     res = f"program {program.name} which is {ack} template assigned to {assignee.username} with real name {assignee.name}"
+#     return gen_standard_response(200, {"result": "success",
+#                                        "message": res})
 
 
 def assign_content(request: HttpRequest):
@@ -490,7 +490,7 @@ def assign_program(request: HttpRequest):
     content_relations = ProgramContentTable.objects.filter(program__id=target_program_id)
     for content_relation in content_relations:
         content = content_relation.content
-        new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner)
+        new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner, deadline = 0)
         new_user_content_relation.save()
     std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including '\
                   + f'{len(content_relations)} contents'

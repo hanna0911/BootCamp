@@ -684,6 +684,8 @@ def assignable_program_list(request: HttpRequest):
     available_programs = program_templates.union(authored_programs)
     target_programs = []
     for program in available_programs:
+        if UserProgramTable.objects.filter(program=program).count() != 0:
+            continue
         if program.audience == 0:
             audience = 'newcomer'
         else:

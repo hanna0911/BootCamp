@@ -689,12 +689,12 @@ def create_new_program_from_template(request: HttpRequest):
     role = session.get('role')
     if action != 'copy program template' or program_id is None:
         return gen_standard_response(400, 'Bad Arguments')
-    program = ProgramTable.objects.filter(id=program_id, isTemplate=True).first()
+    program = ProgramTable.objects.filter(id=program_id).first()
     if program is None:
         return item_not_found_error_response()
     if username is None or role is None:
         return session_timeout_response()
-    if role != 'admin' and role != 'HRBP' or role != 'teacher':
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
         return unauthorized_action_response()
     author = PrivateInfo.objects.filter(username=username).first()
     if author is None:
