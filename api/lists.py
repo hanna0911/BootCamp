@@ -398,17 +398,19 @@ def assignable_course_list(request: HttpRequest):
             audience = 'newcomer'
         else:
             audience = 'teacher'
-        course_list.append([
-            audience,
-            course.isTemplate,
-            course.name,
-            course.intro,
-            course.recommendedTime,
-            course.tag,
-            course.author.name,
-            course.releaseTime,
-            course.lessonCount,
-        ])
+        course_list.append({
+            'audience': audience,
+            'isTemplate': course.isTemplate,
+            'name': course.name,
+            'intro': course.intro,
+            'recommendTime': course.recommendedTime,
+            'tag': course.tag,
+            'name': course.author.name,
+            'releaseTime': course.releaseTime,
+            'lessonCount': course.lessonCount,
+            'programID': course.programId,
+            'contentID': course.id
+        })
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'assignable courses retrieved for {role} user {username}',
                                        'courses': course_list})
@@ -435,20 +437,73 @@ def my_courses_list(request: HttpRequest):
             audience = 'newcomer'
         else:
             audience = 'teacher'
-        course_list.append([
-            audience,
-            course.isTemplate,
-            course.name,
-            course.intro,
-            course.recommendedTime,
-            course.tag,
-            course.author.name,
-            course.releaseTime,
-            course.lessonCount,
-            course_relation.finished
-        ])
+        course_list.append({
+            'audience': audience,
+            'isTemplate': course.isTemplate,
+            'name': course.name,
+            'intro': course.intro,
+            'recommendTime': course.recommendedTime,
+            'tag': course.tag,
+            'author': course.author.name,
+            'releaseTime': course.releaseTime,
+            'lessonCount': course.lessonCount,
+            'finished': course_relation.finished,
+            'programID': course.programId,
+            'contentID': course.id
+        })
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my courses retrieved for {role} user {username}',
+                                       'courses': course_list})
+
+
+def my_course_list_by_id(request: HttpRequest):
+    """
+    {'action': 'course list by username', 'username': '__USERNAME__'}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    target_username = data.get('username')
+    if action != 'course list by id' or target_username is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'teacher' and role != 'HRBP':
+        return unauthorized_action_response()
+    user = PrivateInfo.objects.filter(username=target_username).first()
+    if user is None:
+        return item_not_found_error_response()
+    relations = UserContentTable.objects.filter(user__username=target_username, content__type=0)
+    course_list = []
+    for relation in relations:
+        course = relation.content
+        if course.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        course_list.append({
+            'courseID': course.id,
+            'audience': audience,
+            'isTemplate': course.isTemplate,
+            'name': course.name,
+            'intro': course.intro,
+            'recommendTime': course.recommendedTime,
+            'tag': course.tag,
+            'author': course.author.name,
+            'releaseTime': course.releaseTime,
+            'lessonCount': course.lessonCount,
+            'finished': relation.finished
+        })
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': f'courses retrieved for user {target_username} by {username}',
                                        'courses': course_list})
 
 
