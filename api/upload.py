@@ -414,13 +414,14 @@ def save_test_file(file, username, test_id):
 
 
 def save_task_file(file, username, task_id):
+    # print(username, task_id)
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     head_path = base_dir + f"/files/task/{task_id}"
     print("head_path", head_path)
     # 判断是否存在文件夹, 如果没有就创建文件路径
     if not os.path.exists(head_path):
         os.makedirs(head_path)
-    file_suffix = file.name.split(".")[1]  # 获取文件后缀
+    file_suffix = file.name.split(".")[-1]  # 获取文件后缀
     file_name = file.name.split(".")[0] + f"_{username}_tsk_{time.time()}"  # 获取文件名字
     file_path = head_path + "/{}".format(file_name + "." + file_suffix)
     file_path = file_path.replace(" ", "")
@@ -517,7 +518,7 @@ def create_content(request: HttpRequest):
         except Exception as e:
             print(e)
             return save_file_error_response()
-    if content_type == 'task' and task_type == 2:
+    if content_type == 'task' and task_type == '2':
         try:
             task_file_url = save_task_file(task_file, username, new_content_id)
         except Exception as e:
