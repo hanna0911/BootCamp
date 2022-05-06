@@ -1,0 +1,19 @@
+- name: 导师获取自己的培训摘要
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /teacher_board_summary_info
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师获取自己的培训摘要-方法错误
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_board_summary_info
+    data:
+  validate:
+    - equals: { status_code: 400 }
