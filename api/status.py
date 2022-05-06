@@ -7,7 +7,7 @@ from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
 from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable,\
-    NewcomerRecode, ProgramTable, UserProgramTable
+    NewcomerRecode, ProgramTable, UserProgramTable, ProgramContentTable
 import json
 import datetime
 
@@ -435,6 +435,8 @@ def has_program(request: HttpRequest):
     if username is None or role is None:
         return session_timeout_response()
     target_user = PrivateInfo.objects.filter(username=target_username).first()
+    if role != 'teacher' and role != 'admin' and role != 'HRBP':
+        return unauthorized_action_response()
     if target_user is None:
         return item_not_found_error_response()
     relation = UserProgramTable.objects.filter(user__username=target_username).first()
@@ -448,3 +450,49 @@ def has_program(request: HttpRequest):
                                            'message': f'user {target_username} has been assigned a program',
                                            'hasProgram': True,
                                            'programID': relation.program.id})
+
+
+def assign_program(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'assign program',
+        'username': __USERNAME__,
+        'programID': __PROGRAM_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    target_username = data.get('username')
+    target_program_id = data.get('programID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'assign program' or target_username is None or target_program_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    target_user = PrivateInfo.objects.filter(username=target_username).first()
+    target_program = ProgramTable.objects.filter(id=target_program_id).first()
+    assigner = PrivateInfo.objects.filter(username=username).first()
+    if target_program is None or target_user is None:
+        return item_not_found_error_response()
+    new_user_program_relation = UserProgramTable(user=target_user, program=target_program, assigner=assigner)
+    new_user_program_relation.save()
+    content_relations = ProgramContentTable.objects.filter(program__id=target_program_id)
+    for content_relation in content_relations:
+        content = content_relation.content
+        new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner)
+        new_user_content_relation.save()
+    std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including '\
+                  + f'{len(content_relations)} contents'
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': std_message})
