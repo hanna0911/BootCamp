@@ -827,7 +827,7 @@ def program_content_list(request: HttpRequest):
             'audience': audience,
             'contentType': content_type,
             'isTemplate': content.isTemplate,
-            'programID': content.programId,
+            'programID': program_id,
             'releaseTime': content.releaseTime,
             'lessonCount': content.lessonCount,
             'beginTime': content.beginTime,
