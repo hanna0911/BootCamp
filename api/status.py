@@ -408,3 +408,43 @@ def assign_content(request: HttpRequest):
     res = f"content {content.name} of type {str_type} assigned to {assignee.username} with real name {assignee.name}"
     return gen_standard_response(200, {"result": "success",
                                        "message": res})
+
+
+def has_program(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'has program'
+        'username': __USERNAME__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    target_username = data.get('username')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'has program' or target_username is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    target_user = PrivateInfo.objects.filter(username=target_username).first()
+    if target_user is None:
+        return item_not_found_error_response()
+    relation = UserProgramTable.objects.filter(user__username=target_username).first()
+    if relation is None:
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'user {target_username} has not been assigned a program',
+                                           'hasProgram': False,
+                                           'programID': ''})
+    else:
+        return gen_standard_response(200, {'result': 'success',
+                                           'message': f'user {target_username} has been assigned a program',
+                                           'hasProgram': True,
+                                           'programID': relation.program.id})
