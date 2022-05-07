@@ -721,6 +721,50 @@ def create_new_program_from_template(request: HttpRequest):
                                        'programID': new_program_id})
 
 
+def assign_content_to_program(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'assign content to program',
+        'programID': __PROGRAM_ID__,
+        'contentID': __CONTENT_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    program_id = data.get('programID')
+    content_id = data.get('contentID')
+    if action != 'assign content to program' or program_id is None or content_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'teacher' and role != 'HRBP':
+        return unauthorized_action_response()
+    program = ProgramTable.objects.filter(id=program_id).first()
+    content = ContentTable.objects.filter(id=content_id).first()
+    if program is None or content is None:
+        return item_not_found_error_response()
+    new_program_content_relation = ProgramContentTable(program=program, content=content)
+    new_program_content_relation.save()
+    user = UserProgramTable.objects.filter(program__id=program_id).first().user
+    if user is not None:
+        new_user_content_relation = UserContentTable(user=user, content=content, assigner=username,
+                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=5))
+        new_user_content_relation.save()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'content {content.name} with id {content_id} assigned to {program.name} with id {program_id}'
+    })
+
 # def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
 #     file_ext = file.name.split(".")[-1].lower()
 #     file_path = f"{dir_prefix}/{lesson_id}/"
