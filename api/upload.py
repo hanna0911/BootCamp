@@ -536,7 +536,7 @@ def create_content(request: HttpRequest):
     new_program_content_relation.save()
     target_user = UserProgramTable.objects.filter(program__id=program_id).first().user
     if target_user is not None:
-        new_user_content_relation = UserContentTable(user=target_user, content=new_content, assigner=user)
+        new_user_content_relation = UserContentTable(user=target_user, content=new_content, assigner=user, deadline = datetime.datetime.now() + datetime.timedelta(days = 1))
         new_user_content_relation.save()
     program.contentCount += 1  # 父program的content数量累加
     program.save()

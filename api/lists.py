@@ -165,12 +165,12 @@ def assignable_test_list(request: HttpRequest):
             audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
-                'is_template': test.isTemplate,
+                'isTemplate': test.isTemplate,
                 'name': test.name,
                 'intro': test.intro,
-                'recommend_time': str(test.recommendedTime),
+                'recommendTime': str(test.recommendedTime),
                 'tag': test.tag,
-                'author_name': test.author.name,
+                'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'testID': test.id,
             }
@@ -183,6 +183,7 @@ def assignable_test_list(request: HttpRequest):
                 #     csv_dir = test.questions
                 csv_dir = test.questions
                 fp = open(csv_dir, "r", encoding="UTF-8")
+                fp.close()
             except Exception as e:
                 print(e)
                 return item_not_found_error_response()
@@ -212,12 +213,12 @@ def assignable_test_list(request: HttpRequest):
             audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
-                'is_template': test.isTemplate,
+                'isTemplate': test.isTemplate,
                 'name': test.name,
                 'intro': test.intro,
-                'recommend_time': str(test.recommendedTime),
+                'recommendTime': str(test.recommendedTime),
                 'tag': test.tag,
-                'author_name': test.author.name,
+                'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'testID': test.id,
             }
@@ -258,12 +259,12 @@ def assignable_test_list(request: HttpRequest):
             audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
-                'is_template': test.isTemplate,
+                'isTemplate': test.isTemplate,
                 'name': test.name,
                 'intro': test.intro,
-                'recommend_time': str(test.recommendedTime),
+                'recommendTime': str(test.recommendedTime),
                 'tag': test.tag,
-                'author_name': test.author.name,
+                'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'testID': test.id,
             }
@@ -308,25 +309,25 @@ def my_test_list(request: HttpRequest):
         return unauthorized_action_response()
     target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
     test_list = []
-    recommend_time_list = []
-    tag_list = []
+    # recommend_time_list = []
+    # tag_list = []
     for test_relation in target_tests:
         test = test_relation.content
         audience = audience_select[test.audience]
         test_info = {
             'audience': audience,
-            'is_template': test.isTemplate,
+            'isTemplate': test.isTemplate,
             'name': test.name,
             'intro': test.intro,
-            'recommend_time': str(test.recommendedTime),
+            'recommendTime': str(test.recommendedTime),
             'tag': test.tag,
-            'author_name': test.author.name,
+            'author': test.author.name,
             'releaseTime': test.releaseTime,
-            'testID': test.id,
+            'contentID': test.id,
         }
-        recommend_time_list.append(str(test.recommendedTime))
-        tag_list.append(test.tag)
-        try:
+        # recommend_time_list.append(str(test.recommendedTime))
+        # tag_list.append(test.tag)
+        """try:
             # if test.questions == '' or test.questions is None:
             #     csv_dir = './files/test/SampleTestPaper.csv'
             # else:
@@ -336,15 +337,15 @@ def my_test_list(request: HttpRequest):
         except Exception as e:
             print(e)
             return item_not_found_error_response()
-        test_paper = parse_test_for_student(csv_dir)
-        test_list.append({'test_info': test_info, 'test_paper': test_paper})
+        test_paper = parse_test_for_student(csv_dir)"""  #  用来返回考试内容（考题）
+        # test_list.append({'test_info': test_info, 'test_paper': test_paper})
+        test_list.append(test_info)
     print(test_list)
-    recommend_time_list = list(set(recommend_time_list))
-    tag_list = list(set(tag_list))
+    # recommend_time_list = list(set(recommend_time_list))
+    # tag_list = list(set(tag_list))
     return gen_standard_response(200, {"result": "success",
                                        "message": f'my tests retrieved for {role} user {username}',
-                                       "tests": test_list, 'test_recommend_time_items': recommend_time_list,
-                                       'test_tag_items': tag_list})
+                                       "tests": test_list})
 
 
 def assignable_course_list(request: HttpRequest):
@@ -431,9 +432,10 @@ def my_courses_list(request: HttpRequest):
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
             'finished': course_relation.finished,
-            'programID': course.programId,
+            # 'programID': course.programId,
             'contentID': course.id
         })
+    print(course_list)
     return gen_standard_response(200, {'result': 'success',
                                        'message': f'my courses retrieved for {role} user {username}',
                                        'courses': course_list})
@@ -534,7 +536,7 @@ def assignable_task_list(request: HttpRequest):
             'isTemplate': task.isTemplate,
             'name': task.name,
             'intro': task.intro,
-            'recommend_time': str(task.recommendedTime),
+            'recommendTime': str(task.recommendedTime),
             'tag': task.tag,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
@@ -580,7 +582,7 @@ def my_task_list(request: HttpRequest):
             'isTemplate': task.isTemplate,
             'name': task.name,
             'intro': task.intro,
-            'recommend_time': str(task.recommendedTime),
+            'recommendTime': str(task.recommendedTime),
             'tag': task.tag,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
