@@ -751,13 +751,14 @@ def assign_content_to_program(request: HttpRequest):
         return unauthorized_action_response()
     program = ProgramTable.objects.filter(id=program_id).first()
     content = ContentTable.objects.filter(id=content_id).first()
-    if program is None or content is None:
+    assigner = PrivateInfo.objects.filter(username=username).first()
+    if program is None or content is None or assigner is None:
         return item_not_found_error_response()
     new_program_content_relation = ProgramContentTable(program=program, content=content)
     new_program_content_relation.save()
     user = UserProgramTable.objects.filter(program__id=program_id).first().user
     if user is not None:
-        new_user_content_relation = UserContentTable(user=user, content=content, assigner=username,
+        new_user_content_relation = UserContentTable(user=user, content=content, assigner=assigner,
                                                      deadline=datetime.datetime.now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
     return gen_standard_response(200, {
