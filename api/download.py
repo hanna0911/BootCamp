@@ -1,7 +1,7 @@
 """
 下载相关接口
 """
-from django.http import HttpRequest, StreamingHttpResponse, HttpResponse
+from django.http import HttpRequest, StreamingHttpResponse, HttpResponse, FileResponse
 from wsgiref.util import FileWrapper
 import re
 import os
@@ -197,16 +197,19 @@ def retrieve_task_file_by_id(request: HttpRequest):
         return gen_standard_response(400, {'result': 'failed',
                                            'message': 'Bad Arguments'})
     task = ContentTable.objects.filter(id=task_id).first()
+    print(task.taskType)
     if task is None or task.taskType != 2:
         return item_not_found_error_response()
     try:
-        file = open(task.taskFile, 'r', encoding='UTF-8')
+        file = open(task.taskFile, 'rb')
     except Exception as e:
         print(e)
         return item_not_found_error_response()
-    response = StreamingHttpResponse(file_iterator(task.taskFile), status=206,
-                                     content_type='application/octet-stream')
-    response["Content-Disposition"] = 'attachment; filename={0}'.format(task.name)
+    # response = StreamingHttpResponse(file_iterator(task.taskFile), status=200,
+    #                                  content_type='application/octet-stream')
+    response = FileResponse(file, filename=(task.name + '.' + task.taskFile.split('.')[-1]), as_attachment=True)
+    response["COntent-Disposition"] = 'attachment; filename={0}'.format(task.name + '.' + task.taskFile.split('.')[-1])
+    response['Content-Type'] = 'application/octet-stream'
     response["Access-Control-Expose-Headers"] = "Content-Disposition"
     return response
 
