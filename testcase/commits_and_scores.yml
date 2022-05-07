@@ -147,7 +147,6 @@
     url: /get_commits_and_score
     data:
       newcomer: newcomer
-      teacher: teacher
   validate:
     - equals: { status_code: 200 }
 
@@ -159,18 +158,16 @@
     url: /get_commits_and_score
     data:
       newcomer: newcomer
-      teacher: teacher
   validate:
     - equals: { status_code: 400 }
 
-- name: admin获取评论和打分-师生关系不存在
+- name: admin获取评论和打分-学生无导师
   ident:
     - admin
   request:
     method: POST
     url: /get_commits_and_score
     data:
-      newcomer: s1
-      teacher: teacher
+      newcomer: s5
   validate:
     - equals: { status_code: 400 }

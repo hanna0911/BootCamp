@@ -245,21 +245,21 @@ def get_newcomer_recode(req: HttpRequest):
         "method": "POST",
         "username": "",
         "role": ["teacher", "admin"],
-        "data_field": ["newcomer", "teacher"]
+        "data_field": ["newcomer"]
     })
     if not ok:
         return res
     data = json.loads(req.body)
-    if req.session.get("role") == "teacher":  # 如果是导师发出的请求，则默认导师是自己
-        teacher = PrivateInfo.objects.get(username=req.session.get("username"))
-    else:  # 如果是管理员发出的请求，则按照字段中的导师进行寻找
-        found, teacher = find_people(data["teacher"])
-        if not found:
-            return teacher
+    # if req.session.get("role") == "teacher":  # 如果是导师发出的请求，则默认导师是自己
+    #     teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    # else:  # 如果是管理员发出的请求，则按照字段中的导师进行寻找
+    #     found, teacher = find_people(data["teacher"])
+    #     if not found:
+    #         return teacher
     found, newcomer = find_people(data["newcomer"])
     if not found:
         return newcomer
-    recodes = NewcomerRecode.objects.filter(teacher=teacher, newcomer=newcomer)
+    recodes = NewcomerRecode.objects.filter(newcomer=newcomer)
     return_list = []
     for recode in recodes:
         return_list.append({
@@ -279,14 +279,18 @@ def get_commits_and_score(req: HttpRequest):
         "method": "POST",
         "username": "",
         "role": ["admin"],
-        "data_field": ["newcomer", "teacher"]
+        "data_field": ["newcomer"]  # 只需要确认新人，就可以找到评论，无需导师信息
     })
     if not ok:
         return res
     data = json.loads(req.body)
-    ok, relation = get_relation(data["teacher"], data["newcomer"])
-    if not ok:
-        return relation
+    found, newcomer = find_people(data["newcomer"])
+    if not found:
+        return newcomer
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="newcomer has no teacher")
+    relation = relations.first()
     ret_data = {
         "teacherScore": relation.teacherScore,
         "newcomerScore": relation.newcomerScore,

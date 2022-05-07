@@ -2,7 +2,8 @@ from .api_util import *
 from .models import *
 from .upload import parse_test_for_student, parse_test_for_admin
 
-
+audience_select = ["newcomer", "teacher"]
+task_type_select = ["text", "link", "file"]
 def admin_newcomer_list(request: HttpRequest):
     """
     接收前端向/admin_newcomer_list的get请求
@@ -161,10 +162,7 @@ def assignable_test_list(request: HttpRequest):
         recommend_time_list = []
         tag_list = []
         for test in available_tests:
-            if test.audience == 0:
-                audience = 'newcomer'
-            else:
-                audience = 'teacher'
+            audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
                 'is_template': test.isTemplate,
@@ -211,10 +209,7 @@ def assignable_test_list(request: HttpRequest):
         recommend_time_list = []
         tag_list = []
         for test in available_tests:
-            if test.audience == 0:
-                audience = 'newcomer'
-            else:
-                audience = 'teacher'
+            audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
                 'is_template': test.isTemplate,
@@ -260,10 +255,7 @@ def assignable_test_list(request: HttpRequest):
         recommend_time_list = []
         tag_list = []
         for test in available_tests:
-            if test.audience == 0:
-                audience = 'newcomer'
-            else:
-                audience = 'teacher'
+            audience = audience_select[test.audience]
             test_info = {
                 'audience': audience,
                 'is_template': test.isTemplate,
@@ -320,10 +312,7 @@ def my_test_list(request: HttpRequest):
     tag_list = []
     for test_relation in target_tests:
         test = test_relation.content
-        if test.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[test.audience]
         test_info = {
             'audience': audience,
             'is_template': test.isTemplate,
@@ -393,10 +382,7 @@ def assignable_course_list(request: HttpRequest):
     else:  # newcomer
         return unauthorized_action_response()
     for course in available_courses:
-        if course.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[course.audience]
         course_list.append({
             'audience': audience,
             'isTemplate': course.isTemplate,
@@ -404,10 +390,10 @@ def assignable_course_list(request: HttpRequest):
             'intro': course.intro,
             'recommendTime': course.recommendedTime,
             'tag': course.tag,
-            'name': course.author.name,
+            'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
-            'programID': course.programId,
+            'programID': course.programId.id,
             'contentID': course.id
         })
     return gen_standard_response(200, {'result': 'success',
@@ -433,10 +419,7 @@ def my_courses_list(request: HttpRequest):
     course_list = []
     for course_relation in target_courses:
         course = course_relation.content
-        if course.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[course.audience]
         course_list.append({
             'audience': audience,
             'isTemplate': course.isTemplate,
@@ -544,16 +527,8 @@ def assignable_task_list(request: HttpRequest):
     else:  # newcomer
         return unauthorized_action_response()
     for task in available_tasks:
-        if task.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
-        if task.taskType == 0:
-            task_type = 'text'
-        elif task.taskType == 1:
-            task_type = 'link'
-        else:
-            task_type = 'file'
+        audience = audience_select[task.audience]
+        task_type = task_type_select[task.taskType]
         task_list.append({
             'audience': audience,
             'isTemplate': task.isTemplate,
@@ -598,16 +573,8 @@ def my_task_list(request: HttpRequest):
     tag_list = []
     for task_relation in target_tasks:
         task = task_relation.content
-        if task.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
-        if task.taskType == 0:
-            task_type = 'text'
-        elif task.taskType == 1:
-            task_type = 'link'
-        else:
-            task_type = 'file'
+        audience = audience_select[task.audience]
+        task_type = task_type_select[task.taskType]
         task_list.append({
             'audience': audience,
             'isTemplate': task.isTemplate,
@@ -646,10 +613,7 @@ def program_template_list(request: HttpRequest):
     target_programs = []
     program_templates = ProgramTable.objects.filter(isTemplate=True)
     for program in program_templates:
-        if program.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[program.audience]
         program_info = dict()
         program_info['name'] = program.name
         program_info['author'] = program.author.username
@@ -686,10 +650,7 @@ def assignable_program_list(request: HttpRequest):
     for program in available_programs:
         if UserProgramTable.objects.filter(program=program).count() != 0:
             continue
-        if program.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[program.audience]
         program_info = dict()
         program_info['name'] = program.name
         program_info['author'] = program.author.username
@@ -721,10 +682,7 @@ def my_program_list(request: HttpRequest):
     target_programs = []
     for relation in my_relations:
         program = relation.program
-        if program.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
+        audience = audience_select[program.audience]
         program_info = dict()
         program_info['name'] = program.name
         program_info['author'] = program.author.username
@@ -802,24 +760,12 @@ def program_content_list(request: HttpRequest):
     courses = []
     tests = []
     tasks = []
+    type_select = ["course", "exam", "task"]
     for relation in relations:
         content = relation.content
-        if content.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
-        if content.type == 0:
-            content_type = 'course'
-        elif content.type == 1:
-            content_type = 'exam'
-        else:
-            content_type = 'task'
-        if content.taskType == 0:
-            task_type = 'text'
-        elif content.taskType == 1:
-            task_type = 'link'
-        else:
-            task_type = 'file'
+        audience = audience_select[content.audience]
+        content_type = type_select[content.type]
+        task_type = task_type_select[content.taskType]
         content_info = {
             'name': content.name,
             'author': content.author.username,
@@ -851,6 +797,7 @@ def program_content_list(request: HttpRequest):
                                        'courses': courses,
                                        'tests': tests,
                                        'tasks': tasks})
+
 
 def teacher_newcomer_list_by_name(req: HttpRequest):
     """
