@@ -172,7 +172,7 @@ def assignable_test_list(request: HttpRequest):
                 'tag': test.tag,
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
-                'testID': test.id,
+                'contentID': test.id,
             }
             recommend_time_list.append(str(test.recommendedTime))
             tag_list.append(test.tag)
@@ -189,7 +189,7 @@ def assignable_test_list(request: HttpRequest):
                 return item_not_found_error_response()
             print(csv_dir)
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append({'test_info': test_info, 'test_paper': test_paper, 'courseDialog': False})
+            test_list.append(test_info)
         print(test_list)
         recommend_time_list = list(set(recommend_time_list))
         tag_list = list(set(tag_list))
@@ -220,7 +220,7 @@ def assignable_test_list(request: HttpRequest):
                 'tag': test.tag,
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
-                'testID': test.id,
+                'contentID': test.id,
             }
             recommend_time_list.append(str(test.recommendedTime))
             tag_list.append(test.tag)
@@ -235,7 +235,7 @@ def assignable_test_list(request: HttpRequest):
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append({'test_info': test_info, 'test_paper': test_paper})
+            test_list.append(test_info)
         print(test_list)
         recommend_time_list = list(set(recommend_time_list))
         tag_list = list(set(tag_list))
@@ -266,7 +266,7 @@ def assignable_test_list(request: HttpRequest):
                 'tag': test.tag,
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
-                'testID': test.id,
+                'contentID': test.id,
             }
             recommend_time_list.append(str(test.recommendedTime))
             tag_list.append(test.tag)
@@ -281,7 +281,7 @@ def assignable_test_list(request: HttpRequest):
                 print(e)
                 return item_not_found_error_response()
             test_paper = parse_test_for_admin(csv_dir)
-            test_list.append({'test_info': test_info, 'test_paper': test_paper})
+            test_list.append(test_info)
         print(test_list)
         recommend_time_list = list(set(recommend_time_list))
         tag_list = list(set(tag_list))
@@ -543,7 +543,7 @@ def assignable_task_list(request: HttpRequest):
             'taskType': task_type,
             'taskText': task.text,
             'taskLink': task.link,
-            'taskID': task.id
+            'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
         tag_list.append(task.tag)
