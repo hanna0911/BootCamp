@@ -500,3 +500,44 @@ def assign_program(request: HttpRequest):
                   + f'{len(content_relations)} contents'
     return gen_standard_response(200, {'result': 'success',
                                        'message': std_message})
+
+
+def content_progress(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'check content progress',
+        'programID': __PROGRAM_ID__,
+        'contentID': __CONTENT_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    program_id = data.get('programID')
+    content_id = data.get('contentID')
+    if action != 'check content progress' or program_id is None or content_id is None:
+        return gen_standard_response(200, {'result': 'failed', 'message': 'Bad Arguments'})
+    program = ProgramTable.objects.filter(id=program_id).first()
+    content = ContentTable.objects.filter(id=content_id).first()
+    if program is None or content is None:
+        return item_not_found_error_response()
+    user = UserProgramTable.objects.filter(program__id=program_id).first().user
+    relation = UserContentTable.objects.filter(user__username=user.username, content__id=content.id).first()
+    if relation is None:
+        return item_not_found_error_response()
+    return gen_standard_response(200, {'result': 'success',
+                                       'message': 'user-content info retrieved',
+                                       'finished': relation.finished,
+                                       'userBeginTime': relation.userBeginTime,
+                                       'userEndTime': relation.userEndTime,
+                                       'deadline': relation.deadline,
+                                       'assigner': relation.assigner.username,
+                                       'finishedLessonCount': relation.finishedLessonCount,
+                                       'examUsedTime': relation.examUsedTime,
+                                       'score': relation.score})
