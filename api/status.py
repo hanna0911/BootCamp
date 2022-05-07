@@ -173,6 +173,7 @@ def newcomer_score_teacher(req: HttpRequest):
         return gen_response(400, message="score not a number")
     relation.teacherScore = score
     relation.save()
+    update_teacher_score(relation.teacher)
     return gen_response(200)
 
 
