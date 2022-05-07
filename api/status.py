@@ -523,6 +523,11 @@ def content_progress(request: HttpRequest):
     content_id = data.get('contentID')
     if action != 'check content progress' or program_id is None or content_id is None:
         return gen_standard_response(200, {'result': 'failed', 'message': 'Bad Arguments'})
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
     program = ProgramTable.objects.filter(id=program_id).first()
     content = ContentTable.objects.filter(id=content_id).first()
     if program is None or content is None:
