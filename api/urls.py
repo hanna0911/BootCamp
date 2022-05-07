@@ -69,4 +69,5 @@ urlpatterns = [
     path('my_program_list', lists.my_program_list, name="my_program_list"),
     path('copy_program_template', upload.create_new_program_from_template, name="copy_program_template"),
     path('program_content_list', lists.program_content_list, name="program_content_list"),
+    path('task_file_by_id', download.retrieve_task_file_by_id, name="task_file_by_id")
 ]
