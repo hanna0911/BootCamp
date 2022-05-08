@@ -284,3 +284,25 @@ class UserLessonTable(models.Model):
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
+
+
+class NotificationTable(models.Model):
+    """
+    公告
+    """
+    id = models.AutoField(primary_key=True)
+    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    author_role = models.CharField(max_length=10)
+    title = models.CharField(max_length=50)
+    content = models.CharField(max_length=1000)
+    releaseTime = models.DateTimeField(auto_now_add=True)
+
+
+class UserNotificationTable(models.Model):
+    """
+    公告-用户关系表
+    """
+    relationID = models.AutoField(primary_key=True)
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    notification = models.ForeignKey(NotificationTable, on_delete=models.CASCADE)
+    finished = models.BooleanField(default=False)
