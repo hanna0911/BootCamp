@@ -423,6 +423,7 @@ def has_program(request: HttpRequest):
         'username': __USERNAME__
     }
     """
+
     if request.method != 'POST':
         return illegal_request_type_error_response()
     try:

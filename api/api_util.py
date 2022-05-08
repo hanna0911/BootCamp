@@ -144,18 +144,27 @@ def quick_check(req: HttpRequest, check_points: dict):
                     # logging.error("lack of arguments")
                     return False, gen_response(400, message="lack of arguments")
 
+        elif key == "cur_role":  # 读取session中的role
+            if req.session.get("role", None) is None:
+                return False, gen_response(400, message="no role in session")
+            role = req.session.get("role")
+            if len(check_points[key] == 0):  # 不声明，则当前什么角色都可以
+                return True, gen_response(200)
+            if role not in check_points[key]:
+                return False, gen_response(400, message="current role not matched")
+
     return True, gen_response(200)
 
 
-def update_teacher_score(teacher:PrivateInfo):
+def update_teacher_score(teacher: PrivateInfo):
     relations = TeacherNewcomerTable.objects.filter(teacher=teacher)
     count = 0
     total = 0
     for relation in relations:
-        if relation.teacherScore >=0:
+        if relation.teacherScore >= 0:
             count += 1
             total += relation.teacherScore
-    teacher.teacherScore = total/count
+    teacher.teacherScore = total / count
     teacher.save()
 
 
@@ -391,7 +400,7 @@ def path_converter(path: str = input):
     return path.replace("\\", "/")
 
 
-def get_progress(user: PrivateInfo, is_newcomer: bool = True, type:int = ContentTable.EnumType.Course ):
+def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = ContentTable.EnumType.Course):
     """
 
     :param user:
@@ -413,6 +422,4 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type:int = Content
     else:
         total_len = len(course)
         complete_len = len(course.filter(finished=True))
-        return int(100*complete_len/total_len)
-
-
+        return int(100 * complete_len / total_len)
