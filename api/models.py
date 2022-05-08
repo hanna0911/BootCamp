@@ -204,7 +204,7 @@ class LessonTable(models.Model):
     """
     课程库,隶属于培训内容库
     """
-    id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课堂id
+    id = models.AutoField(primary_key=True)  # 课堂id
     name = models.CharField(max_length=NAME_LEN)  # 课堂名称
     author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 课堂作者
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 课堂所属的事件或者大课程
@@ -218,7 +218,7 @@ class CoursewareTable(models.Model):
     """
     课件库
     """
-    id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课件id
+    id = models.AutoField(primary_key=True)  # 课件id
     lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 所属课堂
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
