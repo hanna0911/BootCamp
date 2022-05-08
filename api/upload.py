@@ -198,6 +198,8 @@ def upload_answers(request: HttpRequest):
     relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds)
     relation.score = score
     relation.save()
+    check_graduated_newcomer(relation.user)
+    check_graduated_teacher(relation.user)
     # print(relation.finished, relation.userBeginTime, relation.userEndTime, relation.examUsedTime, relation.score)
     return gen_standard_response(200, {"result": "success",
                                        "message": "Test paper successfully graded",
@@ -344,6 +346,8 @@ def finish_task(request: HttpRequest):
     relation.userEndTime = datetime.datetime.now()
     relation.finished = True
     relation.save()
+    check_graduated_newcomer(relation.user)
+    check_graduated_teacher(relation.user)
     std_message = f'user {username} marked task {task.name} with id {task.id} as finished'
     return gen_standard_response(200, {'result': 'success',
                                        'message': std_message})

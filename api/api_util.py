@@ -138,6 +138,7 @@ def check_graduated_newcomer(user: PrivateInfo):
         user=user,
         program__audience=ProgramTable.EnumAudience.Newcomer)
     if user_program.count() <= 0:
+        print("no program when checking graduated")
         return
     user_program = user_program.first()
     print(f"{user_program.user.name}")
