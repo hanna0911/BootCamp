@@ -823,7 +823,6 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
         return teacher
     student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
     learning_list = []
-    print(len(student_list))
     for entry in student_list:  # 还在学习的学生
         if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             learning_list.append(entry.newcomer)

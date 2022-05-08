@@ -2,8 +2,18 @@
   ident:
     - teacher
   request:
-    method: GET
+    method: POST
     url: /get_honor
     data:
   validate:
     - equals: { status_code: 200 }
+
+- name: 获取自己的荣誉-方法错误
+  ident:
+    - teacher
+  request:
+    method: GEt
+    url: /get_honor
+    data:
+  validate:
+    - equals: { status_code: 400 }

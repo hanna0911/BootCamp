@@ -274,12 +274,19 @@ def get_honor(req: HttpRequest):
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
+        "data_field": []
     })
     if not ok:
         return res
-    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
     honor_list = Honor.objects.filter(owner=user)
     medals_list = []
     certificates_list = []
@@ -299,17 +306,25 @@ def get_honor(req: HttpRequest):
 def teacher_summary_info(req: HttpRequest):
     """
     导师查看带新概览,自己带了几个新人,已经带过几个新人
+    如果有导师字段，则从字段读取，否则从session中读取
     :param req:
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
         "role": ["teacher"],
+        "data_field": []
     })
     if not ok:
         return res
-    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
     data = {
         "current": user.currentMembers,
         "historical": user.historicalMembers,
