@@ -648,10 +648,10 @@ def create_lesson(request: HttpRequest):
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
-    new_lesson_id = username + "_l_" + str(time.time())
-    new_lesson = LessonTable(id=new_lesson_id, name=name, author=user, content=content,
+    new_lesson = LessonTable(name=name, author=user, content=content,
                              intro=intro, recommendedTime=recommend_time, cover=cover)
     new_lesson.save()
+    new_lesson_id = new_lesson.id
     try:
         file_paths = save_courseware_files(coursewares, new_lesson_id, content_id, username)
         print('courseware file paths')
