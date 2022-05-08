@@ -13,7 +13,7 @@ def write_db(req: HttpRequest):
     if req.method == "POST":
         path = "/testcase/template.xlsx"
     else:
-        path = "/testcase/template.xlsx"
+        path = "/testcase/real.xlsx"
     root = get_root_path()
     df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
     for i in range(len(df)):

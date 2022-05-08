@@ -6,6 +6,8 @@ from .upload import parse_test_for_student, parse_test_for_admin
 
 audience_select = ["newcomer", "teacher"]
 task_type_select = ["text", "link", "file"]
+
+
 def admin_newcomer_list(request: HttpRequest):
     """
     接收前端向/admin_newcomer_list的get请求
@@ -339,7 +341,7 @@ def my_test_list(request: HttpRequest):
         except Exception as e:
             print(e)
             return item_not_found_error_response()
-        test_paper = parse_test_for_student(csv_dir)"""  #  用来返回考试内容（考题）
+        test_paper = parse_test_for_student(csv_dir)"""  # 用来返回考试内容（考题）
         # test_list.append({'test_info': test_info, 'test_paper': test_paper})
         test_list.append(test_info)
     print(test_list)
@@ -734,6 +736,7 @@ def teacher_newcomer_list(req: HttpRequest):
     return gen_response(200, data=return_list)
 
 
+
 def program_content_list(request: HttpRequest):
     """
     POST{
@@ -741,22 +744,19 @@ def program_content_list(request: HttpRequest):
     'programID': '__PROGRAM_ID__'
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
-    session = request.session
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "username": "",
+        "cur_role": [],  # 如果列表为空，则只检查session中是否存在role
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     program_id = data.get('programID')
-    username = session.get('username')
-    role = session.get('role')
     if action != 'get content list for program' or program_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     program = ProgramTable.objects.filter(id=program_id).first()
     if program is None:
         return item_not_found_error_response()
@@ -823,7 +823,6 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
         return teacher
     student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
     learning_list = []
-    print(len(student_list))
     for entry in student_list:  # 还在学习的学生
         if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             learning_list.append(entry.newcomer)
