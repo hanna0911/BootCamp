@@ -10,7 +10,10 @@ from api.api_util import gen_response
 
 
 def write_db(req: HttpRequest):
-    path = "/testcase/template.xlsx"
+    if req.method == "POST":
+        path = "/testcase/template.xlsx"
+    else:
+        path = "/testcase/template.xlsx"
     root = get_root_path()
     df: pd.DataFrame = open_xlsx(str(root) + path, "privateinfo")
     for i in range(len(df)):

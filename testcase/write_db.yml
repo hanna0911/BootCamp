@@ -1,6 +1,6 @@
 - name: 初始化数据
   request:
-    method: GET
+    method: POST
     url: /write_db
     data:
     headers:
