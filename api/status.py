@@ -331,8 +331,8 @@ def finish_lesson(req: HttpRequest):
     if relations.count() <= 0:
         return gen_response(400, message="relation between user and lesson not found")
     relation = relations.first()
-    if relation.finished:
-        return gen_response(200, message="already finished")
+    # if relation.finished:
+    #     return gen_response(200, message="already finished")
     relation.finished = True
     relation.save()
     # 更新content
@@ -344,6 +344,7 @@ def finish_lesson(req: HttpRequest):
     course_relation.finishedLessonCount += 1
     if course_relation.finishedLessonCount == course.lessonCount:
         course_relation.finished = True
+        logging.info("lesson 结束，课程紧跟着结束")
     course_relation.save()
     # 更新整个培训内容是否完成
     check_graduated_teacher(user)

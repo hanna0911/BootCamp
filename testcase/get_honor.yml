@@ -1,6 +1,6 @@
 - name: 获取自己的荣誉
   ident:
-    - teacher
+    - admin
   request:
     method: POST
     url: /get_honor
@@ -12,8 +12,19 @@
   ident:
     - teacher
   request:
-    method: GEt
+    method: GET
     url: /get_honor
     data:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取自己的荣誉-查无此人
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /get_honor
+    data:
+      teacher: 查无此人
   validate:
     - equals: { status_code: 400 }
