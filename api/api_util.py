@@ -147,6 +147,18 @@ def quick_check(req: HttpRequest, check_points: dict):
     return True, gen_response(200)
 
 
+def update_teacher_score(teacher:PrivateInfo):
+    relations = TeacherNewcomerTable.objects.filter(teacher=teacher)
+    count = 0
+    total = 0
+    for relation in relations:
+        if relation.teacherScore >=0:
+            count += 1
+            total += relation.teacherScore
+    teacher.teacherScore = total/count
+    teacher.save()
+
+
 def unknown_error_response():
     """
     生成未知错误的标准响应
