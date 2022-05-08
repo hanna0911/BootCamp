@@ -76,7 +76,8 @@ def my_notifications(request: HttpRequest):
             'author': notification.author.username,
             'authorRole': notification.author_role,
             'releaseTime': notification.releaseTime,
-            'notificationID': notification.id
+            'notificationID': notification.id,
+            'finished': relation.finished
         })
     return gen_standard_response(200, {
         'result': 'success',
