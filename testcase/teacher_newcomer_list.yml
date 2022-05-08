@@ -2,7 +2,7 @@
   ident:
     - teacher
   request:
-    method: POST
+    method: GET
     url: /teacher_newcomer_list
     data:
   validate:
