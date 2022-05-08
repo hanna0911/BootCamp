@@ -1,14 +1,16 @@
 """
 下载相关接口
 """
-from django.http import HttpRequest, StreamingHttpResponse, HttpResponse
+from django.http import HttpRequest, StreamingHttpResponse, HttpResponse, FileResponse
 from wsgiref.util import FileWrapper
 import re
 import os
 import mimetypes
 import csv
-from api.models import ContentTable
+import json
+from api.models import ContentTable, PrivateInfo, UserContentTable
 from api.api_util import *
+from api.upload import parse_test_for_grader, parse_test_for_student, grade_test
 
 
 def file_iterator(file_name, chunk_size=8192, offset=0, length=None):
@@ -123,5 +125,91 @@ def retrieve_test_paper_by_id(request: HttpRequest):
     csv_writer = csv.writer(response)
     csv_writer.writerows(csv_reader)
     response.status_code = 200
+    return response
+
+
+def retrieve_test_by_user_id(request: HttpRequest):
+    """
+    文件功能正式接口
+    接收POST请求
+    {action: "retrieve tests by user id", "username": __USER_ID__}
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    session = request.session
+    action = data.get('action')
+    target_username = data.get('username')
+    if action != 'retrieve tests by user id' or target_username is None:
+        return gen_standard_response(400, {"result": "failed", "message": "Bad Arguments"})
+    target_user_filter = PrivateInfo.objects.filter(username=target_username)
+    if len(target_user_filter) == 0:
+        return item_not_found_error_response()
+    target_user = target_user_filter.first()
+    target_tests = UserContentTable.objects.filter(user=target_user, content__type=ContentTable.EnumType.Exam)
+    test_list = []
+    for test_relation in target_tests:
+        test = test_relation.content
+        if test.audience == 0:
+            audience = 'newcomer'
+        else:
+            audience = 'teacher'
+        test_info = [
+            audience,
+            test.isTemplate,
+            test.name,
+            test.intro,
+            test.recommendedTime,
+            test.tag,
+            test.author.name,
+            test.releaseTime
+        ]
+        try:
+            fp = open(test.questions, "r", encoding="UTF-8")
+        except Exception as e:
+            print(e)
+            return item_not_found_error_response()
+        test_paper = parse_test_for_student(test.questions)
+        test_list.append([test_info, test_paper])
+    return gen_standard_response(200, {"result": "success",
+                                       "message": f"tests retrieved for {target_username}",
+                                       "tests": test_list})
+
+
+def retrieve_task_file_by_id(request: HttpRequest):
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    session = request.session
+    action = data.get('action')
+    task_id = data.get('taskID')
+    if session.get('username') is None or session.get('role') is None:
+        return session_timeout_response()
+    if action != 'task file by id' or task_id is None:
+        return gen_standard_response(400, {'result': 'failed',
+                                           'message': 'Bad Arguments'})
+    task = ContentTable.objects.filter(id=task_id).first()
+    print(task.taskType)
+    if task is None or task.taskType != 2:
+        return item_not_found_error_response()
+    try:
+        file = open(task.taskFile, 'rb')
+    except Exception as e:
+        print(e)
+        return item_not_found_error_response()
+    # response = StreamingHttpResponse(file_iterator(task.taskFile), status=200,
+    #                                  content_type='application/octet-stream')
+    response = FileResponse(file, filename=(task.name + '.' + task.taskFile.split('.')[-1]), as_attachment=True)
+    response["COntent-Disposition"] = 'attachment; filename={0}'.format(task.name + '.' + task.taskFile.split('.')[-1])
+    response['Content-Type'] = 'application/octet-stream'
+    response["Access-Control-Expose-Headers"] = "Content-Disposition"
     return response
 

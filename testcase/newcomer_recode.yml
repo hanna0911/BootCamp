@@ -1,0 +1,48 @@
+# 带新记录相关的接口测试
+- name: 导师写带新记录
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_recode
+    data:
+      newcomer: newcomer
+      content: 今天新人的表现很好
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师写带新记录-角色错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /newcomer_recode
+    data:
+      newcomer: newcomer
+      content: 今天新人的表现很好
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师写带新记录-新人不存在
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_recode
+    data:
+      newcomer: 查无此人
+      content: 今天新人的表现很好
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 导师写带新记录-不是自己的学生
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_recode
+    data:
+      newcomer: s1
+      content: 今天新人的表现很好
+  validate:
+    - equals: { status_code: 400 }

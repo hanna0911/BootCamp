@@ -6,7 +6,7 @@
     url: /assign_teacher
     data:
       teacher: t1
-      newcomer: newcomer
+      newcomer: s5
   validate:
     - equals: { status_code: 200 }
 

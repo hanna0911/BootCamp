@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, lists, upload, download, status, analysis
+from . import views, lists, upload, download, status, analysis, notification
 from backend.write_db import write_db
 
 # api应用的路由配置
@@ -23,17 +23,56 @@ urlpatterns = [
     path("video/", download.stream_video, name="video"),
     path("avatar_by_name/", views.avatar_by_name, name="avatar_by_name"),
     path("avatar", views.avatar, name="avatar"),
-    path("upload_courseware_info", upload.upload_courseware_info, name="upload_courseware_info"),
-    path("upload_courseware_file", upload.upload_courseware_file, name="upload_courseware_file"),
     path("reject_nominate", status.reject_nominate, name="reject_nominate"),
     path("accept_nominate", status.accept_nominate, name="accept_nominate"),
+    path("nominate_teachers", status.nominate_teachers, name="nominate_teachers"),
     path("assign_teacher", status.assign_teacher, name="assign_teacher"),
     path("bootcamp_attend", analysis.bootcamp_attend, name="bootcamp_attend"),
     path("newcomer_average_score", analysis.newcomer_average_score, name="newcomer_average_score"),
-    path('upload_test_file', upload.upload_test_file, name="upload_test_file"),
+    path("teacher_average_score", analysis.teacher_average_score, name="teacher_average_score"),
+    path("graduate_time", analysis.graduate_time, name="graduate_time"),
+    path("camp_completion", analysis.camp_completion, name="camp_completion"),
+    path("tutor_assignment_chart", analysis.tutor_assignment_chart, name="tutor_assignment_chart"),
     path('upload_lesson_file', upload.upload_lesson_file, name="upload_lesson_file"),
     path('download_test_info', download.retrieve_test_info_by_id, name="download_test_info"),
     path('download_test_paper', download.retrieve_test_paper_by_id, name="download_test_paper"),
-    path("teacher_newcomer_list", lists.teacher_newcomer_list,name="teacher_newcomer_list"),
-    path("get_honor", views.get_honor, name="get_honor")
+    path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
+    path("teacher_summary_info", views.teacher_summary_info, name="teacher_summary_info"),  # 查看导师带了几个人
+    path("newcomer_summary_info", views.newcomer_summary_info, name="newcomer_summary_info"), # 查看新人项目的完成概览
+    path("teacher_board_summary_info",views.teacher_board_summary_info, name="teacher_board_summary_info"), # 查看导师培训完成概览
+    path('begin_test', upload.begin_test, name="begin_test"),
+    path('upload_answers', upload.upload_answers, name="upload_answers"),
+    path('finish_task', upload.finish_task, name="finish_task"),
+    path('assignable_test_list', lists.assignable_test_list, name="assignable_test_list"),
+    path('my_test_list', lists.my_test_list, name="my_test_list"),
+    path('assignable_course_list', lists.assignable_course_list, name="assignable_course_list"),
+    path('my_course_list', lists.my_courses_list, name="my_course_list"),
+    path('assignable_task_list', lists.assignable_task_list, name="assignable_task_list"),
+    path('my_task_list', lists.my_task_list, name="assignable_task_list"),
+    path('assign_content', status.assign_content, name="assign content"),
+    path("teacher_newcomer_list", lists.teacher_newcomer_list, name="teacher_newcomer_list"),
+    path("teacher_newcomer_list_by_name", lists.teacher_newcomer_list_by_name, name="teacher_newcomer_list_by_name"),
+    path("get_honor", views.get_honor, name="get_honor"),
+    path('create_lesson', upload.create_lesson, name="create_lesson"),
+    path('get_cur_role', views.get_cur_role, name="get_cur_role"),
+    path("newcomer_commit_teacher",status.newcomer_commit_teacher,name="newcomer_commit_teacher"), # 导师和新人互相评价和打分
+    path("teacher_commit_newcomer",status.teacher_commit_newcomer,name="teacher_commit_newcomer"),
+    path("newcomer_score_teacher",status.newcomer_score_teacher,name="newcomer_score_teacher"),
+    path("teacher_score_newcomer",status.teacher_score_newcomer,name="teacher_score_newcomer"),
+    path("newcomer_recode",status.newcomer_recode,name="newcomer_recode"),
+    path("get_newcomer_recode",status.get_newcomer_recode, name="get_newcomer_recode"),
+    path("get_commits_and_score",status.get_commits_and_score, name="get_commits_and_score"),
+    path('program_templates', lists.program_template_list, name="program_templates"),
+    path('assign_program', status.assign_program, name="assign_program"),
+    path('has_program', status.has_program, name="has_program"),
+    path('assignable_program_list', lists.assignable_program_list, name="assignable_program_list"),
+    path('my_program_list', lists.my_program_list, name="my_program_list"),
+    path('copy_program_template', upload.create_new_program_from_template, name="copy_program_template"),
+    path('program_content_list', lists.program_content_list, name="program_content_list"),
+    path('task_file_by_id', download.retrieve_task_file_by_id, name="task_file_by_id"),
+    path('assign_content_to_program', upload.assign_content_to_program, name="assign_content_to_program"),
+    path('content_progress', status.content_progress, name="content_progress"),
+    path('create_notification', notification.create_notification, name="create_notification"),
+    path('my_notification_list', notification.my_notifications, name="my_notification_list"),
+    path('finish_notification', notification.finish_notification, name="finish_notification"),
 ]

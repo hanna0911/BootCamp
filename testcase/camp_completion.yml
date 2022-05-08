@@ -1,0 +1,60 @@
+- name: 培训完成情况-成功
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /camp_completion
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 培训完成情况-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /camp_completion
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 培训完成情况-权限错误
+  ident:
+    - newcomer
+    - teacher
+  request:
+    method: POST
+    url: /camp_completion
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 培训完成情况-字段缺失
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /camp_completion
+    data:
+      dateRangeStart: 1651334400000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 培训完成情况-时间错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /camp_completion
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939200000
+  validate:
+    - equals: { status_code: 400 }

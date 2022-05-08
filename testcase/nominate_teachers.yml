@@ -1,0 +1,19 @@
+- name: admin提名人选
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /nominate_teachers
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: admin提名人选-权限错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /nominate_teachers
+    data:
+  validate:
+    - equals: { status_code: 400 }
