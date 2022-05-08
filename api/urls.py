@@ -70,5 +70,6 @@ urlpatterns = [
     path('copy_program_template', upload.create_new_program_from_template, name="copy_program_template"),
     path('program_content_list', lists.program_content_list, name="program_content_list"),
     path('task_file_by_id', download.retrieve_task_file_by_id, name="task_file_by_id"),
-    path('assign_content_to_program', upload.assign_content_to_program, name="assign_content_to_program")
+    path('assign_content_to_program', upload.assign_content_to_program, name="assign_content_to_program"),
+    path('content_progress', status.content_progress, name="content_progress"),
 ]

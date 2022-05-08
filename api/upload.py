@@ -534,9 +534,9 @@ def create_content(request: HttpRequest):
     print(new_content.questions)
     new_program_content_relation = ProgramContentTable(program=program, content=new_content)  # 和父program创建关联信息
     new_program_content_relation.save()
-    target_user = UserProgramTable.objects.filter(program__id=program_id).first().user
+    target_user = UserProgramTable.objects.filter(program__id=program_id).first()
     if target_user is not None:
-        new_user_content_relation = UserContentTable(user=target_user, content=new_content, assigner=user, deadline = datetime.datetime.now() + datetime.timedelta(days = 1))
+        new_user_content_relation = UserContentTable(user=target_user.user, content=new_content, assigner=user, deadline = datetime.datetime.now() + datetime.timedelta(days = 1))
         new_user_content_relation.save()
     program.contentCount += 1  # 父program的content数量累加
     program.save()
