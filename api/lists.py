@@ -1,3 +1,5 @@
+import json
+
 from .api_util import *
 from .models import *
 from .upload import parse_test_for_student, parse_test_for_admin
@@ -752,7 +754,7 @@ def program_content_list(request: HttpRequest):
     username = session.get('username')
     role = session.get('role')
     if action != 'get content list for program' or program_id is None:
-        return gen_standard_response(400, 'Bad Arguments')
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
     if username is None or role is None:
         return session_timeout_response()
     program = ProgramTable.objects.filter(id=program_id).first()
@@ -833,3 +835,91 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
     return gen_response(200, return_list)
+
+
+def content_lesson_list(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'lesson list for course'
+        'contentID': __CONTENT_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    content_id = data.get('contentID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'lesson list for course' or content_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    course = ContentTable.objects.filter(id=content_id).first()
+    if course is None:
+        return item_not_found_error_response()
+    lessons = LessonTable.objects.filter(content__id=content_id)
+    lesson_list = []
+    for lesson in lessons:
+        lesson_list.append({
+            'lessonID': lesson.id,
+            'name': lesson.name,
+            'author': lesson.author.username,
+            'intro': lesson.intro,
+            'recommendTime': lesson.recommendedTime,
+            'releaseTime': lesson.releaseTime
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'{len(lessons)} lessons retrieved for course {course.name}',
+        'lessons': lesson_list
+    })
+
+
+def lesson_courseware_list(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'courseware list for lesson'
+        'lessonID': __LESSON_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    lesson_id = data.get('lessonID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'courseware list for lesson' or lesson_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    lesson = LessonTable.objects.filter(id=lesson_id).first()
+    if lesson is None:
+        return item_not_found_error_response()
+    coursewares = CoursewareTable.objects.filter(lesson__id=lesson_id)
+    courseware_list = []
+    for courseware in coursewares:
+        courseware_list.append({
+            'coursewareID': courseware.id,
+            'name': courseware.name,
+            'uploadTime': courseware.uploadTime,
+            'url': courseware.url
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'{len(coursewares)} coursewares retrieved for lesson {lesson.name}',
+        'lessons': courseware_list
+    })
