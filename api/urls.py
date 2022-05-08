@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views, lists, upload, download, status, analysis
+from . import views, lists, upload, download, status, analysis, notification
 from backend.write_db import write_db
 
 # api应用的路由配置
@@ -72,4 +72,7 @@ urlpatterns = [
     path('task_file_by_id', download.retrieve_task_file_by_id, name="task_file_by_id"),
     path('assign_content_to_program', upload.assign_content_to_program, name="assign_content_to_program"),
     path('content_progress', status.content_progress, name="content_progress"),
+    path('create_notification', notification.create_notification, name="create_notification"),
+    path('my_notification_list', notification.my_notifications, name="my_notification_list"),
+    path('finish_notification', notification.finish_notification, name="finish_notification"),
 ]
