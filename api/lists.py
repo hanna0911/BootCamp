@@ -709,19 +709,28 @@ def my_program_list(request: HttpRequest):
 def teacher_newcomer_list(req: HttpRequest):
     """
     获得老师自己带的学生列表(已经毕业的不算)
+    如果带了teacher参数，则根据参数找新人列表
     :param req:
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
-        "role": ["teacher"],
+        "role": ["teacher", "admin"],
+        "data_field": []
     })
     if not ok:
         return res
-    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, teacher = find_people(data["teacher"])
+        if not found:
+            return teacher
     student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
     learning_list = []
+    print(teacher.username)
     for entry in student_list:  # 还在学习的学生
         if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             learning_list.append(entry.newcomer)
@@ -734,6 +743,7 @@ def teacher_newcomer_list(req: HttpRequest):
         return_list.append(tmp)
 
     return gen_response(200, data=return_list)
+
 
 
 def program_content_list(request: HttpRequest):
