@@ -56,7 +56,8 @@ def teacher_wait_list(req: HttpRequest):
     })
     if not ok:
         return res
-    newcomer_list = PrivateInfo.objects.filter(isTeacher=False, isNew=True)
+    newcomer_list = PrivateInfo.objects.filter(
+        isTeacher=False, isNew=True, newcomerGraduateState=PrivateInfo.EnumNewcomerGraduateState.NormalGraduate)
     return_list = []
     for new in newcomer_list:
         tmp = load_private_info(new)
@@ -311,7 +312,14 @@ def my_test_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_tests = UserContentTable.objects.filter(
+        user__username=username, content__type=ContentTable.EnumType.Exam,
+        content__audience=audience
+    )
     test_list = []
     # recommend_time_list = []
     # tag_list = []
@@ -419,8 +427,15 @@ def my_courses_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_courses = UserContentTable.objects.filter(user__username=username,
-                                                     content__type=ContentTable.EnumType.Course)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_courses = UserContentTable.objects.filter(
+        user__username=username,
+        content__type=ContentTable.EnumType.Course,
+        content__audience=audience
+    )
     course_list = []
     for course_relation in target_courses:
         course = course_relation.content
@@ -572,8 +587,15 @@ def my_task_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_tasks = UserContentTable.objects.filter(user__username=username,
-                                                   content__type=ContentTable.EnumType.Task)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_tasks = UserContentTable.objects.filter(
+        user__username=username,
+        content__type=ContentTable.EnumType.Task,
+        content__audience=audience
+    )
     task_list = []
     recommend_time_list = []
     tag_list = []

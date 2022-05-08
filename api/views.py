@@ -329,6 +329,7 @@ def teacher_summary_info(req: HttpRequest):
         "current": user.currentMembers,
         "historical": user.historicalMembers,
         "dutyDate": user.teacherDutyDate,
+        "teacherIsDuty":user.teacherIsDuty,
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
@@ -393,10 +394,17 @@ def newcomer_summary_info(req: HttpRequest):
     if len(relations) <= 0:
         teacher_name = "无"
         teacher_username = ""
+        evaluate_progress = 0
     else:
         relation = relations.first()
         teacher_name = relation.teacher.name
         teacher_username = relation.teacher.username
+        if relation.newcomerCommitted and relation.teacherCommitted:
+            evaluate_progress = 100
+        elif relation.newcomerCommitted or relation.teacherCommitted:
+            evaluate_progress = 50
+        else:
+            evaluate_progress = 0
 
     is_graduate = GraduateStatusToTest[newcomer.newcomerGraduateState]
     date_select = ["未毕业", newcomer.newcomerGraduateDate, newcomer.newcomerGraduateDate]
@@ -412,9 +420,9 @@ def newcomer_summary_info(req: HttpRequest):
         "graduateDate": graduate_date,
         "isGraduate": is_graduate,
         "courseProgress": course_progress,
-        "examProgress": exam_progress,
+        "examProgress": exam_progress,#69 f
         "taskProgress": task_progress,
-        "evaluateProgress": 50,  # TODO: !!!还没统计呢
+        "evaluateProgress": evaluate_progress,
         "certificate": 'https://gimg2.baidu.com/image_search/s'
                        'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
                        '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'

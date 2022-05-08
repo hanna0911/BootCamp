@@ -3,9 +3,10 @@ import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
-from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable
+from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable, UserProgramTable, UserLessonTable, ProgramTable
 from .models import ContentTable
 import json
+from django.utils import timezone
 
 chinese_role_trans = {
     "admin": "管理员",
@@ -99,6 +100,70 @@ def str_to_boolean(s: str):
         return None
 
 
+def check_graduated_teacher(user: PrivateInfo):
+    """
+    检查导师是否毕业
+    :param user:
+    :return:
+    """
+    user_program = UserProgramTable.objects.filter(
+        user=user,
+        program__audience=ProgramTable.EnumAudience.Teacher)
+    if user_program.count() <= 0:
+        return
+    user_program = user_program.first()
+    print(f"{user_program.user.name}")
+    contents = UserContentTable.objects.filter(
+        user=user,
+        content__audience=ContentTable.EnumAudience.teacher)
+    total = contents.count()
+    finished = contents.filter(finished=True).count()
+    print(f"teacher total{total}, finished{finished}")
+    if total == finished:
+        user_program.finished = True
+        user_program.save()
+        user.teacherIsDuty = True
+        print("teacher graduated")
+        user.teacherDutyDate = timezone.now()
+        user.save()
+
+
+def check_graduated_newcomer(user: PrivateInfo):
+    """¬
+    检查一个新人是否完成了新人培训
+    :param newcomer:
+    :return:
+    """
+    user_program = UserProgramTable.objects.filter(
+        user=user,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        return
+    user_program = user_program.first()
+    print(f"{user_program.user.name}")
+    contents = UserContentTable.objects.filter(
+        user=user,
+        content__audience=ContentTable.EnumAudience.newcomer)
+    total = contents.count()
+    finished = contents.filter(finished=True).count()
+    print(f"newcomr total{total}, finished{finished}")
+    if total == finished:
+        user_program.finished = True
+        user_program.save()
+        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=user)
+        if teacher_relations.count() <= 0:  # 还没有导师，不能毕业
+            return
+        teacher_relation = teacher_relations.first()
+        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted:
+            user.newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate
+            user.newcomerGraduateDate = timezone.now()
+            user.save()
+            teacher = teacher_relation.teacher
+            teacher.currentMembers -= 1
+            teacher.historicalMembers += 1
+            print("newcomer graduated")
+
+
 def find_people(username: str):
     users = PrivateInfo.objects.filter(username=username)
     if len(users) <= 0:
@@ -148,7 +213,7 @@ def quick_check(req: HttpRequest, check_points: dict):
             if req.session.get("role", None) is None:
                 return False, gen_response(400, message="no role in session")
             role = req.session.get("role")
-            if len(check_points[key] == 0):  # 不声明，则当前什么角色都可以
+            if len(check_points[key]) == 0:  # 不声明，则当前什么角色都可以
                 return True, gen_response(200)
             if role not in check_points[key]:
                 return False, gen_response(400, message="current role not matched")

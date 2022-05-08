@@ -116,6 +116,8 @@ class TeacherNewcomerTable(models.Model):
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField(default=-1.)  # 该新人被该老师评价的分数
     teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
+    teacherCommitted = models.BooleanField(default=False)
+    newcomerCommitted = models.BooleanField(default=False)
 
 
 class NewcomerRecode(models.Model):
