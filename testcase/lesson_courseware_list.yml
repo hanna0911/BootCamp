@@ -1,0 +1,47 @@
+- name: 成功获取课件列表
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /lesson_courseware_list
+    data:
+      action: courseware list for lesson
+      lessonID: 2
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 成功获取课件列表-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /lesson_courseware_list
+    data:
+      action: courseware list for lesson
+      lessonID: 2
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 成功获取课件列表-找不到课程
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /lesson_courseware_list
+    data:
+      action: courseware list for lesson
+      lessonID: 123
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 成功获取课件列表-action错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /lesson_courseware_list
+    data:
+      action: courseware list for
+      lessonID: 2
+  validate:
+    - equals: { status_code: 400 }

@@ -1,0 +1,25 @@
+- name: 分配program
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assign_program
+    data:
+      action: assign program
+      username: s1
+      programID: 15
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 分配program-身份错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /assign_program
+    data:
+      action: assign program
+      username: s1
+      programID: 15
+  validate:
+    - equals: { status_code: 400 }

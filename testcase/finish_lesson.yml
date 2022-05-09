@@ -1,12 +1,12 @@
 - name: 新人结束课程
   ident:
-    - newcomer
+    - finishnewcomer
   request:
     method: POST
     url: /finish_lesson
     data:
       # 不要动这里的数据，这里和表格中严格对应
-      username: newcomer
+      username: finishnewcomer
       lessonID: 3
     headers:
   validate:
@@ -14,7 +14,7 @@
 
 - name: 新人结束课程-方法错误
   ident:
-    - newcomer
+    - finishnewcomer
   request:
     method: GET
     url: /finish_lesson
@@ -29,10 +29,23 @@
   ident:
     - newcomer
   request:
-    method: GET
+    method: POST
     url: /finish_lesson
     data:
       username: newcomer
+      lessonID: 283
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 新人结束课程-查无此人
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /finish_lesson
+    data:
+      username: 查无此人
       lessonID: 283
     headers:
   validate:
@@ -42,7 +55,7 @@
   ident:
     - newcomer
   request:
-    method: GET
+    method: POST
     url: /finish_lesson
     data:
       username: newcomer

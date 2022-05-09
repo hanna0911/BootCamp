@@ -113,17 +113,20 @@ def check_graduated_teacher(user: PrivateInfo):
         return
     user_program = user_program.first()
     print(f"{user_program.user.name}")
+    logging.warning(f"checking teacher graduate{user_program.user.name}")
     contents = UserContentTable.objects.filter(
         user=user,
         content__audience=ContentTable.EnumAudience.teacher)
     total = contents.count()
     finished = contents.filter(finished=True).count()
     print(f"teacher total{total}, finished{finished}")
+    logging.warning(f"teacher total{total}, finished{finished}")
     if total == finished:
         user_program.finished = True
         user_program.save()
         user.teacherIsDuty = True
         print("teacher graduated")
+        logging.warning("teacher graduated")
         user.teacherDutyDate = timezone.now()
         user.save()
 
@@ -148,6 +151,7 @@ def check_graduated_newcomer(user: PrivateInfo):
     total = contents.count()
     finished = contents.filter(finished=True).count()
     print(f"newcomr total{total}, finished{finished}")
+    logging.warning(f"newcomr total{total}, finished{finished}")
     if total == finished:
         user_program.finished = True
         user_program.save()
@@ -163,6 +167,7 @@ def check_graduated_newcomer(user: PrivateInfo):
             teacher.currentMembers -= 1
             teacher.historicalMembers += 1
             print("newcomer graduated")
+            logging.warning("newcomer graduated")
 
 
 def find_people(username: str):
@@ -212,7 +217,7 @@ def quick_check(req: HttpRequest, check_points: dict):
 
         elif key == "cur_role":  # 读取session中的role
             if req.session.get("role", None) is None:
-                return False, gen_response(400, message="no role in session")
+                return False, gen_response(400, message="no role in session, maybe time out")
             role = req.session.get("role")
             if len(check_points[key]) == 0:  # 不声明，则当前什么角色都可以
                 return True, gen_response(200)
@@ -370,18 +375,9 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
-    if pv.joinStatus == 0:
-        info["joinStatus"] = "待入职"
-        info["employed"] = "待入职"
-    elif pv.joinStatus == 1:
-        info["joinStatus"] = "在职"
-        info["employed"] = "在职"
-    elif pv.joinStatus == 2:
-        info["joinStatus"] = "离职"
-        info["employed"] = "离职"
-    else:
-        info["joinStatus"] = "未知"
-        info["employed"] = "未知"
+    join_state_select = ["待入职", "在职","离职"]
+    info["joinStatus"] = join_state_select[pv.joinStatus]
+    info["employed"] = join_state_select[pv.joinStatus]
     info["detail"] = pv.detail
     info["leader"] = pv.leader
     info["superior"] = pv.leader  # temp

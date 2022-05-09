@@ -29,6 +29,10 @@ class Tests(TestCase):
             self.process("/testcase/idents/teacher.yml")
         elif ident == "newcomer":
             self.process("/testcase/idents/newcomer.yml")
+        elif ident == "finishnewcomer":
+            self.process("/testcase/idents/finishnewcomer.yml")
+        elif ident == "finishteacher":
+            self.process("/testcase/idents/finishteacher.yml")
         else:
             raise Exception("wrong ident")
 
@@ -148,15 +152,6 @@ class Tests(TestCase):
     def test_assign_teacher(self):
         self.process("/testcase/assign_teacher.yml")
 
-    # def test_upload_program(self):  # TODO:测试有问题
-    #     self.process("/testcase/upload_program.yml")
-
-    # def test_upload_content_template(self):
-    #     self.process("/testcase/upload_content_template.yml")
-
-    # def test_upload_lesson_template(self):
-    #     self.process("/testcase/upload_lesson_template.yml")
-
     def test_video(self):
         logging.info("测试video接口")
         res = self.client.get("/api/video")
@@ -219,5 +214,41 @@ class Tests(TestCase):
     def test_finish_lesson(self):
         self.process("/testcase/finish_lesson.yml")
 
+    def test_finish_all_lesson(self):
+        self.process("/testcase/finish_all_lesson.yml")
+
     def test_get_cur_role(self):
         self.process("/testcase/get_cur_role.yml")
+
+    def test_lesson_courseware_list(self):
+        self.process("/testcase/lesson_courseware_list.yml")
+
+    def test_content_lesson_list(self):
+        self.process("/testcase/content_lesson_list.yml")
+
+    def test_program_content_list(self):
+        self.process("/testcase/program_content_list.yml")
+
+    def test_program_template_list(self):
+        self.process("/testcase/program_template_list.yml")
+
+    def test_assignable_program_list(self):
+        self.process("/testcase/assignable_program_list.yml")
+
+    def test_has_program(self):
+        self.process("/testcase/has_program.yml")
+
+    def test_assign_program(self):
+        self.process("/testcase/assign_program.yml")
+
+    def test_content_progress(self):
+        self.process("/testcase/content_progress.yml")
+
+    # def test_upload_program(self):  # TODO:测试有问题
+    #     self.process("/testcase/upload_program.yml")
+
+    # def test_upload_content_template(self):
+    #     self.process("/testcase/upload_content_template.yml")
+
+    # def test_upload_lesson_template(self):
+    #     self.process("/testcase/upload_lesson_template.yml")

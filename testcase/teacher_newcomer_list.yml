@@ -7,3 +7,35 @@
     data:
   validate:
     - equals: { status_code: 200 }
+
+- name: 导师查看自己的学生列表-方法错误
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_newcomer_list
+    data:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 管理员通过名字查看导师列表
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /teacher_newcomer_list_by_name
+    data:
+      teacher: teacher
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 管理员通过名字查看导师列表-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /teacher_newcomer_list_by_name
+    data:
+      teacher: teacher
+  validate:
+    - equals: { status_code: 400 }
