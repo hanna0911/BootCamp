@@ -1,0 +1,47 @@
+- name: 获取某个content的lesson list
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /content_lesson_list
+    data:
+      action: lesson list for course
+      contentID: 8
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取某个content的lesson list-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /content_lesson_list
+    data:
+      action: lesson list for course
+      contentID: 8
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取某个content的lesson list-课程找不到
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /content_lesson_list
+    data:
+      action: lesson list for course
+      contentID: 888
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取某个content的lesson list-action错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /content_lesson_list
+    data:
+      action: lesson list for
+      contentID: 8
+  validate:
+    - equals: { status_code: 400 }

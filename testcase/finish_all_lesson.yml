@@ -1,0 +1,35 @@
+- name: 新人结束所有课程
+  ident:
+    - finishnewcomer
+  request:
+    method: POST
+    url: /finish_all_lesson
+    data:
+      username: finishnewcomer
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 导师结束所有课程
+  ident:
+    - finishteacher
+  request:
+    method: POST
+    url: /finish_all_lesson
+    data:
+      username: finishteacher
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 新人结束所有课程-方法错误
+  ident:
+    - finishnewcomer
+  request:
+    method: GET
+    url: /finish_all_lesson
+    data:
+      username: finishnewcomer
+    headers:
+  validate:
+    - equals: { status_code: 400 }
