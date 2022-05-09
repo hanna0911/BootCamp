@@ -451,6 +451,7 @@ def my_courses_list(request: HttpRequest):
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
             'finished': course_relation.finished,
+            'finishedLessonCount': course_relation.finishedLessonCount,
             # 'programID': course.programId,
             'contentID': course.id
         })
@@ -786,6 +787,9 @@ def program_content_list(request: HttpRequest):
     courses = []
     tests = []
     tasks = []
+    user_program_relation = UserProgramTable.objects.filter(program__id=program_id).first()
+    if user_program_relation is not None:
+        target_user = user_program_relation.user
     type_select = ["course", "exam", "task"]
     for relation in relations:
         content = relation.content
@@ -811,6 +815,12 @@ def program_content_list(request: HttpRequest):
             'link': content.link,
             'contentID': content.id
         }
+        if user_program_relation is not None:
+            user_content_relation = UserContentTable.objects.filter(user=target_user, content=content).first()
+            content_info['isFinished'] = user_content_relation.finished
+            content_info['finishedLessonCount'] = user_content_relation.finishedLessonCount
+            content_info['score'] = user_content_relation.score
+            content_info['examUsedTime'] = user_content_relation.examUsedTime
         if content.type == 0:
             courses.append(content_info)
         elif content.type == 1:
