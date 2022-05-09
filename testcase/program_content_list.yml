@@ -9,3 +9,25 @@
       programID: 15
   validate:
     - equals: { status_code: 200 }
+
+- name: 获取program的content list-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /program_content_list
+    data:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取program的content list-找不到program
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /program_content_list
+    data:
+      action: get content list for program
+      programID: 888
+  validate:
+    - equals: { status_code: 400 }
