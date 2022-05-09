@@ -2,7 +2,6 @@
 切换状态，切换关系相关的接口
 """
 import logging
-
 from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
@@ -515,26 +514,20 @@ def has_program(request: HttpRequest):
         'username': __USERNAME__
     }
     """
-
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",
+        "cur_role": ["teacher", "admin", "HRBP"]
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     target_username = data.get('username')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
     if action != 'has program' or target_username is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     target_user = PrivateInfo.objects.filter(username=target_username).first()
-    if role != 'teacher' and role != 'admin' and role != 'HRBP':
-        return unauthorized_action_response()
     if target_user is None:
         return item_not_found_error_response()
     relation = UserProgramTable.objects.filter(user__username=target_username).first()
@@ -559,25 +552,22 @@ def assign_program(request: HttpRequest):
         'programID': __PROGRAM_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",
+        "cur_role": ["teacher", "admin", "HRBP"]
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     target_username = data.get('username')
     target_program_id = data.get('programID')
     session = request.session
     username = session.get('username')
-    role = session.get('role')
     if action != 'assign program' or target_username is None or target_program_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
-    if role != 'admin' and role != 'HRBP' and role != 'teacher':
-        return unauthorized_action_response()
     target_user = PrivateInfo.objects.filter(username=target_username).first()
     target_program = ProgramTable.objects.filter(id=target_program_id).first()
     assigner = PrivateInfo.objects.filter(username=username).first()
@@ -606,23 +596,20 @@ def content_progress(request: HttpRequest):
         'contentID': __CONTENT_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": ["action", "programID", "contentID"],
+        "username": "",
+        "cur_role": []
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     program_id = data.get('programID')
     content_id = data.get('contentID')
     if action != 'check content progress' or program_id is None or content_id is None:
         return gen_standard_response(200, {'result': 'failed', 'message': 'Bad Arguments'})
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
     program = ProgramTable.objects.filter(id=program_id).first()
     content = ContentTable.objects.filter(id=content_id).first()
     if program is None or content is None:

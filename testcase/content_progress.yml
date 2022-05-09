@@ -1,0 +1,38 @@
+- name: 查看content完成情况
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /content_progress
+    data:
+      action: check content progress
+      programID: 15
+      contentID: 8
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 查看content完成情况-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /content_progress
+    data:
+      action: check content progress
+      programID: 15
+      contentID: 8
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 查看content完成情况-action错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /content_progress
+    data:
+      action: 2
+      programID: 15
+      contentID: 8
+  validate:
+    - equals: { status_code: 400 }

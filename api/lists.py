@@ -629,13 +629,20 @@ def my_task_list(request: HttpRequest):
 
 
 def program_template_list(request: HttpRequest):
-    if request.method != 'GET':
-        return illegal_request_type_error_response()
+    """
+    获取模板项目列表
+    :param request:
+    :return:
+    """
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
     session = request.session
-    username = session.get('username')
     role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
     if role != 'teacher' and role != 'admin' and role != 'HRBP':
         return unauthorized_action_response()
     target_programs = []
@@ -660,13 +667,21 @@ def program_template_list(request: HttpRequest):
 
 
 def assignable_program_list(request: HttpRequest):
-    if request.method != 'GET':
-        return illegal_request_type_error_response()
+    """
+    获取可分配的项目
+    :param request:
+    :return:
+    """
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
     session = request.session
     username = session.get('username')
     role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
     if role != 'admin' and role != 'teacher' and role != 'HRBP':
         return unauthorized_action_response()
 

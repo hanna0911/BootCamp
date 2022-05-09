@@ -220,7 +220,6 @@ class Tests(TestCase):
     def test_get_cur_role(self):
         self.process("/testcase/get_cur_role.yml")
 
-
     def test_lesson_courseware_list(self):
         self.process("/testcase/lesson_courseware_list.yml")
 
@@ -230,7 +229,20 @@ class Tests(TestCase):
     def test_program_content_list(self):
         self.process("/testcase/program_content_list.yml")
 
+    def test_program_template_list(self):
+        self.process("/testcase/program_template_list.yml")
 
+    def test_assignable_program_list(self):
+        self.process("/testcase/assignable_program_list.yml")
+
+    def test_has_program(self):
+        self.process("/testcase/has_program.yml")
+
+    def test_assign_program(self):
+        self.process("/testcase/assign_program.yml")
+
+    def test_content_progress(self):
+        self.process("/testcase/content_progress.yml")
 
     # def test_upload_program(self):  # TODO:测试有问题
     #     self.process("/testcase/upload_program.yml")
