@@ -628,6 +628,7 @@ def create_lesson(request: HttpRequest):
         recommend_time = request.POST.get("recommendTime")
         cover = request.POST.get("cover")
         content_id = request.POST.get("contentID")
+        programID = request.POST.get("programID")
         coursewares = []
         for key in request.FILES.keys():
             coursewares.append(request.FILES.get(key))
@@ -672,6 +673,12 @@ def create_lesson(request: HttpRequest):
         return save_file_error_response()
     content.lessonCount += 1
     content.save()
+
+    target_user = UserProgramTable.objects.filter(program__id=programID).first()
+    if target_user is not None:
+        target_user = target_user.user
+        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=datetime.datetime.now())
+        new_relation.save()
     return gen_standard_response(200, {
         "result": "success",
         "message": f"lesson {name} created successfully",
@@ -760,9 +767,9 @@ def assign_content_to_program(request: HttpRequest):
         return item_not_found_error_response()
     new_program_content_relation = ProgramContentTable(program=program, content=content)
     new_program_content_relation.save()
-    user = UserProgramTable.objects.filter(program__id=program_id).first().user
+    user = UserProgramTable.objects.filter(program__id=program_id).first()
     if user is not None:
-        new_user_content_relation = UserContentTable(user=user, content=content, assigner=assigner,
+        new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
                                                      deadline=datetime.datetime.now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
     return gen_standard_response(200, {
