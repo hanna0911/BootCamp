@@ -198,6 +198,8 @@ def upload_answers(request: HttpRequest):
     relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds)
     relation.score = score
     relation.save()
+    check_graduated_newcomer(relation.user)
+    check_graduated_teacher(relation.user)
     # print(relation.finished, relation.userBeginTime, relation.userEndTime, relation.examUsedTime, relation.score)
     return gen_standard_response(200, {"result": "success",
                                        "message": "Test paper successfully graded",
@@ -344,6 +346,8 @@ def finish_task(request: HttpRequest):
     relation.userEndTime = datetime.datetime.now()
     relation.finished = True
     relation.save()
+    check_graduated_newcomer(relation.user)
+    check_graduated_teacher(relation.user)
     std_message = f'user {username} marked task {task.name} with id {task.id} as finished'
     return gen_standard_response(200, {'result': 'success',
                                        'message': std_message})
@@ -624,6 +628,7 @@ def create_lesson(request: HttpRequest):
         recommend_time = request.POST.get("recommendTime")
         cover = request.POST.get("cover")
         content_id = request.POST.get("contentID")
+        programID = request.POST.get("programID")
         coursewares = []
         for key in request.FILES.keys():
             coursewares.append(request.FILES.get(key))
@@ -648,10 +653,10 @@ def create_lesson(request: HttpRequest):
         return unauthorized_action_response()
     if intro is None or intro == "":
         intro = "暂无简介"
-    new_lesson_id = username + "_l_" + str(time.time())
-    new_lesson = LessonTable(id=new_lesson_id, name=name, author=user, content=content,
+    new_lesson = LessonTable(name=name, author=user, content=content,
                              intro=intro, recommendedTime=recommend_time, cover=cover)
     new_lesson.save()
+    new_lesson_id = new_lesson.id
     try:
         file_paths = save_courseware_files(coursewares, new_lesson_id, content_id, username)
         print('courseware file paths')
@@ -668,6 +673,12 @@ def create_lesson(request: HttpRequest):
         return save_file_error_response()
     content.lessonCount += 1
     content.save()
+
+    target_user = UserProgramTable.objects.filter(program__id=programID).first()
+    if target_user is not None:
+        target_user = target_user.user
+        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=datetime.datetime.now())
+        new_relation.save()
     return gen_standard_response(200, {
         "result": "success",
         "message": f"lesson {name} created successfully",
@@ -756,9 +767,9 @@ def assign_content_to_program(request: HttpRequest):
         return item_not_found_error_response()
     new_program_content_relation = ProgramContentTable(program=program, content=content)
     new_program_content_relation.save()
-    user = UserProgramTable.objects.filter(program__id=program_id).first().user
+    user = UserProgramTable.objects.filter(program__id=program_id).first()
     if user is not None:
-        new_user_content_relation = UserContentTable(user=user, content=content, assigner=assigner,
+        new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
                                                      deadline=datetime.datetime.now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
     return gen_standard_response(200, {

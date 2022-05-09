@@ -75,4 +75,8 @@ urlpatterns = [
     path('create_notification', notification.create_notification, name="create_notification"),
     path('my_notification_list', notification.my_notifications, name="my_notification_list"),
     path('finish_notification', notification.finish_notification, name="finish_notification"),
+    path('content_lesson_list', lists.content_lesson_list, name="content_lesson_list"),
+    path('lesson_courseware_list', lists.lesson_courseware_list, name="lesson_courseware_list"),
+    path("finish_lesson", status.finish_lesson, name="finish_lesson"),
+    path("finish_all_lesson",status.finish_all_lesson,name="finish_all_lesson")
 ]

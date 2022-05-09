@@ -215,3 +215,9 @@ class Tests(TestCase):
 
     def test_newcomer_summary_info(self):
         self.process("/testcase/newcomer_summary_info.yml")
+
+    def test_finish_lesson(self):
+        self.process("/testcase/finish_lesson.yml")
+
+    def test_get_cur_role(self):
+        self.process("/testcase/get_cur_role.yml")

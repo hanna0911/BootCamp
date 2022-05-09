@@ -6,8 +6,8 @@ import logging
 from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
-from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable,\
-    NewcomerRecode, ProgramTable, UserProgramTable, ProgramContentTable
+from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable, \
+    NewcomerRecode, ProgramTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
 import json
 import datetime
 
@@ -119,7 +119,9 @@ def newcomer_commit_teacher(req: HttpRequest):
         return gen_response(400, message="newcomer has no teacher")
     relation = relations.first()
     relation.newcomerToTeacher = data.get("content")
+    relation.newcomerCommitted = True
     relation.save()
+    check_graduated_newcomer(newcomer)
     return gen_response(200)
 
 
@@ -142,7 +144,9 @@ def teacher_commit_newcomer(req: HttpRequest):
     if not ok:
         return relation
     relation.teacherToNewcomer = data["content"]
+    relation.teacherCommitted = True
     relation.save()
+    check_graduated_newcomer(relation.newcomer)
     return gen_response(200)
 
 
@@ -300,6 +304,88 @@ def get_commits_and_score(req: HttpRequest):
     }
     return gen_response(200, ret_data)
 
+
+def finish_lesson(req: HttpRequest):
+    """
+    完成lesson的接口
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer", "teacher"],
+        "data_field": ["username", "lessonID"]  # 只需要确认新人，就可以找到评论，无需导师信息
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, user = find_people(data["username"])
+    if not found:
+        return user
+    lessons = LessonTable.objects.filter(id=data["lessonID"])
+    if lessons.count() <= 0:
+        return gen_response(400, message="lesson not found")
+    lesson = lessons.first()
+    relations = UserLessonTable.objects.filter(user=user, lesson=lesson)
+    if relations.count() <= 0:
+        return gen_response(400, message="relation between user and lesson not found")
+    relation = relations.first()
+    # if relation.finished:
+    #     return gen_response(200, message="already finished")
+    relation.finished = True
+    relation.save()
+    # 更新content
+    course = lesson.content
+    course_relations = UserContentTable.objects.filter(user=user, content=course)
+    if course_relations.count() <= 0:
+        return gen_response(400, message="not course with user and lesson")
+    course_relation = course_relations.first()
+    course_relation.finishedLessonCount += 1
+    if course_relation.finishedLessonCount == course.lessonCount:
+        course_relation.finished = True
+        logging.info("lesson 结束，课程紧跟着结束")
+    course_relation.save()
+    # 更新整个培训内容是否完成
+    check_graduated_teacher(user)
+    check_graduated_newcomer(user)
+    return gen_response(200, message="success finish")
+
+def finish_all_lesson(req:HttpRequest):
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["newcomer", "teacher"],
+        "data_field": ["username"]  # 只需要确认新人，就可以找到评论，无需导师信息
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, user = find_people(data["username"])
+    if not found:
+        return user
+    relations = UserLessonTable.objects.filter(user=user)
+    for relation in relations:
+        relation.finished = True
+        relation.save()
+        course = relation.lesson.content
+        course_relations = UserContentTable.objects.filter(user=user, content=course)
+        if course_relations.count() <= 0:
+            return gen_response(400, message="not course with user and lesson")
+        course_relation = course_relations.first()
+        logging.warning(course_relation.finished,"???")
+        course_relation.finished = True
+        course_relation.save()
+    content_relations = UserContentTable.objects.filter(user=user,content__type=ContentTable.EnumType.Course)
+    if content_relations.count()<=0:
+        return gen_response(200,message="not coures")
+    content_relation = content_relations.first()
+    content_relation.finished = True
+    content_relation.save()
+    check_graduated_teacher(user)
+    check_graduated_newcomer(user)
+    return gen_response(200, message="temp use")
+
 # def assign_program(request: HttpRequest):
 #     """
 #     POST{
@@ -423,6 +509,7 @@ def has_program(request: HttpRequest):
         'username': __USERNAME__
     }
     """
+
     if request.method != 'POST':
         return illegal_request_type_error_response()
     try:
@@ -495,9 +582,10 @@ def assign_program(request: HttpRequest):
     content_relations = ProgramContentTable.objects.filter(program__id=target_program_id)
     for content_relation in content_relations:
         content = content_relation.content
-        new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner, deadline = datetime.datetime.now() + datetime.timedelta(days = 1))
+        new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner,
+                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=1))
         new_user_content_relation.save()
-    std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including '\
+    std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including ' \
                   + f'{len(content_relations)} contents'
     return gen_standard_response(200, {'result': 'success',
                                        'message': std_message})

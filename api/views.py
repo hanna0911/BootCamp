@@ -36,7 +36,8 @@ def get_cur_role(request: HttpRequest):
     if username is None or role is None:
         return session_timeout_response()
     else:
-        return gen_standard_response(200, {'result': 'success', 'role': role})
+        return gen_standard_response(
+            200, {'result': 'success', 'role': role, "message":"success"})
 
 
 def login(request: HttpRequest):  # 登录
@@ -274,12 +275,19 @@ def get_honor(req: HttpRequest):
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
+        "data_field": []
     })
     if not ok:
         return res
-    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
     honor_list = Honor.objects.filter(owner=user)
     medals_list = []
     certificates_list = []
@@ -299,21 +307,30 @@ def get_honor(req: HttpRequest):
 def teacher_summary_info(req: HttpRequest):
     """
     导师查看带新概览,自己带了几个新人,已经带过几个新人
+    如果有导师字段，则从字段读取，否则从session中读取
     :param req:
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
         "role": ["teacher"],
+        "data_field": []
     })
     if not ok:
         return res
-    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
     data = {
         "current": user.currentMembers,
         "historical": user.historicalMembers,
         "dutyDate": user.teacherDutyDate,
+        "teacherIsDuty":user.teacherIsDuty,
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
@@ -378,10 +395,17 @@ def newcomer_summary_info(req: HttpRequest):
     if len(relations) <= 0:
         teacher_name = "无"
         teacher_username = ""
+        evaluate_progress = 0
     else:
         relation = relations.first()
         teacher_name = relation.teacher.name
         teacher_username = relation.teacher.username
+        if relation.newcomerCommitted and relation.teacherCommitted:
+            evaluate_progress = 100
+        elif relation.newcomerCommitted or relation.teacherCommitted:
+            evaluate_progress = 50
+        else:
+            evaluate_progress = 0
 
     is_graduate = GraduateStatusToTest[newcomer.newcomerGraduateState]
     date_select = ["未毕业", newcomer.newcomerGraduateDate, newcomer.newcomerGraduateDate]
@@ -397,9 +421,9 @@ def newcomer_summary_info(req: HttpRequest):
         "graduateDate": graduate_date,
         "isGraduate": is_graduate,
         "courseProgress": course_progress,
-        "examProgress": exam_progress,
+        "examProgress": exam_progress,#69 f
         "taskProgress": task_progress,
-        "evaluateProgress": 50,  # TODO: !!!还没统计呢
+        "evaluateProgress": evaluate_progress,
         "certificate": 'https://gimg2.baidu.com/image_search/s'
                        'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
                        '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'

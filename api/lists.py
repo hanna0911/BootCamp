@@ -1,9 +1,13 @@
+import json
+
 from .api_util import *
 from .models import *
 from .upload import parse_test_for_student, parse_test_for_admin
 
 audience_select = ["newcomer", "teacher"]
 task_type_select = ["text", "link", "file"]
+
+
 def admin_newcomer_list(request: HttpRequest):
     """
     接收前端向/admin_newcomer_list的get请求
@@ -52,7 +56,8 @@ def teacher_wait_list(req: HttpRequest):
     })
     if not ok:
         return res
-    newcomer_list = PrivateInfo.objects.filter(isTeacher=False, isNew=True)
+    newcomer_list = PrivateInfo.objects.filter(
+        isTeacher=False, isNew=True, newcomerGraduateState=PrivateInfo.EnumNewcomerGraduateState.NormalGraduate)
     return_list = []
     for new in newcomer_list:
         tmp = load_private_info(new)
@@ -307,7 +312,14 @@ def my_test_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_tests = UserContentTable.objects.filter(user__username=username, content__type=ContentTable.EnumType.Exam)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_tests = UserContentTable.objects.filter(
+        user__username=username, content__type=ContentTable.EnumType.Exam,
+        content__audience=audience
+    )
     test_list = []
     # recommend_time_list = []
     # tag_list = []
@@ -337,7 +349,7 @@ def my_test_list(request: HttpRequest):
         except Exception as e:
             print(e)
             return item_not_found_error_response()
-        test_paper = parse_test_for_student(csv_dir)"""  #  用来返回考试内容（考题）
+        test_paper = parse_test_for_student(csv_dir)"""  # 用来返回考试内容（考题）
         # test_list.append({'test_info': test_info, 'test_paper': test_paper})
         test_list.append(test_info)
     print(test_list)
@@ -415,8 +427,15 @@ def my_courses_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_courses = UserContentTable.objects.filter(user__username=username,
-                                                     content__type=ContentTable.EnumType.Course)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_courses = UserContentTable.objects.filter(
+        user__username=username,
+        content__type=ContentTable.EnumType.Course,
+        content__audience=audience
+    )
     course_list = []
     for course_relation in target_courses:
         course = course_relation.content
@@ -432,6 +451,7 @@ def my_courses_list(request: HttpRequest):
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
             'finished': course_relation.finished,
+            'finishedLessonCount': course_relation.finishedLessonCount,
             # 'programID': course.programId,
             'contentID': course.id
         })
@@ -568,8 +588,15 @@ def my_task_list(request: HttpRequest):
         return session_timeout_response()
     if role != 'teacher' and role != 'newcomer':
         return unauthorized_action_response()
-    target_tasks = UserContentTable.objects.filter(user__username=username,
-                                                   content__type=ContentTable.EnumType.Task)
+    if role == "teacher":
+        audience = ContentTable.EnumAudience.teacher
+    else:
+        audience = ContentTable.EnumAudience.newcomer
+    target_tasks = UserContentTable.objects.filter(
+        user__username=username,
+        content__type=ContentTable.EnumType.Task,
+        content__audience=audience
+    )
     task_list = []
     recommend_time_list = []
     tag_list = []
@@ -732,6 +759,7 @@ def teacher_newcomer_list(req: HttpRequest):
     return gen_response(200, data=return_list)
 
 
+
 def program_content_list(request: HttpRequest):
     """
     POST{
@@ -739,22 +767,19 @@ def program_content_list(request: HttpRequest):
     'programID': '__PROGRAM_ID__'
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
-    session = request.session
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "username": "",
+        "cur_role": [],  # 如果列表为空，则只检查session中是否存在role
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     program_id = data.get('programID')
-    username = session.get('username')
-    role = session.get('role')
     if action != 'get content list for program' or program_id is None:
-        return gen_standard_response(400, 'Bad Arguments')
-    if username is None or role is None:
-        return session_timeout_response()
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
     program = ProgramTable.objects.filter(id=program_id).first()
     if program is None:
         return item_not_found_error_response()
@@ -762,6 +787,9 @@ def program_content_list(request: HttpRequest):
     courses = []
     tests = []
     tasks = []
+    user_program_relation = UserProgramTable.objects.filter(program__id=program_id).first()
+    if user_program_relation is not None:
+        target_user = user_program_relation.user
     type_select = ["course", "exam", "task"]
     for relation in relations:
         content = relation.content
@@ -787,6 +815,12 @@ def program_content_list(request: HttpRequest):
             'link': content.link,
             'contentID': content.id
         }
+        if user_program_relation is not None:
+            user_content_relation = UserContentTable.objects.filter(user=target_user, content=content).first()
+            content_info['isFinished'] = user_content_relation.finished
+            content_info['finishedLessonCount'] = user_content_relation.finishedLessonCount
+            content_info['score'] = user_content_relation.score
+            content_info['examUsedTime'] = user_content_relation.examUsedTime
         if content.type == 0:
             courses.append(content_info)
         elif content.type == 1:
@@ -821,7 +855,6 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
         return teacher
     student_list = TeacherNewcomerTable.objects.filter(teacher=teacher)
     learning_list = []
-    print(len(student_list))
     for entry in student_list:  # 还在学习的学生
         if entry.newcomer.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             learning_list.append(entry.newcomer)
@@ -833,3 +866,91 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
         tmp["avatar"] = "/api/avatar_by_name/?username={}".format(newcomer.username)  # 直接后端指定路径，前端自动请求
         return_list.append(tmp)
     return gen_response(200, return_list)
+
+
+def content_lesson_list(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'lesson list for course'
+        'contentID': __CONTENT_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    content_id = data.get('contentID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'lesson list for course' or content_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    course = ContentTable.objects.filter(id=content_id).first()
+    if course is None:
+        return item_not_found_error_response()
+    lessons = LessonTable.objects.filter(content__id=content_id)
+    lesson_list = []
+    for lesson in lessons:
+        lesson_list.append({
+            'lessonID': lesson.id,
+            'name': lesson.name,
+            'author': lesson.author.username,
+            'intro': lesson.intro,
+            'recommendTime': lesson.recommendedTime,
+            'releaseTime': lesson.releaseTime
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'{len(lessons)} lessons retrieved for course {course.name}',
+        'lessons': lesson_list
+    })
+
+
+def lesson_courseware_list(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'courseware list for lesson'
+        'lessonID': __LESSON_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    lesson_id = data.get('lessonID')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'courseware list for lesson' or lesson_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    lesson = LessonTable.objects.filter(id=lesson_id).first()
+    if lesson is None:
+        return item_not_found_error_response()
+    coursewares = CoursewareTable.objects.filter(lesson__id=lesson_id)
+    courseware_list = []
+    for courseware in coursewares:
+        courseware_list.append({
+            'coursewareID': courseware.id,
+            'name': courseware.name,
+            'uploadTime': courseware.uploadTime,
+            'url': courseware.url
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'{len(coursewares)} coursewares retrieved for lesson {lesson.name}',
+        'lessons': courseware_list
+    })
