@@ -1,0 +1,29 @@
+- name: 获取program的content list
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /program_templates
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取program的content list-方法错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /program_templates
+    data:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取program的content list-身份错误
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /program_templates
+    data:
+  validate:
+    - equals: { status_code: 400 }

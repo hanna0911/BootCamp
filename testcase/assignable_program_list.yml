@@ -1,0 +1,29 @@
+- name: 获取program的可分配的项目列表
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /assignable_program_list
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取program的可分配的项目列表-方法错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /assignable_program_list
+    data:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取program的可分配的项目列表-身份错误
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /assignable_program_list
+    data:
+  validate:
+    - equals: { status_code: 400 }

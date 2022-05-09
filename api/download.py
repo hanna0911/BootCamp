@@ -37,6 +37,7 @@ def stream_video(request: HttpRequest):
     folder_path = os.getcwd().replace('\\', '/')
     print(folder_path)
     path = folder_path + '/static/' + path  # path就是template ？后面的参数的值
+    print(path)
     size = os.path.getsize(path)
     content_type, encoding = mimetypes.guess_type(path)
     content_type = content_type or 'application/octet-stream'

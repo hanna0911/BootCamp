@@ -82,7 +82,9 @@ def write_db(req: HttpRequest):
             teacherScore=info["teacherScore"],
             newcomerToTeacher=info["newcomerToTeacher"],
             newcomerScore=info["newcomerScore"],
-            teacherToNewcomer=info["teacherToNewcomer"]
+            teacherToNewcomer=info["teacherToNewcomer"],
+            teacherCommitted=info["teacherCommitted"],
+            newcomerCommitted=info["newcomerCommitted"]
         )
         tnt.save()
     size = len(TeacherNewcomerTable.objects.all())

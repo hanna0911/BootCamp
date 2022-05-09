@@ -1,0 +1,38 @@
+- name: 查询一个人是否有program
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /has_program
+    data:
+      username: newcomer
+      action: has program
+    headers:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 查询一个人是否有program-方法错误
+  ident:
+    - teacher
+  request:
+    method: GET
+    url: /has_program
+    data:
+      username: newcomer
+      action: has program
+    headers:
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 查询一个人是否有program-action错误
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /has_program
+    data:
+      username: newcomer
+      action: has
+    headers:
+  validate:
+    - equals: { status_code: 400 }

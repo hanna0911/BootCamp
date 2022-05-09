@@ -461,55 +461,55 @@ def my_courses_list(request: HttpRequest):
                                        'courses': course_list})
 
 
-def my_course_list_by_id(request: HttpRequest):
-    """
-    {'action': 'course list by username', 'username': '__USERNAME__'}
-    """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
-    action = data.get('action')
-    target_username = data.get('username')
-    if action != 'course list by id' or target_username is None:
-        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
-    if role != 'admin' and role != 'teacher' and role != 'HRBP':
-        return unauthorized_action_response()
-    user = PrivateInfo.objects.filter(username=target_username).first()
-    if user is None:
-        return item_not_found_error_response()
-    relations = UserContentTable.objects.filter(user__username=target_username, content__type=0)
-    course_list = []
-    for relation in relations:
-        course = relation.content
-        if course.audience == 0:
-            audience = 'newcomer'
-        else:
-            audience = 'teacher'
-        course_list.append({
-            'courseID': course.id,
-            'audience': audience,
-            'isTemplate': course.isTemplate,
-            'name': course.name,
-            'intro': course.intro,
-            'recommendTime': course.recommendedTime,
-            'tag': course.tag,
-            'author': course.author.name,
-            'releaseTime': course.releaseTime,
-            'lessonCount': course.lessonCount,
-            'finished': relation.finished
-        })
-    return gen_standard_response(200, {'result': 'success',
-                                       'message': f'courses retrieved for user {target_username} by {username}',
-                                       'courses': course_list})
+# def my_course_list_by_id(request: HttpRequest):
+#     """
+#     {'action': 'course list by username', 'username': '__USERNAME__'}
+#     """
+#     ok, res = quick_check(request, {
+#         "method": "POST",
+#         "data_field": []
+#     })
+#     if not ok:
+#         return res
+#     data = json.loads(request.body)
+#     action = data.get('action')
+#     target_username = data.get('username')
+#     if action != 'course list by id' or target_username is None:
+#         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+#     session = request.session
+#     username = session.get('username')
+#     role = session.get('role')
+#     if username is None or role is None:
+#         return session_timeout_response()
+#     if role != 'admin' and role != 'teacher' and role != 'HRBP':
+#         return unauthorized_action_response()
+#     user = PrivateInfo.objects.filter(username=target_username).first()
+#     if user is None:
+#         return item_not_found_error_response()
+#     relations = UserContentTable.objects.filter(user__username=target_username, content__type=0)
+#     course_list = []
+#     for relation in relations:
+#         course = relation.content
+#         if course.audience == 0:
+#             audience = 'newcomer'
+#         else:
+#             audience = 'teacher'
+#         course_list.append({
+#             'courseID': course.id,
+#             'audience': audience,
+#             'isTemplate': course.isTemplate,
+#             'name': course.name,
+#             'intro': course.intro,
+#             'recommendTime': course.recommendedTime,
+#             'tag': course.tag,
+#             'author': course.author.name,
+#             'releaseTime': course.releaseTime,
+#             'lessonCount': course.lessonCount,
+#             'finished': relation.finished
+#         })
+#     return gen_standard_response(200, {'result': 'success',
+#                                        'message': f'courses retrieved for user {target_username} by {username}',
+#                                        'courses': course_list})
 
 
 def assignable_task_list(request: HttpRequest):
@@ -630,13 +630,20 @@ def my_task_list(request: HttpRequest):
 
 
 def program_template_list(request: HttpRequest):
-    if request.method != 'GET':
-        return illegal_request_type_error_response()
+    """
+    获取模板项目列表
+    :param request:
+    :return:
+    """
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
     session = request.session
-    username = session.get('username')
     role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
     if role != 'teacher' and role != 'admin' and role != 'HRBP':
         return unauthorized_action_response()
     target_programs = []
@@ -661,13 +668,21 @@ def program_template_list(request: HttpRequest):
 
 
 def assignable_program_list(request: HttpRequest):
-    if request.method != 'GET':
-        return illegal_request_type_error_response()
+    """
+    获取可分配的项目
+    :param request:
+    :return:
+    """
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
     session = request.session
     username = session.get('username')
     role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
     if role != 'admin' and role != 'teacher' and role != 'HRBP':
         return unauthorized_action_response()
 
@@ -697,36 +712,41 @@ def assignable_program_list(request: HttpRequest):
                                        'program_templates': target_programs})
 
 
-def my_program_list(request: HttpRequest):
-    if request.method != 'GET':
-        return illegal_request_type_error_response()
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
-    if username is None or role is None:
-        return session_timeout_response()
-    if role != 'teacher' and role != 'newcomer':
-        return unauthorized_action_response()
-    my_relations = UserProgramTable.objects.filter(user__username=username)
-    target_programs = []
-    for relation in my_relations:
-        program = relation.program
-        audience = audience_select[program.audience]
-        program_info = dict()
-        program_info['name'] = program.name
-        program_info['author'] = program.author.username
-        program_info['intro'] = program.intro
-        program_info['contentCount'] = program.contentCount
-        program_info['recommendTime'] = program.recommendTime
-        program_info['audience'] = audience
-        # program_info['cover'] = program.cover
-        program_info['releaseTime'] = program.releaseTime
-        program_info['isTemplate'] = program.isTemplate
-        program_info['programID'] = program.id
-        target_programs.append(program_info)
-    return gen_standard_response(200, {'result': 'success',
-                                       'message': 'my programs retrieved',
-                                       'program_templates': target_programs})
+# def my_program_list(request: HttpRequest):
+#     """
+#     获取自己的program
+#     :param request:
+#     :return:
+#     """
+#     if request.method != 'GET':
+#         return illegal_request_type_error_response()
+#     session = request.session
+#     username = session.get('username')
+#     role = session.get('role')
+#     if username is None or role is None:
+#         return session_timeout_response()
+#     if role != 'teacher' and role != 'newcomer':
+#         return unauthorized_action_response()
+#     my_relations = UserProgramTable.objects.filter(user__username=username)
+#     target_programs = []
+#     for relation in my_relations:
+#         program = relation.program
+#         audience = audience_select[program.audience]
+#         program_info = dict()
+#         program_info['name'] = program.name
+#         program_info['author'] = program.author.username
+#         program_info['intro'] = program.intro
+#         program_info['contentCount'] = program.contentCount
+#         program_info['recommendTime'] = program.recommendTime
+#         program_info['audience'] = audience
+#         # program_info['cover'] = program.cover
+#         program_info['releaseTime'] = program.releaseTime
+#         program_info['isTemplate'] = program.isTemplate
+#         program_info['programID'] = program.id
+#         target_programs.append(program_info)
+#     return gen_standard_response(200, {'result': 'success',
+#                                        'message': 'my programs retrieved',
+#                                        'program_templates': target_programs})
 
 
 def teacher_newcomer_list(req: HttpRequest):
@@ -757,7 +777,6 @@ def teacher_newcomer_list(req: HttpRequest):
         return_list.append(tmp)
 
     return gen_response(200, data=return_list)
-
 
 
 def program_content_list(request: HttpRequest):
@@ -870,28 +889,26 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
 
 def content_lesson_list(request: HttpRequest):
     """
+    获取content的lesson列表
     POST
     {
         'action': 'lesson list for course'
         'contentID': __CONTENT_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     content_id = data.get('contentID')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
     if action != 'lesson list for course' or content_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     course = ContentTable.objects.filter(id=content_id).first()
     if course is None:
         return item_not_found_error_response()
@@ -906,6 +923,7 @@ def content_lesson_list(request: HttpRequest):
             'recommendTime': lesson.recommendedTime,
             'releaseTime': lesson.releaseTime
         })
+    logging.info(lesson_list)
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'{len(lessons)} lessons retrieved for course {course.name}',
@@ -921,22 +939,19 @@ def lesson_courseware_list(request: HttpRequest):
         'lessonID': __LESSON_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     lesson_id = data.get('lessonID')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
     if action != 'courseware list for lesson' or lesson_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     lesson = LessonTable.objects.filter(id=lesson_id).first()
     if lesson is None:
         return item_not_found_error_response()
