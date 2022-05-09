@@ -910,22 +910,19 @@ def lesson_courseware_list(request: HttpRequest):
         'lessonID': __LESSON_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     lesson_id = data.get('lessonID')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
     if action != 'courseware list for lesson' or lesson_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     lesson = LessonTable.objects.filter(id=lesson_id).first()
     if lesson is None:
         return item_not_found_error_response()

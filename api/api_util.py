@@ -217,7 +217,7 @@ def quick_check(req: HttpRequest, check_points: dict):
 
         elif key == "cur_role":  # 读取session中的role
             if req.session.get("role", None) is None:
-                return False, gen_response(400, message="no role in session")
+                return False, gen_response(400, message="no role in session, maybe time out")
             role = req.session.get("role")
             if len(check_points[key]) == 0:  # 不声明，则当前什么角色都可以
                 return True, gen_response(200)
