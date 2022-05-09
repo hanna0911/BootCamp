@@ -75,14 +75,26 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
+# DATABASES = {
+#     # 方法一
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
+#         'NAME': 'test',  # 数据库名称
+#         'USER': 'root',  # 数据库登录用户名
+#         'PASSWORD': 'ohph8iew5uiseiSeeQuuufee4Wai7thi',  # 密码
+#         'HOST': 'data.WeWriteBugs.secoder.local',  # 数据库主机IP，如保持默认，则为127.0.0.1
+#         'PORT': 3306,  # 数据库端口号，如保持默认，则为3306
+#     }
+# }
+
 DATABASES = {
     # 方法一
     'default': {
         'ENGINE': 'django.db.backends.mysql',  # 数据库引擎
         'NAME': 'test',  # 数据库名称
         'USER': 'root',  # 数据库登录用户名
-        'PASSWORD': 'ohph8iew5uiseiSeeQuuufee4Wai7thi',  # 密码
-        'HOST': 'data.WeWriteBugs.secoder.local',  # 数据库主机IP，如保持默认，则为127.0.0.1
+        'PASSWORD': 'aPaigiegh8shiesh6ahB4Xoo8ahyohwu',  # 密码
+        'HOST': 'data2.WeWriteBugs.secoder.local',  # 数据库主机IP，如保持默认，则为127.0.0.1
         'PORT': 3306,  # 数据库端口号，如保持默认，则为3306
     }
 }
