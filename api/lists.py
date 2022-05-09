@@ -464,13 +464,13 @@ def my_course_list_by_id(request: HttpRequest):
     """
     {'action': 'course list by username', 'username': '__USERNAME__'}
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     target_username = data.get('username')
     if action != 'course list by id' or target_username is None:
@@ -756,7 +756,6 @@ def teacher_newcomer_list(req: HttpRequest):
         return_list.append(tmp)
 
     return gen_response(200, data=return_list)
-
 
 
 def program_content_list(request: HttpRequest):

@@ -331,8 +331,8 @@ def finish_lesson(req: HttpRequest):
     if relations.count() <= 0:
         return gen_response(400, message="relation between user and lesson not found")
     relation = relations.first()
-    # if relation.finished:
-    #     return gen_response(200, message="already finished")
+    if relation.finished:
+        return gen_response(200, message="already finished")
     relation.finished = True
     relation.save()
     # 更新content
@@ -351,7 +351,13 @@ def finish_lesson(req: HttpRequest):
     check_graduated_newcomer(user)
     return gen_response(200, message="success finish")
 
-def finish_all_lesson(req:HttpRequest):
+
+def finish_all_lesson(req: HttpRequest):
+    """
+    结束自己所有的lesson和course
+    :param req:
+    :return:
+    """
     ok, res = quick_check(req, {
         "method": "POST",
         "username": "",
@@ -373,18 +379,18 @@ def finish_all_lesson(req:HttpRequest):
         if course_relations.count() <= 0:
             return gen_response(400, message="not course with user and lesson")
         course_relation = course_relations.first()
-        logging.warning(course_relation.finished,"???")
         course_relation.finished = True
         course_relation.save()
-    content_relations = UserContentTable.objects.filter(user=user,content__type=ContentTable.EnumType.Course)
-    if content_relations.count()<=0:
-        return gen_response(200,message="not coures")
-    content_relation = content_relations.first()
-    content_relation.finished = True
-    content_relation.save()
+    content_relations = UserContentTable.objects.filter(user=user, content__type=ContentTable.EnumType.Course)
+    if content_relations.count() <= 0:
+        return gen_response(200, message="not coures")
+    for content_relation in content_relations:
+        content_relation.finished = True
+        content_relation.save()
     check_graduated_teacher(user)
     check_graduated_newcomer(user)
     return gen_response(200, message="temp use")
+
 
 # def assign_program(request: HttpRequest):
 #     """
@@ -450,13 +456,13 @@ def assign_content(request: HttpRequest):
         "deadline": "yyyy-MM-dd HH:mm"
         "obligatory": true/false
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     assignee_id = data.get('assigneeID')
     content_id = data.get('contentID')
