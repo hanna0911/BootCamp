@@ -1,7 +1,7 @@
 """
 描述数据库结构的文件
 """
-
+import datetime
 from email.policy import default
 from random import choice
 from django.db import models
@@ -12,11 +12,13 @@ NAME_LEN = 50
 SHORT_INFO_LEN = 20
 LONG_INFO_LEN = 200
 COMMENT_LEN = 500
-JoinStatusToText = ["待入职","在职","离职"]
-EmployeeTypeToText = ["校招","社招","实习","未选择"]
-GraduateStatusToTest = ["未毕业","正常毕业","非正常毕业"]
-TeacherExaminedStatusToTest = ["未审核","审核通过","审核拒绝"]
-HonorToTest = ["奖章","证书","奖项"]
+JoinStatusToText = ["待入职", "在职", "离职"]
+EmployeeTypeToText = ["校招", "社招", "实习", "未选择"]
+GraduateStatusToTest = ["未毕业", "正常毕业", "非正常毕业"]
+TeacherExaminedStatusToTest = ["未审核", "通过", "拒绝"]
+HonorToTest = ["奖章", "证书", "奖项"]
+
+
 class PrivateInfo(models.Model):
     """
     user table
@@ -69,7 +71,7 @@ class PrivateInfo(models.Model):
 
     # 新人相关
     newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
-    newcomerGraduateState = models.BooleanField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
+    newcomerGraduateState = models.IntegerField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
     newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
 
     # 导师相关
@@ -114,6 +116,8 @@ class TeacherNewcomerTable(models.Model):
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField(default=-1.)  # 该新人被该老师评价的分数
     teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
+    teacherCommitted = models.BooleanField(default=False)
+    newcomerCommitted = models.BooleanField(default=False)
 
 
 class NewcomerRecode(models.Model):
@@ -147,6 +151,7 @@ class ProgramTable(models.Model):
     audience = models.IntegerField(choices = EnumAudience.choices)  # 项目受众，无默认值
     cover = models.ImageField()  # 项目封面
     releaseTime = models.DateTimeField(auto_now_add=True)  # 发布时间
+    isTemplate = models.BooleanField()  # 是否为模板（即管理员创建、所有导师可见）
 
 
 class ContentTable(models.Model):
@@ -165,6 +170,9 @@ class ContentTable(models.Model):
         Text = 0    # text
         Link = 1    # link
         File = 2    # file
+    class EnumAudience(models.IntegerChoices):
+        teacher = 1  # 导师培训内容
+        newcomer = 0 # 新人培训内容
     # --------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
@@ -173,7 +181,7 @@ class ContentTable(models.Model):
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
-    audience = models.IntegerField()  # 受众
+    audience = models.IntegerField(choices=EnumAudience.choices)  # 受众
     cover = models.ImageField()  # 封面
     type = models.IntegerField(choices = EnumType.choices)  # content类型 0 代表course，1代表exam，2代表task
     isTemplate = models.BooleanField()  # 是否是模板
@@ -189,14 +197,14 @@ class ContentTable(models.Model):
     taskType = models.IntegerField(choices = EnumTaskType.choices, default = EnumTaskType.Text)  # 任务类型(针对task类 0-text, 1-link, 2-file)
     text = models.CharField(max_length=10000)  # 任务文字(针对task类)
     link = models.URLField(max_length=LONG_INFO_LEN)  # 任务链接
-    taskFile = models.FileField()  # 任务文件
+    taskFile = models.CharField(max_length=1000)  # 任务文件
 
 
 class LessonTable(models.Model):
     """
     课程库,隶属于培训内容库
     """
-    id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课堂id
+    id = models.AutoField(primary_key=True)  # 课堂id
     name = models.CharField(max_length=NAME_LEN)  # 课堂名称
     author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 课堂作者
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 课堂所属的事件或者大课程
@@ -210,7 +218,7 @@ class CoursewareTable(models.Model):
     """
     课件库
     """
-    id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 课件id
+    id = models.AutoField(primary_key=True)  # 课件id
     lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 所属课堂
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 所属课程或事件
     name = models.CharField(max_length=NAME_LEN)  # 名称
@@ -253,7 +261,7 @@ class UserContentTable(models.Model):
     content = models.ForeignKey(ContentTable, on_delete=models.CASCADE)  # 培训内容
     finished = models.BooleanField(default=False)  # 是否结束
     userBeginTime = models.DateTimeField(auto_now_add=True)  # 开始时间 这个时间属于个人
-    userEndTime = models.DateTimeField()  # 结束时间  这个时间属于个人
+    userEndTime = models.DateTimeField(default=datetime.datetime.fromisoformat("2000-01-01 00:00"))  # 结束时间  这个时间属于个人
     deadline = models.DateTimeField()  # 单个培训内容对个人来说的ddl
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
 
@@ -278,3 +286,25 @@ class UserLessonTable(models.Model):
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
     endTime = models.DateTimeField()  # 结束时间
+
+
+class NotificationTable(models.Model):
+    """
+    公告
+    """
+    id = models.AutoField(primary_key=True)
+    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    author_role = models.CharField(max_length=10)
+    title = models.CharField(max_length=50)
+    content = models.CharField(max_length=1000)
+    releaseTime = models.DateTimeField(auto_now_add=True)
+
+
+class UserNotificationTable(models.Model):
+    """
+    公告-用户关系表
+    """
+    relationID = models.AutoField(primary_key=True)
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    notification = models.ForeignKey(NotificationTable, on_delete=models.CASCADE)
+    finished = models.BooleanField(default=False)

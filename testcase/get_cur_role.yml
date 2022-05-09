@@ -1,0 +1,19 @@
+- name: 获取当前使用的身份
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /get_cur_role
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取当前使用的身份-方法错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /get_cur_role
+    data:
+  validate:
+    - equals: { status_code: 400 }

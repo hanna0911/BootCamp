@@ -1,0 +1,60 @@
+- name: 新人平均分-成功
+  ident:
+    - admin
+    - HRBP
+  request:
+    method: POST
+    url: /newcomer_average_score
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 新人平均分-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /newcomer_average_score
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 新人平均分-权限错误
+  ident:
+    - newcomer
+    - teacher
+  request:
+    method: POST
+    url: /newcomer_average_score
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939199000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 新人平均分-字段缺失
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /newcomer_average_score
+    data:
+      dateRangeStart: 1651334400000
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 新人平均分-时间错误
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /newcomer_average_score
+    data:
+      dateRangeStart: 1651334400000
+      dateRangeEnd: 1651939200000
+  validate:
+    - equals: { status_code: 400 }

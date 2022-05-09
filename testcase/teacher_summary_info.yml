@@ -1,0 +1,9 @@
+- name: 获取导师基本带新信息
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /teacher_summary_info
+    data:
+  validate:
+    - equals: { status_code: 200 }

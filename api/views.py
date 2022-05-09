@@ -28,6 +28,18 @@ def get_token(request: HttpRequest):
         return illegal_request_type_error_response()
 
 
+def get_cur_role(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    else:
+        return gen_standard_response(
+            200, {'result': 'success', 'role': role, "message":"success"})
+
+
 def login(request: HttpRequest):  # 登录
     """
     receive post '/login' from frontend
@@ -263,17 +275,159 @@ def get_honor(req: HttpRequest):
     :return:
     """
     ok, res = quick_check(req, {
-        "method": "GET",
+        "method": "POST",
         "username": "",
+        "data_field": []
     })
     if not ok:
         return res
-    user = PrivateInfo.objects.get(username=req.session.get("username"))
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
     honor_list = Honor.objects.filter(owner=user)
-    ret_list = []
+    medals_list = []
+    certificates_list = []
+    award_list = []
     for honor in honor_list:
-        tmp = {}
-        tmp["type"] = HonorToTest[honor.type]
-        tmp["text"] = honor.text
-        ret_list.append(tmp )
-    return gen_response(200,data=ret_list)
+        tmp = {"name": honor.text, "avator": "/api/avatar_by_name/?username={}".format(user.username)}
+        if honor.type == Honor.EnumType.Certificate:
+            certificates_list.append(tmp)
+        elif honor.type == Honor.EnumType.Medal:
+            medals_list.append(tmp)
+        else:
+            award_list.append(tmp)
+    ret_dic = {"medals": medals_list, "certificates": certificates_list, "awards": award_list}
+    return gen_response(200, data=ret_dic)
+
+
+def teacher_summary_info(req: HttpRequest):
+    """
+    导师查看带新概览,自己带了几个新人,已经带过几个新人
+    如果有导师字段，则从字段读取，否则从session中读取
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher"],
+        "data_field": []
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    if data.get("teacher") is None:
+        user = PrivateInfo.objects.get(username=req.session.get("username"))
+    else:
+        found, user = find_people(data["teacher"])
+        if not found:
+            return user
+    data = {
+        "current": user.currentMembers,
+        "historical": user.historicalMembers,
+        "dutyDate": user.teacherDutyDate,
+        "teacherIsDuty":user.teacherIsDuty,
+        "total": user.currentMembers + user.historicalMembers,
+    }
+    return gen_response(200, data=data)
+
+
+def teacher_board_summary_info(req: HttpRequest):
+    """
+    导师培训查看个人各个任务的完成情况
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["teacher"]
+    })
+    if not ok:
+        return res
+    teacher = PrivateInfo.objects.get(username=req.session.get("username"))
+    if teacher.teacherIsDuty:
+        is_graduate = "毕业"
+        graduate_date = teacher.teacherDutyDate
+    else:
+        is_graduate = "未毕业"
+        graduate_date = "未毕业"
+    course_progress = get_progress(teacher, False, ContentTable.EnumType.Course)
+    exam_progress = get_progress(teacher, False, ContentTable.EnumType.Exam)
+    task_progress = get_progress(teacher, False, ContentTable.EnumType.Task)
+    data = {
+        "startDate": teacher.teacherNominationDate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,
+        "taskProgress": task_progress,
+        "evaluateProgress": 50,
+        "graduateDate": graduate_date,
+        "idGraduate": is_graduate,
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+
+    }
+    return gen_response(200, data)
+
+
+def newcomer_summary_info(req: HttpRequest):
+    """
+    返回新人看板的概述
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "GET",
+        "username": "",
+        "role": ["newcomer"]
+    })
+    if not ok:
+        return res
+    newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        teacher_name = "无"
+        teacher_username = ""
+        evaluate_progress = 0
+    else:
+        relation = relations.first()
+        teacher_name = relation.teacher.name
+        teacher_username = relation.teacher.username
+        if relation.newcomerCommitted and relation.teacherCommitted:
+            evaluate_progress = 100
+        elif relation.newcomerCommitted or relation.teacherCommitted:
+            evaluate_progress = 50
+        else:
+            evaluate_progress = 0
+
+    is_graduate = GraduateStatusToTest[newcomer.newcomerGraduateState]
+    date_select = ["未毕业", newcomer.newcomerGraduateDate, newcomer.newcomerGraduateDate]
+    graduate_date = date_select[newcomer.newcomerGraduateState]
+
+    course_progress = get_progress(newcomer, True, ContentTable.EnumType.Course)
+    exam_progress = get_progress(newcomer, True, ContentTable.EnumType.Exam)
+    task_progress = get_progress(newcomer, True, ContentTable.EnumType.Task)
+    data = {
+        "startDate": newcomer.newcomerStartDate,
+        "tutor": teacher_name,
+        "teacherUsername": teacher_username,
+        "graduateDate": graduate_date,
+        "isGraduate": is_graduate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,#69 f
+        "taskProgress": task_progress,
+        "evaluateProgress": evaluate_progress,
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+    }
+    return gen_response(200, data)

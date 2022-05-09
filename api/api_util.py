@@ -1,9 +1,12 @@
+import datetime
 import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
-from .models import PrivateInfo
+from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable, UserProgramTable, UserLessonTable, ProgramTable
+from .models import ContentTable
 import json
+from django.utils import timezone
 
 chinese_role_trans = {
     "admin": "管理员",
@@ -87,31 +90,148 @@ def check_method(req: HttpRequest, method: str):
         return False
 
 
+def str_to_boolean(s: str):
+    s = s.lower()
+    if s == 'true':
+        return True
+    elif s == 'false':
+        return False
+    else:
+        return None
+
+
+def check_graduated_teacher(user: PrivateInfo):
+    """
+    检查导师是否毕业
+    :param user:
+    :return:
+    """
+    user_program = UserProgramTable.objects.filter(
+        user=user,
+        program__audience=ProgramTable.EnumAudience.Teacher)
+    if user_program.count() <= 0:
+        return
+    user_program = user_program.first()
+    print(f"{user_program.user.name}")
+    contents = UserContentTable.objects.filter(
+        user=user,
+        content__audience=ContentTable.EnumAudience.teacher)
+    total = contents.count()
+    finished = contents.filter(finished=True).count()
+    print(f"teacher total{total}, finished{finished}")
+    if total == finished:
+        user_program.finished = True
+        user_program.save()
+        user.teacherIsDuty = True
+        print("teacher graduated")
+        user.teacherDutyDate = timezone.now()
+        user.save()
+
+
+def check_graduated_newcomer(user: PrivateInfo):
+    """¬
+    检查一个新人是否完成了新人培训
+    :param newcomer:
+    :return:
+    """
+    user_program = UserProgramTable.objects.filter(
+        user=user,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        print("no program when checking graduated")
+        return
+    user_program = user_program.first()
+    print(f"{user_program.user.name}")
+    contents = UserContentTable.objects.filter(
+        user=user,
+        content__audience=ContentTable.EnumAudience.newcomer)
+    total = contents.count()
+    finished = contents.filter(finished=True).count()
+    print(f"newcomr total{total}, finished{finished}")
+    if total == finished:
+        user_program.finished = True
+        user_program.save()
+        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=user)
+        if teacher_relations.count() <= 0:  # 还没有导师，不能毕业
+            return
+        teacher_relation = teacher_relations.first()
+        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted:
+            user.newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate
+            user.newcomerGraduateDate = timezone.now()
+            user.save()
+            teacher = teacher_relation.teacher
+            teacher.currentMembers -= 1
+            teacher.historicalMembers += 1
+            print("newcomer graduated")
+
+
+def find_people(username: str):
+    users = PrivateInfo.objects.filter(username=username)
+    if len(users) <= 0:
+        return False, gen_response(400, message=f"{username} user not found")
+    else:
+        return True, users.first()
+
+
+def get_relation(teacher: str, newcomer: str):
+    teachers = PrivateInfo.objects.filter(username=teacher)
+    newcoemrs = PrivateInfo.objects.filter(username=newcomer)
+    if len(teachers) <= 0 or len(newcoemrs) <= 0:
+        return False, gen_response(400, message="teacher or newcomer not found")
+    teacher = teachers.first()
+    newcomer = newcoemrs.first()
+    relations = TeacherNewcomerTable.objects.filter(teacher=teacher, newcomer=newcomer)
+    if len(relations) <= 0:
+        return False, gen_response(400, message="not relation between teacher and newcomer")
+    return True, relations.first()
+
+
 def quick_check(req: HttpRequest, check_points: dict):
     for key in check_points.keys():
         if key == "method" and not check_method(req, check_points[key]):
-            logging.error("invalid method")
+            # logging.error("invalid method")
             return False, gen_response(400, message="invalid method")
         elif key == "username":
             if req.session.get("username", None) is None:
-                logging.error("no username in session, probly not login")
+                # logging.error("no username in session, probly not login")
                 return False, gen_response(
                     400, message="no username in session, probly not login")
         elif key == "role" and not role_list_check(req.session.get("username"), check_points[key]):
-            logging.error("no permission")
+            # logging.error("no permission")
             return False, gen_response(400, message="no permission")
         elif key == "data_field":
             try:
                 data: dict = json.loads(req.body)
             except Exception:
-                logging.error("load fail")
+                # logging.error("load fail")
                 return False, gen_response(400, message='Load json request failed')
             for field in check_points[key]:
                 if field not in data.keys():
-                    logging.error("lack of arguments")
+                    # logging.error("lack of arguments")
                     return False, gen_response(400, message="lack of arguments")
 
+        elif key == "cur_role":  # 读取session中的role
+            if req.session.get("role", None) is None:
+                return False, gen_response(400, message="no role in session")
+            role = req.session.get("role")
+            if len(check_points[key]) == 0:  # 不声明，则当前什么角色都可以
+                return True, gen_response(200)
+            if role not in check_points[key]:
+                return False, gen_response(400, message="current role not matched")
+
     return True, gen_response(200)
+
+
+def update_teacher_score(teacher: PrivateInfo):
+    relations = TeacherNewcomerTable.objects.filter(teacher=teacher)
+    count = 0
+    total = 0
+    for relation in relations:
+        if relation.teacherScore >= 0:
+            count += 1
+            total += relation.teacherScore
+    teacher.teacherScore = total / count
+    teacher.save()
 
 
 def unknown_error_response():
@@ -145,6 +265,18 @@ def unauthorized_action_response():
     response: JsonResponse = JsonResponse({
         'result': 'failed',
         'message': 'unauthorized action'
+    })
+    response.status_code = 400
+    return response
+
+
+def save_file_error_response():
+    """
+    生成保存文件错误响应
+    """
+    response: JsonResponse = JsonResponse({
+        'result': 'failed',
+        'message': 'failed to save file on server'
     })
     response.status_code = 400
     return response
@@ -311,3 +443,49 @@ def item_not_found_error_response():
                                            "message": "requested item not found in database"})
     response.status_code = 400
     return response
+
+
+def cn_datetime_fromtimestamp(timestamp: float) -> datetime.datetime:
+    """
+    将timestamp转换成datetime类（无时区信息的北京本地时间）
+    如果你有上述需求，使用这个函数，而不是datetime.fromtimestamp
+
+    P.S.
+    我们构造的数据全是无时区信息的时间，所以要将USE_TZ设为False、且使用的datetime类也得是无时区的
+    而python把时间戳转化为datetime时，是采用系统自身的时区信息进行转化的
+    而服务器的时区信息是在芝加哥！！！
+    如果直接使用datetime.fromtimestamp，部署上去的所有时间会延迟11个小时
+    """
+    local = datetime.datetime.now().replace(tzinfo=datetime.timezone(datetime.timedelta(hours=8)))
+    beijing = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
+    delta = beijing - local
+    return datetime.datetime.fromtimestamp(timestamp) + delta
+
+
+def path_converter(path: str = input):
+    return path.replace("\\", "/")
+
+
+def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = ContentTable.EnumType.Course):
+    """
+
+    :param user:
+    :param is_newcomer: True 为新人培训， False为导师培训
+    :param type: 分别为EnumType.Course， EnumType.Exam，EnumType.Task
+    :return:
+    """
+    if is_newcomer:
+        audience = ContentTable.EnumAudience.newcomer
+    else:
+        audience = ContentTable.EnumAudience.teacher
+    course = UserContentTable.objects.filter(
+        user=user,
+        content__audience=audience,
+        content__type=type
+    )
+    if len(course) <= 0:
+        return 100
+    else:
+        total_len = len(course)
+        complete_len = len(course.filter(finished=True))
+        return int(100 * complete_len / total_len)
