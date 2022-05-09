@@ -1,0 +1,11 @@
+- name: 获取program的content list
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /program_content_list
+    data:
+      action: get content list for program
+      programID: 15
+  validate:
+    - equals: { status_code: 200 }

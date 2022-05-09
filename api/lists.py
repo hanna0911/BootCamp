@@ -859,28 +859,26 @@ def teacher_newcomer_list_by_name(req: HttpRequest):
 
 def content_lesson_list(request: HttpRequest):
     """
+    获取content的lesson列表
     POST
     {
         'action': 'lesson list for course'
         'contentID': __CONTENT_ID__
     }
     """
-    if request.method != 'POST':
-        return illegal_request_type_error_response()
-    try:
-        data = json.loads(request.body)
-    except Exception as e:
-        print(e)
-        return unknown_error_response()
+    ok, res = quick_check(request, {
+        "method": "POST",
+        "data_field": [],
+        "username": "",  # 检查session
+        "cur_role": [],  # 检查session
+    })
+    if not ok:
+        return res
+    data = json.loads(request.body)
     action = data.get('action')
     content_id = data.get('contentID')
-    session = request.session
-    username = session.get('username')
-    role = session.get('role')
     if action != 'lesson list for course' or content_id is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
-    if username is None or role is None:
-        return session_timeout_response()
     course = ContentTable.objects.filter(id=content_id).first()
     if course is None:
         return item_not_found_error_response()
@@ -895,6 +893,7 @@ def content_lesson_list(request: HttpRequest):
             'recommendTime': lesson.recommendedTime,
             'releaseTime': lesson.releaseTime
         })
+    logging.info(lesson_list)
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'{len(lessons)} lessons retrieved for course {course.name}',

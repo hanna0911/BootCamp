@@ -6,7 +6,6 @@
     method: GET
     url: /duty_teacher_list
     data:
-    headers:
   validate:
     - equals: { status_code: 200 }
 
@@ -18,7 +17,6 @@
     method: GET
     url: /duty_teacher_list
     data:
-    headers:
   validate:
     - equals: { status_code: 400 }
 
@@ -29,6 +27,5 @@
     method: POST
     url: /duty_teacher_list
     data:
-    headers:
   validate:
     - equals: { status_code: 400 }
