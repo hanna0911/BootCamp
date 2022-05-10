@@ -41,7 +41,7 @@ def create_notification(request: HttpRequest):
     author = PrivateInfo.objects.filter(username=username).first()
     if author is None:
         return item_not_found_error_response()
-    new_notification = NotificationTable(title=title, content=content, author=author, author_role=role)
+    new_notification = NotificationTable(title=title, content=content, author_name=author.name, author_role=role)
     new_notification.save()
     for assignee in assignees:
         new_user_notification_relation = UserNotificationTable(user=assignee, notification=new_notification)
@@ -73,7 +73,7 @@ def my_notifications(request: HttpRequest):
         notification_list.append({
             'title': notification.title,
             'content': notification.content,
-            'author': notification.author.name,
+            'author': notification.author_name,
             'authorRole': notification.author_role,
             'releaseTime': notification.releaseTime,
             'notificationID': notification.id,
@@ -291,7 +291,7 @@ def create_group_notification(request: HttpRequest):
     author = PrivateInfo.objects.filter(username=username).first()
     if author is None:
         return item_not_found_error_response()
-    new_notification = NotificationTable(title=title, content=content, author=author, author_role=role)
+    new_notification = NotificationTable(title=title, content=content, author_name=author.name, author_role=role)
     new_notification.save()
     for group_id in group_ids:
         user_group_relations = UserGroupTable.objects.filter(group__id=group_id)
