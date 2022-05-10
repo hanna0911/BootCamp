@@ -58,17 +58,18 @@
   validate:
     - equals: { status_code: 200 }
 
-#- name: 完成阅读公告
-#  ident:
-#    - newcomer
-#  request:
-#    method: POST
-#    url: /create_notification
-#    data:
-#      action: create notification
-#
-#  validate:
-#    - equals: { status_code: 200 }
+- name: 完成阅读公告
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /finish_notification
+    data:
+      action: finish notification
+      notificationID: 1
+
+  validate:
+    - equals: { status_code: 200 }
 
 - name: 创建群组
   ident:
@@ -80,8 +81,47 @@
       action: create group
       groupName: 测试群组
       members:
-        - student1
-        - NOT_A_NEWCOMER
         - newcomer
   validate:
-    - equals: { status_code: 400 }
+    - equals: { status_code: 200 }
+
+- name: 添加组员
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /add_group_member
+    data:
+      action: add group member
+      groupID: 1
+      username:
+        - s1
+        - s2
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取my_group_list
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /my_group_list
+
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 群发通知
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /create_group_notification
+    data:
+      action: create group notification
+      title: test_title
+      content: test_content
+      groups:
+        - 1
+
+  validate:
+    - equals: { status_code: 200 }
