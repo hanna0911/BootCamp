@@ -294,7 +294,7 @@ class NotificationTable(models.Model):
     公告
     """
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    author_name = models.CharField(max_length=100)
     author_role = models.CharField(max_length=10)
     title = models.CharField(max_length=50)
     content = models.CharField(max_length=1000)
@@ -322,5 +322,20 @@ class GroupTable(models.Model):
 
 
 class UserGroupTable(models.Model):
+    relationID = models.AutoField(primary_key=True)
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     group = models.ForeignKey(GroupTable, on_delete=models.CASCADE)
+
+
+class ScheduledNotificationTable(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+    content = models.CharField(max_length=1000)
+    scheduledReleaseTime = models.DateTimeField()
+
+
+class UserScheduledTable(models.Model):
+    relationID = models.AutoField(primary_key=True)
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    scheduled_notification = models.ForeignKey(ScheduledNotificationTable, on_delete=models.CASCADE)
+
