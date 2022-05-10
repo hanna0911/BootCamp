@@ -244,6 +244,9 @@ class Tests(TestCase):
     def test_content_progress(self):
         self.process("/testcase/content_progress.yml")
 
+    def test_notification(self):
+        self.process("/testcase/notification.yml")
+
     # def test_upload_program(self):  # TODO:测试有问题
     #     self.process("/testcase/upload_program.yml")
 
