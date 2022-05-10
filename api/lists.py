@@ -617,7 +617,7 @@ def my_task_list(request: HttpRequest):
             'taskText': task.text,
             'taskLink': task.link,
             'isFinished': task_relation.finished,
-            'taskID': task.id
+            'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
         tag_list.append(task.tag)
@@ -830,8 +830,8 @@ def program_content_list(request: HttpRequest):
             'beginTime': content.beginTime,
             'endTime': content.endTime,
             'taskType': task_type,
-            'text': content.text,
-            'link': content.link,
+            'taskText': content.text,
+            'taskLink': content.link,
             'contentID': content.id
         }
         if user_program_relation is not None:
