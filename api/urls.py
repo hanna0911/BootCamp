@@ -78,5 +78,8 @@ urlpatterns = [
     path('content_lesson_list', lists.content_lesson_list, name="content_lesson_list"),
     path('lesson_courseware_list', lists.lesson_courseware_list, name="lesson_courseware_list"),
     path("finish_lesson", status.finish_lesson, name="finish_lesson"),
-    path("finish_all_lesson",status.finish_all_lesson,name="finish_all_lesson")
+    path("finish_all_lesson",status.finish_all_lesson,name="finish_all_lesson"),
+    path('create_group', notification.create_group, name="create_group"),
+    path('add_group_member', notification.add_group_member, name="add_group_member"),
+    path('my_group_list', notification.my_group_list, name="my_group_list")
 ]
