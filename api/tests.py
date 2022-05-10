@@ -245,6 +245,9 @@ class Tests(TestCase):
     def test_content_progress(self):
         self.process("/testcase/content_progress.yml")
 
+    def test_notification(self):
+        self.process("/testcase/notification.yml")
+
     def latency(self):
         large = 30000
         write_time = time.time()
