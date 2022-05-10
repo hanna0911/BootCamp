@@ -27,6 +27,7 @@ def reject_nominate(req: HttpRequest):
         return gen_response(400, "user not found")
     user = users.first()
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Fail
+    user.isTeacher = False  # 直接打回新人原型，提名进度列表中不会有拒绝状态
     user.save()
     return gen_response(200)
 
@@ -66,6 +67,7 @@ def nominate_teachers(req: HttpRequest):
         user = PrivateInfo.objects.get(username=item["username"])
         user.isTeacher = True
         user.teacherNominationDate = timezone.now()
+        user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
     return gen_response(200, message="success")
 

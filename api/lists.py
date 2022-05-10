@@ -127,7 +127,7 @@ def duty_teacher_list(req: HttpRequest):
 
 def nominated_list(req: HttpRequest):
     """
-    已经被提名,可以进行审核的教室列表
+    已经被提名,可以进行审核的教师列表
     :param req:
     :return:
     """
@@ -139,7 +139,9 @@ def nominated_list(req: HttpRequest):
             400, message="no username in session, probly not login")
     if not role_list_check(username, ["HRBP", "admin"]):  # 暂时做修改适应前端
         return gen_response(400, message="permission denied")
-    teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
+    teacher_list = PrivateInfo.objects.filter(
+        isTeacher=True, teacherIsDuty=False,
+        teacherExaminedStatus=PrivateInfo.EnumTeacherExaminedStatus.NotYet)
     # TODO:获取培训状态
     return_list = []
     for teacher in teacher_list:

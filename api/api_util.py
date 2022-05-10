@@ -166,6 +166,7 @@ def check_graduated_newcomer(user: PrivateInfo):
             teacher = teacher_relation.teacher
             teacher.currentMembers -= 1
             teacher.historicalMembers += 1
+            teacher.save()
             print("newcomer graduated")
             logging.warning("newcomer graduated")
 
