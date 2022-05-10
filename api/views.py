@@ -37,7 +37,7 @@ def get_cur_role(request: HttpRequest):
         return session_timeout_response()
     else:
         return gen_standard_response(
-            200, {'result': 'success', 'role': role, "message":"success"})
+            200, {'result': 'success', 'role': role, "message": "success"})
 
 
 def login(request: HttpRequest):  # 登录
@@ -330,7 +330,7 @@ def teacher_summary_info(req: HttpRequest):
         "current": user.currentMembers,
         "historical": user.historicalMembers,
         "dutyDate": user.teacherDutyDate,
-        "teacherIsDuty":user.teacherIsDuty,
+        "teacherIsDuty": user.teacherIsDuty,
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
@@ -421,7 +421,7 @@ def newcomer_summary_info(req: HttpRequest):
         "graduateDate": graduate_date,
         "isGraduate": is_graduate,
         "courseProgress": course_progress,
-        "examProgress": exam_progress,#69 f
+        "examProgress": exam_progress,  # 69 f
         "taskProgress": task_progress,
         "evaluateProgress": evaluate_progress,
         "certificate": 'https://gimg2.baidu.com/image_search/s'

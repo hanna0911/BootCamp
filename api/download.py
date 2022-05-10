@@ -213,4 +213,3 @@ def retrieve_task_file_by_id(request: HttpRequest):
     response['Content-Type'] = 'application/octet-stream'
     response["Access-Control-Expose-Headers"] = "Content-Disposition"
     return response
-

@@ -170,9 +170,10 @@ class ContentTable(models.Model):
         Text = 0    # text
         Link = 1    # link
         File = 2    # file
+
     class EnumAudience(models.IntegerChoices):
-        teacher = 1  # 导师培训内容
-        newcomer = 0 # 新人培训内容
+        teacher = 1     # 导师培训内容
+        newcomer = 0    # 新人培训内容
     # --------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
@@ -324,6 +325,7 @@ class UserGroupTable(models.Model):
     relationID = models.AutoField(primary_key=True)
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     group = models.ForeignKey(GroupTable, on_delete=models.CASCADE)
+<<<<<<< HEAD
 
 
 class ScheduledNotificationTable(models.Model):
@@ -338,3 +340,5 @@ class UserScheduledTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     scheduled_notification = models.ForeignKey(ScheduledNotificationTable, on_delete=models.CASCADE)
 
+=======
+>>>>>>> 6974c16613e768168507859c8038ed0d6c830f6a

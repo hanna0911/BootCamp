@@ -172,7 +172,7 @@ def newcomer_score_teacher(req: HttpRequest):
     relation = relations.first()
     try:
         score = float(data.get("score"))
-    except:
+    except Exception:
         return gen_response(400, message="score not a number")
     relation.teacherScore = score
     relation.save()
@@ -200,7 +200,7 @@ def teacher_score_newcomer(req: HttpRequest):
         return relation
     try:
         score = float(data.get("score"))
-    except:
+    except Exception:
         return gen_response(400, message="score not a number")
     relation.newcomerScore = score
     relation.save()
