@@ -308,3 +308,18 @@ class UserNotificationTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     notification = models.ForeignKey(NotificationTable, on_delete=models.CASCADE)
     finished = models.BooleanField(default=False)
+
+
+class GroupTable(models.Model):
+    """
+    公告群组表
+    """
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    creator = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    user_count = models.IntegerField(default=0)
+
+
+class UserGroupTable(models.Model):
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    group = models.ForeignKey(GroupTable, on_delete=models.CASCADE)

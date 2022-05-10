@@ -121,3 +121,139 @@ def finish_notification(request: HttpRequest):
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'finished reading notification {notification_id}'})
+
+
+def create_group(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'create group',
+        'groupName': __GROUP_NAME__,
+        'members': [USERNAME1, USERNAME2, ... ]
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    member_usernames = data.get('members')
+    group_name = data.get('groupName')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'create group' or member_usernames is None or group_name is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    user = PrivateInfo.objects.filter(username=username).first()
+    if user is None:
+        return item_not_found_error_response()
+    members = []
+    for member_username in member_usernames:
+        member = PrivateInfo.objects.filter(username=member_username).first()
+        if member is None:
+            return item_not_found_error_response()
+        members.append(member)
+    new_group = GroupTable(creator=user, name=group_name)
+    new_group.save()
+    for member in members:
+        new_relation = UserGroupTable(user=member, group=new_group)
+        new_relation.save()
+        new_group.user_count += 1
+        new_group.save()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'created new group with id {new_group.id}, which now has {new_group.user_count} users'
+    })
+
+
+def add_group_member(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'add group member'
+        'groupID': __GROUP_ID__,
+        'username': __TARGET_USERNAME__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    group_id = data.get('groupID')
+    target_username = data.get('username')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'add group member' or group_id is None or target_username is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    try:
+        group_id = eval(group_id)
+    except Exception as e:
+        print(e)
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    group = GroupTable.objects.filter(id=group_id).first()
+    target_user = PrivateInfo.objects.filter(username=target_username).first()
+    user = PrivateInfo.objects.filter(username=username).first()
+    if group is None or target_user is None or user is None:
+        return item_not_found_error_response()
+    if group.creator.username != username:
+        return unauthorized_action_response()
+    new_relation = UserGroupTable(user=target_user, group=group)
+    new_relation.save()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'user {target_username} added to group {group.name}'
+    })
+
+
+def my_group_list(request: HttpRequest):
+    """
+    GET
+    """
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    user = PrivateInfo.objects.filter(username=username)
+    if user is None:
+        return unknown_error_response()
+    my_groups = GroupTable.objects.filter(creator__username=username)
+    group_list = []
+    for group in my_groups:
+        member_list = []
+        member_group_relations = UserGroupTable.objects.filter(group__id=group.id)
+        for relation in member_group_relations:
+            member_list.append({
+                'username': relation.user.username,
+                'dept': relation.user.dept
+            })
+        group_list.append({
+            'groupID': group.id,
+            'groupName': group.name,
+            'members': member_list
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'a total of {len(group_list)} groups retrieved',
+        'groups': group_list
+    })
+
+
+
