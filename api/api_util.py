@@ -121,7 +121,8 @@ def check_graduated_teacher(user: PrivateInfo):
     finished = contents.filter(finished=True).count()
     print(f"teacher total{total}, finished{finished}")
     logging.warning(f"teacher total{total}, finished{finished}")
-    if total == finished:
+    # 未上岗，但结束了课程
+    if total == finished and user.teacherIsDuty is False:
         user_program.finished = True
         user_program.save()
         user.teacherIsDuty = True
@@ -159,7 +160,9 @@ def check_graduated_newcomer(user: PrivateInfo):
         if teacher_relations.count() <= 0:  # 还没有导师，不能毕业
             return
         teacher_relation = teacher_relations.first()
-        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted:
+        # 相互评论并且未毕业
+        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted \
+                and user.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             user.newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate
             user.newcomerGraduateDate = timezone.now()
             user.save()
