@@ -44,7 +44,7 @@ def create_notification(request: HttpRequest):
     new_notification = NotificationTable(title=title, content=content, author=author, author_role=role)
     new_notification.save()
     for assignee in assignees:
-        new_user_notification_relation = UserNotificationTable(user=assignee, notification=new_notification,)
+        new_user_notification_relation = UserNotificationTable(user=assignee, notification=new_notification)
         new_user_notification_relation.save()
     return gen_standard_response(200, {
         'result': 'success',
@@ -73,7 +73,7 @@ def my_notifications(request: HttpRequest):
         notification_list.append({
             'title': notification.title,
             'content': notification.content,
-            'author': notification.author.username,
+            'author': notification.author.name,
             'authorRole': notification.author_role,
             'releaseTime': notification.releaseTime,
             'notificationID': notification.id,
@@ -258,4 +258,54 @@ def my_group_list(request: HttpRequest):
     })
 
 
-
+def create_group_notification(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'create group notification',
+        'title': __TITLE__,
+        'content': __CONTENT__(只是公告内容，不是ContentTable那种Content！！)
+        'groups': ['GROUP1', 'GROUP2', ... ]
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    title = data.get('title')
+    content = data.get('content')
+    group_ids = data.get('groups')
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if action != 'create group notification' or title is None or content is None or group_ids is None:
+        return gen_standard_response(400, {'result': 'failure', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    author = PrivateInfo.objects.filter(username=username).first()
+    if author is None:
+        return item_not_found_error_response()
+    new_notification = NotificationTable(title=title, content=content, author=author, author_role=role)
+    new_notification.save()
+    for group_id in group_ids:
+        user_group_relations = UserGroupTable.objects.filter(group__id=group_id)
+        assignees = []
+        if len(user_group_relations) == 0:
+            return item_not_found_error_response()
+        for user_group_relation in user_group_relations:
+            assignee = user_group_relation.user
+            assignees.append(assignee)
+        for assignee in assignees:
+            if UserNotificationTable.objects.filter(user=assignee, notification=new_notification).first() is None:
+                new_user_notification_relation = UserNotificationTable(user=assignee, notification=new_notification)
+                new_user_notification_relation.save()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'notification {title} assigned to {len(group_ids)} groups'
+    })
