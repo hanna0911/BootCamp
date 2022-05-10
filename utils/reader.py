@@ -328,6 +328,11 @@ def create_templage_xlsx(path: str):
     save(writer, UserProgramTable, UserProgramTable._meta.model_name)
     save(writer, UserContentTable, UserContentTable._meta.model_name)
     save(writer, UserLessonTable, UserLessonTable._meta.model_name)
-
+    save(writer, NotificationTable, NotificationTable._meta.model_name)
+    save(writer, UserNotificationTable, UserNotificationTable._meta.model_name)
+    save(writer, GroupTable, GroupTable._meta.model_name)
+    save(writer, UserGroupTable, UserGroupTable._meta.model_name)
+    save(writer, ScheduledNotificationTable, ScheduledNotificationTable._meta.model_name)
+    save(writer, UserScheduledTable, UserScheduledTable._meta.model_name)
     writer.save()
     writer.close()
