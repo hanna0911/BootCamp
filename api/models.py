@@ -325,7 +325,6 @@ class UserGroupTable(models.Model):
     relationID = models.AutoField(primary_key=True)
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     group = models.ForeignKey(GroupTable, on_delete=models.CASCADE)
-<<<<<<< HEAD
 
 
 class ScheduledNotificationTable(models.Model):
@@ -340,5 +339,3 @@ class UserScheduledTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     scheduled_notification = models.ForeignKey(ScheduledNotificationTable, on_delete=models.CASCADE)
 
-=======
->>>>>>> 6974c16613e768168507859c8038ed0d6c830f6a
