@@ -7,6 +7,7 @@
     data:
       username: newcomer
       action: has program
+      audience: newcomer
     headers:
   validate:
     - equals: { status_code: 200 }
