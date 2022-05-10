@@ -518,7 +518,7 @@ def has_program(request: HttpRequest):
     """
     ok, res = quick_check(request, {
         "method": "POST",
-        "data_field": [],
+        "data_field": ["audience"],
         "username": "",
         "cur_role": ["teacher", "admin", "HRBP"]
     })
@@ -527,12 +527,16 @@ def has_program(request: HttpRequest):
     data = json.loads(request.body)
     action = data.get('action')
     target_username = data.get('username')
+    audience_select = {"teacher": 1, "newcomer": 0}
+    audience = audience_select.get(data["audience"], 0) # 如果这个字段为空则自动为0
     if action != 'has program' or target_username is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
     target_user = PrivateInfo.objects.filter(username=target_username).first()
     if target_user is None:
         return item_not_found_error_response()
-    relation = UserProgramTable.objects.filter(user__username=target_username).first()
+    relation = UserProgramTable.objects.filter(user__username=target_username,
+                                               program__audience=audience
+                                               ).first()
     if relation is None:
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'user {target_username} has not been assigned a program',
