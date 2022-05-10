@@ -375,7 +375,7 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
-    join_state_select = ["待入职", "在职","离职"]
+    join_state_select = ["待入职", "在职", "离职"]
     info["joinStatus"] = join_state_select[pv.joinStatus]
     info["employed"] = join_state_select[pv.joinStatus]
     info["detail"] = pv.detail

@@ -170,9 +170,10 @@ class ContentTable(models.Model):
         Text = 0    # text
         Link = 1    # link
         File = 2    # file
+
     class EnumAudience(models.IntegerChoices):
-        teacher = 1  # 导师培训内容
-        newcomer = 0 # 新人培训内容
+        teacher = 1     # 导师培训内容
+        newcomer = 0    # 新人培训内容
     # --------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
