@@ -340,7 +340,7 @@ def finish_lesson(req: HttpRequest):
     if relation.finished:
         return gen_response(200, message="already finished")
     relation.finished = True
-    relation.endTime = timezone.now()
+    relation.endTime = cn_datetime_now()
     relation.save()
     # 更新content
     course = lesson.content
@@ -351,7 +351,7 @@ def finish_lesson(req: HttpRequest):
     course_relation.finishedLessonCount += 1
     if course_relation.finishedLessonCount == course.lessonCount:
         course_relation.finished = True
-        course_relation.userEndTime = timezone.now()
+        course_relation.userEndTime = cn_datetime_now()
         logging.info("lesson 结束，课程紧跟着结束")
     course_relation.save()
     # 更新整个培训内容是否完成
