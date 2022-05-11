@@ -76,7 +76,7 @@ def login(request: HttpRequest):  # 登录
         if get_highest_role(username) == "newcomer":
             #导师评价通知
             if program_finished_and_student_not_commented(user):
-                releasetime1 = get_next_weekday_time(1,12,0)
+                releasetime1 = get_next_week_time(1,11,0)
                 studentNotice1 = ScheduledNotificationTable(title = '导师评价通知', content = '您已完成培训项目，请注意评价导师以完成毕业流程。此公告由系统发出。', scheduledReleaseTime = releasetime1)
                 studentNotice1.save() 
                 studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
@@ -85,7 +85,7 @@ def login(request: HttpRequest):  # 登录
             scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
             Welcomed = False
             for scheduledNotice in scheduledNotices:
-                if scheduledNotice.ScheduledNotificationTable.title == "欢迎加入新人旅程":
+                if scheduledNotice.scheduled_notification.title == "欢迎加入新人旅程":
                     Welcomed = True
                     break
             if not Welcomed:
@@ -97,11 +97,11 @@ def login(request: HttpRequest):  # 登录
         #导师通知
         if get_highest_role(username) == "teacher":
             #新人评价通知
-            students = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
-            for student in students:
-                if program_finished_and_teacher_not_commented(student) :
-                    releasetime3 = get_next_weekday_time(1,12,0)
-                    teacherNotice1 = ScheduledNotificationTable(title = '新人评价通知', content = '您有新人{}已完成培训项目，请注意评价以完成其毕业流程。此公告由系统发出。'.format(student.name), scheduledReleaseTime = releasetime3)
+            studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
+            for studentRelation in studentRelations:
+                if program_finished_and_teacher_not_commented(studentRelation.newcomer):
+                    releasetime3 = get_next_week_time(1,11,0)
+                    teacherNotice1 = ScheduledNotificationTable(title = '新人评价通知', content = '您有新人{}已完成培训项目，请注意评价以完成其毕业流程。此公告由系统发出。'.format(studentRelation.newcomer.name), scheduledReleaseTime = releasetime3)
                     teacherNotice1.save()
                     teacherNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = teacherNotice1)
                     teacherNoticeTable1.save()
@@ -109,7 +109,7 @@ def login(request: HttpRequest):  # 登录
                 if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
                     delta = cn_datetime_now().day() - user.TeacherExaminedDate.day()
                     if delta >= 7 :
-                        releasetime4 = get_next_time(12,0)
+                        releasetime4 = get_next_week_time(1,11,0)
                         teacherNotice2 = ScheduledNotificationTable(title = '导师学习通知', content = '您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。此公告由系统发出。', scheduledReleaseTime = releasetime4)
                         teacherNotice2.save()
                         teacherNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = teacherNotice2)

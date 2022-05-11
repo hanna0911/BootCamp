@@ -66,8 +66,9 @@ def my_notifications(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()
     if user is None:
         return unauthorized_action_response()
-    relations = UserNotificationTable.objects.filter(user__username=username)
     notification_list = []
+    #扫描一般公告
+    relations = UserNotificationTable.objects.filter(user__username=username)
     for relation in relations:
         notification = relation.notification
         notification_list.append({
@@ -79,6 +80,22 @@ def my_notifications(request: HttpRequest):
             'notificationID': notification.id,
             'finished': relation.finished
         })
+    #扫描定时公告
+    '''
+    scheduledRelations = UserScheduledTable.objects.filter(user__username=username)
+    for scheduledRelation in scheduledRelations:
+        notification = scheduledRelation.scheduled_notification
+        if notification.scheduledReleaseTime <= cn_datetime_now():
+            notification_list.append({
+            'title': notification.title,
+            'content': notification.content,
+            'author': '系统生成',
+            'authorRole': '系统',
+            'releaseTime': notification.scheduledReleaseTime,
+            'notificationID': notification.id,
+            #'finished': relation.finished
+            })
+    '''
     return gen_standard_response(200, {
         'result': 'success',
         'message': 'notification list retrieved',
@@ -116,7 +133,6 @@ def finish_notification(request: HttpRequest):
         return item_not_found_error_response()
     if relation.finished is True:
         return gen_standard_response(200, {'result': 'failed', 'message': 'already finished!'})
-    relation.finished = True
     relation.save()
     return gen_standard_response(200, {
         'result': 'success',

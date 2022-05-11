@@ -75,9 +75,10 @@ def nominate_teachers(req: HttpRequest):
     #对HRBP自动通知审核导师
     hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
     for hrbp in hrbps:
-        if hrbp.isadmin == False:
+        if hrbp.isAdmin == False:#isAdmin not isadmin
+            #teachername = user.name
             releasetime = get_next_time(10,30)
-            HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = "导师提名列表已更新，{}已被提名为导师，请注意完成审核。此公告由系统发出。".format(user.name), scheduledReleaseTime = releasetime)
+            HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = "导师提名列表已更新，请注意完成审核。此公告由系统发出。", scheduledReleaseTime = releasetime)
             HRBPNotice.save()
             HRBPNoticeTable = UserScheduledTable(user = hrbp, scheduled_notification = HRBPNotice)
             HRBPNoticeTable.save()
