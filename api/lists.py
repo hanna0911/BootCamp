@@ -184,13 +184,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -232,13 +233,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -278,13 +280,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -342,7 +345,8 @@ def my_test_list(request: HttpRequest):
             'name': test.name,
             'intro': test.intro,
             'recommendTime': str(test.recommendedTime),
-            'tag': test.tag,
+            'tag': str2taglist(test.tag),
+            'isObligatory': test.isObligatory,
             'author': test.author.name,
             'releaseTime': test.releaseTime,
             'contentID': test.id,
@@ -415,7 +419,8 @@ def assignable_course_list(request: HttpRequest):
             'name': course.name,
             'intro': course.intro,
             'recommendTime': course.recommendedTime,
-            'tag': course.tag,
+            'tag': str2taglist(course.tag),
+            'isObligatory': course.isObligatory,
             'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
@@ -459,7 +464,8 @@ def my_courses_list(request: HttpRequest):
             'name': course.name,
             'intro': course.intro,
             'recommendTime': course.recommendedTime,
-            'tag': course.tag,
+            'tag': str2taglist(course.tag),
+            'isObligatory': course.isObligatory,
             'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
@@ -570,7 +576,8 @@ def assignable_task_list(request: HttpRequest):
             'name': task.name,
             'intro': task.intro,
             'recommendTime': str(task.recommendedTime),
-            'tag': task.tag,
+            'tag': str2taglist(task.tag),
+            'isObligatory': task.isObligatory,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
             'taskType': task_type,
@@ -579,7 +586,7 @@ def assignable_task_list(request: HttpRequest):
             'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
-        tag_list.append(task.tag)
+        tag_list.extend(str2taglist(task.tag))
     recommend_time_list = list(set(recommend_time_list))
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
@@ -623,7 +630,8 @@ def my_task_list(request: HttpRequest):
             'name': task.name,
             'intro': task.intro,
             'recommendTime': str(task.recommendedTime),
-            'tag': task.tag,
+            'tag': str2taglist(task.tag),
+            'isObligatory': task.isObligatory,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
             'taskType': task_type,
@@ -633,7 +641,7 @@ def my_task_list(request: HttpRequest):
             'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
-        tag_list.append(task.tag)
+        tag_list.extend(str2taglist(task.tag))
     recommend_time_list = list(set(recommend_time_list))
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
@@ -832,7 +840,8 @@ def program_content_list(request: HttpRequest):
             'name': content.name,
             'author': content.author.username,
             'intro': content.intro,
-            'tag': content.tag,
+            'tag': str2taglist(content.tag),
+            'isObligatory': content.isObligatory,
             'recommendTime': content.recommendedTime,
             'audience': audience,
             'contentType': content_type,
