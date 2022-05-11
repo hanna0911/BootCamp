@@ -74,16 +74,20 @@ def my_notifications(request: HttpRequest):
             decoy_notification = NotificationTable(
                 author_name='通知系统',
                 author_role='Bootcamp',
-                title=scheduled_notification.title,
+                title='[系统通知]' + scheduled_notification.title,
                 content=scheduled_notification.content,
-                releaseTime=scheduled_notification.scheduledReleaseTime
+                # releaseTime=scheduled_notification.scheduledReleaseTime
             )
             decoy_notification.save()
+            decoy_notification.releaseTime = scheduled_notification.scheduledReleaseTime
+            decoy_notification.save()#非auto_now_add
             user_decoy_relation = UserNotificationTable(
                 user=user,
                 notification=decoy_notification,
             )
             user_decoy_relation.save()
+            scheduled_relation.delete()
+            scheduled_notification.delete()
 
     notification_list = []
     # 扫描一般公告
@@ -153,6 +157,7 @@ def finish_notification(request: HttpRequest):
         return item_not_found_error_response()
     if relation.finished is True:
         return gen_standard_response(200, {'result': 'failed', 'message': 'already finished!'})
+    relation.finished = True
     relation.save()
     return gen_standard_response(200, {
         'result': 'success',
