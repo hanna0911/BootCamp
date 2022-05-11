@@ -35,7 +35,7 @@ def analysis_precheck(request: HttpRequest):
         return unauthorized_action_response()
 
     try:
-        dept = PrivateInfo.objects.get(username = username).dept
+        dept = PrivateInfo.objects.get(username=username).dept
     except Exception:
         return session_timeout_response()
 
@@ -60,7 +60,8 @@ def check_day(date: datetime.datetime, day_start: bool) -> bool:
     return date.hour == 23 and date.minute == 59 and date.second == 59
 
 
-def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime, delta: datetime.timedelta = datetime.timedelta(seconds = 86400)) \
+def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime,
+                delta: datetime.timedelta = datetime.timedelta(seconds=86400)) \
         -> Tuple[(datetime.datetime, datetime.datetime)]:
     days_minus1 = (endDate - startDate).days
     startList = [startDate]
@@ -72,15 +73,35 @@ def date_ranges(startDate: datetime.datetime, endDate: datetime.datetime, delta:
     return list(zip(startList, endList))
 
 
-def average_score(users: QuerySet) -> float:
-    userprograms = [user.ProgramsAsUser.all() for user in users]
-    if len(userprograms) == 0:
-        return 0.0
-    if len(userprograms) == 1:
-        userprograms = userprograms[0]
+# def average_score(users: QuerySet) -> float:
+#     userprograms = [user.ProgramsAsUser.all() for user in users]
+#     if len(userprograms) == 0:
+#         return 0.0
+#     if len(userprograms) == 1:
+#         userprograms = userprograms[0]
+#     else:
+#         userprograms = userprograms[0].union(*userprograms[1:])
+#     return userprograms.aggregate(Avg("score"))["score__avg"]
+
+
+def average_teacher_score(users: QuerySet) -> float:
+    total_score = sum([teacher.teacherScore for teacher in users])
+    if len(users) <= 0:
+        return 0.
     else:
-        userprograms = userprograms[0].union(*userprograms[1:])
-    return userprograms.aggregate(Avg("score"))["score__avg"]
+        return total_score / len(users)
+
+
+def average_newcomer_socre(users: [PrivateInfo, ]) -> float:
+    total = 0
+    for newcomer in users:
+        relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+        if relations.count() > 0:
+            total += relations.first().newcomerScore
+    if len(users) > 0:
+        return total / len(users)
+    else:
+        return 0.
 
 
 def average_graduate_time(users: QuerySet) -> int:
@@ -113,14 +134,14 @@ def bootcamp_attend(request: HttpRequest):
     unselect = []
     joinBootcamp = []
     for dayStart, dayEnd in date_ranges(startDate, endDate):
-        users = PrivateInfo.objects.filter(joinDate__range = (dayStart, dayEnd))
+        users = PrivateInfo.objects.filter(joinDate__range=(dayStart, dayEnd))
         days.append(dayStart.date().isoformat()[5:])
         totalEmploy.append(users.count())
-        school.append(users.filter(employeeType__exact = PrivateInfo.EnumEmployeeType.Campus).count())
-        society.append(users.filter(employeeType__exact = PrivateInfo.EnumEmployeeType.Social).count())
-        intern.append(users.filter(employeeType__exact = PrivateInfo.EnumEmployeeType.Intern).count())
-        unselect.append(users.filter(employeeType__exact = PrivateInfo.EnumEmployeeType.Other).count())
-        joinBootcamp.append(users.filter(isNew__exact = True).count())
+        school.append(users.filter(employeeType__exact=PrivateInfo.EnumEmployeeType.Campus).count())
+        society.append(users.filter(employeeType__exact=PrivateInfo.EnumEmployeeType.Social).count())
+        intern.append(users.filter(employeeType__exact=PrivateInfo.EnumEmployeeType.Intern).count())
+        unselect.append(users.filter(employeeType__exact=PrivateInfo.EnumEmployeeType.Other).count())
+        joinBootcamp.append(users.filter(isNew__exact=True).count())
 
     return gen_response(200, {
         "days": days,
@@ -143,11 +164,11 @@ def newcomer_average_score(request: HttpRequest):
         return result
     startDate, endDate, dept = result
 
-    users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (startDate, endDate))
+    users = PrivateInfo.objects.filter(newcomerGraduateDate__range=(startDate, endDate))
 
     return gen_response(200, {
-        "all": average_score(users),
-        "group": average_score(users.filter(dept__exact = dept)),
+        "all": average_newcomer_socre(users),
+        "group": average_newcomer_socre(users.filter(dept__exact=dept)),
     })
 
 
@@ -161,11 +182,11 @@ def teacher_average_score(request: HttpRequest):
         return result
     startDate, endDate, dept = result
 
-    users = PrivateInfo.objects.filter(teacherDutyDate__range = (startDate, endDate))
+    users = PrivateInfo.objects.filter(teacherDutyDate__range=(startDate, endDate))
 
     return gen_response(200, {
-        "all": average_score(users),
-        "group": average_score(users.filter(dept__exact = dept)),
+        "all": average_teacher_score(users),
+        "group": average_teacher_score(users.filter(dept__exact=dept)),
     })
 
 
@@ -183,10 +204,10 @@ def camp_completion(request: HttpRequest):
     normalGraduate = []
     totalGraduate = []
     for dayStart, dayEnd in date_ranges(startDate, endDate):
-        users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (dayStart, dayEnd))
+        users = PrivateInfo.objects.filter(newcomerGraduateDate__range=(dayStart, dayEnd))
         days.append(dayStart.date().isoformat()[5:])
-        normalNum = users.filter(newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate).count()
-        abnormalNum = users.filter(newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.AbnormalGraduate).count()
+        normalNum = users.filter(newcomerGraduateState=PrivateInfo.EnumNewcomerGraduateState.NormalGraduate).count()
+        abnormalNum = users.filter(newcomerGraduateState=PrivateInfo.EnumNewcomerGraduateState.AbnormalGraduate).count()
 
         normalGraduate.append(normalNum)
         totalGraduate.append(normalNum + abnormalNum)
@@ -212,10 +233,10 @@ def graduate_time(request: HttpRequest):
     groupAverageGraduateTime = []
     totalAverageGraduateTime = []
     for dayStart, dayEnd in date_ranges(startDate, endDate):
-        users = PrivateInfo.objects.filter(newcomerGraduateDate__range = (dayStart, dayEnd))
+        users = PrivateInfo.objects.filter(newcomerGraduateDate__range=(dayStart, dayEnd))
         days.append(dayStart.date().isoformat()[5:])
         totalAverageGraduateTime.append(average_graduate_time(users))
-        groupAverageGraduateTime.append(average_graduate_time(users.filter(dept__exact = dept)))
+        groupAverageGraduateTime.append(average_graduate_time(users.filter(dept__exact=dept)))
 
     return gen_response(200, {
         "days": days,
@@ -238,10 +259,10 @@ def tutor_assignment_chart(request: HttpRequest):
     assignedNewcomers = []
     totalNewcomers = []
     for dayStart, dayEnd in date_ranges(startDate, endDate):
-        users = PrivateInfo.objects.filter(newcomerStartDate__range = (dayStart, dayEnd))
+        users = PrivateInfo.objects.filter(newcomerStartDate__range=(dayStart, dayEnd))
         days.append(dayStart.date().isoformat()[5:])
         totalNewcomers.append(users.count())
-        assignedNewcomers.append(users.exclude(AsNewcomer = None).count())
+        assignedNewcomers.append(users.exclude(AsNewcomer=None).count())
 
     return gen_response(200, {
         "days": days,

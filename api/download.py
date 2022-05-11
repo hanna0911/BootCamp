@@ -85,8 +85,9 @@ def retrieve_test_info_by_id(request: HttpRequest):
         "name": test.name,
         "intro": test.intro,
         "time": test.recommendedTime,
-        "tag": test.tag,
-        "author": test.author.name
+        "tag": str2taglist(test.tag),
+        "author": test.author.name,
+        "isObligatory": test.isObligatory,
     })
 
 
@@ -165,9 +166,10 @@ def retrieve_test_by_user_id(request: HttpRequest):
             test.name,
             test.intro,
             test.recommendedTime,
-            test.tag,
+            str2taglist(test.tag),
             test.author.name,
-            test.releaseTime
+            test.releaseTime,
+            test.isObligatory,
         ]
         try:
             fp = open(test.questions, "r", encoding="UTF-8")

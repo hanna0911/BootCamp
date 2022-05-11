@@ -72,6 +72,16 @@ def nominate_teachers(req: HttpRequest):
         user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
+    #对HRBP自动通知审核导师
+    hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
+    for hrbp in hrbps:
+        if hrbp.isAdmin == False:#isAdmin not isadmin
+            #teachername = user.name
+            releasetime = get_next_time(10,30)
+            HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = "导师提名列表已更新，请注意完成审核。此公告由系统发出。", scheduledReleaseTime = releasetime)
+            HRBPNotice.save()
+            HRBPNoticeTable = UserScheduledTable(user = hrbp, scheduled_notification = HRBPNotice)
+            HRBPNoticeTable.save()
     
     return gen_response(200, message="success")
 
@@ -99,6 +109,19 @@ def assign_teacher(req: HttpRequest):
     entry.save()
     teacher.currentMembers = teacher.currentMembers + 1
     teacher.save()
+
+    #对新人自动通知分配导师
+    releasetime1 = get_next_time(12, 10)
+    studentNotice = ScheduledNotificationTable(title = '导师分配通知', content = "您已被分配导师{}，请注意完成学习。此公告由系统发出。".format(teacher.name), scheduledReleaseTime = releasetime1)
+    studentNotice.save()
+    studentNoticeTable = UserScheduledTable(user = newcomer, scheduled_notification = studentNotice)
+    studentNoticeTable.save()
+    #对导师自动通知分配新人
+    releasetime2 = get_next_time(12, 10)
+    teacherNotice = ScheduledNotificationTable(title = '新人分配通知', content = "您已被分配新的学生{}，请注意个性化新人面板并指导。此公告由系统发出。".format(newcomer.name), scheduledReleaseTime = releasetime2)
+    teacherNotice.save()
+    teacherNoticeTable = UserScheduledTable(user = teacher, scheduled_notification = teacherNotice)
+    teacherNoticeTable.save()
 
     return gen_response(200)
 
@@ -340,7 +363,7 @@ def finish_lesson(req: HttpRequest):
     if relation.finished:
         return gen_response(200, message="already finished")
     relation.finished = True
-    relation.endTime = timezone.now()
+    relation.endTime = cn_datetime_now()
     relation.save()
     # 更新content
     course = lesson.content
@@ -351,7 +374,7 @@ def finish_lesson(req: HttpRequest):
     course_relation.finishedLessonCount += 1
     if course_relation.finishedLessonCount == course.lessonCount:
         course_relation.finished = True
-        course_relation.userEndTime = timezone.now()
+        course_relation.userEndTime = cn_datetime_now()
         logging.info("lesson 结束，课程紧跟着结束")
     course_relation.save()
     # 更新整个培训内容是否完成
