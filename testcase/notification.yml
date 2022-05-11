@@ -124,3 +124,50 @@
         - 1
   validate:
     - equals: { status_code: 200 }
+
+- name: 删除群组
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /delete_group
+    data:
+      action: delete group
+      groupID: 1
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 从群组移除成员
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /delete_member
+    data:
+      action: delete member
+      groupID: 1
+      memberUsername: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 删除公告
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /delete_notification
+    data:
+      action: delete notification
+      notificationID: 1
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取authored_group_list
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /authored_notification_list
+    data:
+  validate:
+    - equals: { status_code: 200 }

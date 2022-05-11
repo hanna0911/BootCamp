@@ -175,6 +175,41 @@ def check_graduated_newcomer(user: PrivateInfo):
 
             logging.warning("newcomer graduated")
 
+def program_finished_and_student_not_commented(student: PrivateInfo):
+    user_program = UserProgramTable.objects.filter(
+        user = student,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        print("no program when checking graduated")
+        return False
+    user_program = user_program.first()
+    if (user_program.finished):
+        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=student)
+        if teacher_relations.count() <= 0:  #无导师
+            return False
+        teacher_relation = teacher_relations.first()
+        # 检查新人是否已评价
+        if(not teacher_relation.newcomerCommitted):
+            return True
+    return False
+
+def program_finished_and_teacher_not_commented(student: PrivateInfo):
+    user_program = UserProgramTable.objects.filter(
+        user = student,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        print("no program when checking graduated")
+        return False
+    user_program = user_program.first()
+    if (user_program.finished):
+        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=student)
+        if teacher_relations.count() <= 0:  #无导师
+            return False
+        teacher_relation = teacher_relations.first()
+        # 检查导师是否已评价
+        if(not teacher_relation.teacherCommitted):
+            return True
+    return False
 
 def find_people(username: str):
     users = PrivateInfo.objects.filter(username=username)
@@ -508,7 +543,7 @@ def get_next_time(hour: int, minute: int) -> datetime.datetime:
 
 def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetime:
     timeret = get_next_time(hour, minute)
-    while timeret.weekday != weekday:
+    while timeret.weekday() != weekday:
         timeret += datetime.timedelta(days=1)
     return timeret
 

@@ -66,8 +66,32 @@ def my_notifications(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()
     if user is None:
         return unauthorized_action_response()
-    relations = UserNotificationTable.objects.filter(user__username=username)
+    # release scheduled notifications as decoy notifications
+    scheduled_relations = UserScheduledTable.objects.filter(user__username=username)
+    for scheduled_relation in scheduled_relations:
+        scheduled_notification = scheduled_relation.scheduled_notification
+        if scheduled_notification.scheduledReleaseTime <= cn_datetime_now():
+            decoy_notification = NotificationTable(
+                author_name='通知系统',
+                author_role='Bootcamp',
+                title='[系统通知]' + scheduled_notification.title,
+                content=scheduled_notification.content,
+                # releaseTime=scheduled_notification.scheduledReleaseTime
+            )
+            decoy_notification.save()
+            decoy_notification.releaseTime = scheduled_notification.scheduledReleaseTime
+            decoy_notification.save()#非auto_now_add
+            user_decoy_relation = UserNotificationTable(
+                user=user,
+                notification=decoy_notification,
+            )
+            user_decoy_relation.save()
+            scheduled_relation.delete()
+            scheduled_notification.delete()
+
     notification_list = []
+    # 扫描一般公告
+    relations = UserNotificationTable.objects.filter(user__username=username)
     for relation in relations:
         notification = relation.notification
         notification_list.append({
@@ -79,6 +103,23 @@ def my_notifications(request: HttpRequest):
             'notificationID': notification.id,
             'finished': relation.finished
         })
+    # 扫描定时公告
+    '''
+    scheduledRelations = UserScheduledTable.objects.filter(user__username=username)
+    for scheduledRelation in scheduledRelations:
+        notification = scheduledRelation.scheduled_notification
+        if notification.scheduledReleaseTime <= cn_datetime_now():
+            notification_list.append({
+            'title': notification.title,
+            'content': notification.content,
+            'author': '系统生成',
+            'authorRole': '系统',
+            'releaseTime': notification.scheduledReleaseTime,
+            'notificationID': notification.id,
+            #'finished': relation.finished
+            })
+    '''
+
     return gen_standard_response(200, {
         'result': 'success',
         'message': 'notification list retrieved',
@@ -308,4 +349,154 @@ def create_group_notification(request: HttpRequest):
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'notification {title} assigned to {len(group_ids)} groups'
+    })
+
+
+def delete_group(request: HttpRequest):
+    """
+    POST
+    action: 'delete group'
+    groupID: __GROUP_ID__
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    group_id = data.get('groupID')
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if action != 'delete group' or group_id is None:
+        return gen_standard_response(400, {'result': 'failure', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    user = PrivateInfo.objects.filter(username=username).first()
+    group = GroupTable.objects.filter(id=group_id).first()
+    group_name = group.name
+    if user is None or group is None:
+        return item_not_found_error_response()
+    if user != group.creator:
+        return unauthorized_action_response()
+    user_group_relations = UserGroupTable.objects.filter(group=group)
+    length = len(user_group_relations)
+    user_group_relations.delete()
+    group.delete()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'group {group_name} with {length} users deleted'
+    })
+
+
+def delete_member(request: HttpRequest):
+    """
+    POST
+    action: 'delete member',
+    groupID: __GROUP_ID__,
+    memberUsername: __USERNAME__,
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    group_id = data.get('groupID')
+    member_username = data.get('memberUsername')
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if action != 'delete member' or group_id is None or member_username is None:
+        return gen_standard_response(400, {'result': 'failure', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'HRBP' and role != 'teacher':
+        return unauthorized_action_response()
+    target_user = PrivateInfo.objects.filter(username=member_username).first()
+    user = PrivateInfo.objects.filter(username=username).first()
+    group = GroupTable.objects.filter(id=group_id).first()
+    target_relation = UserGroupTable.objects.filter(user=target_user, group=group).first()
+    print('tu', target_user)
+    print('cu', user)
+    print('tg', group)
+    print('tr', target_relation)
+    if user is None or group is None or target_user is None or target_relation is None:
+        return item_not_found_error_response()
+    if user != group.creator:
+        return unauthorized_action_response()
+    target_relation.delete()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'user {target_user.name} removed from group {group.name}'
+    })
+
+
+def delete_notification(request: HttpRequest):
+    """
+    POST
+    action: 'delete notification',
+    notificationID: __NOTIFICATION_ID__
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    notification_id = data.get('notificationID')
+    username = request.session.get('username')
+    role = request.session.get('role')
+    if action != 'delete notification' or notification_id is None:
+        return gen_standard_response(400, {'result': 'failure', 'message': 'Bad Arguments'})
+    if username is None or role is None:
+        return session_timeout_response()
+    user = PrivateInfo.objects.filter(username=username).first()
+    if user is None:
+        return item_not_found_error_response()
+    notification = NotificationTable.objects.filter(id=notification_id).first()
+    if notification is None:
+        return item_not_found_error_response()
+    relations = UserNotificationTable.objects.filter(notification=notification)
+    relations.delete()
+    notification.delete()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': 'notification deleted'
+    })
+
+
+def authored_notification_list(request: HttpRequest):
+    if request.method != 'GET':
+        return illegal_request_type_error_response()
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    user = PrivateInfo.objects.filter(username=username).first()
+    if user is None:
+        return unauthorized_action_response()
+    notification_list = []
+    # 扫描一般公告
+    notifications = NotificationTable.objects.filter(author_name=user.name)
+    for notification in notifications:
+        notification_list.append({
+            'title': notification.title,
+            'content': notification.content,
+            'author': notification.author_name,
+            'authorRole': notification.author_role,
+            'releaseTime': notification.releaseTime,
+            'notificationID': notification.id,
+        })
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': 'authored notification list retrieved',
+        'notifications': notification_list
     })

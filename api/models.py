@@ -79,8 +79,8 @@ class PrivateInfo(models.Model):
     currentMembers = models.IntegerField(default=0)  # 当前带新人数
     teacherNominationDate = models.DateTimeField(null=True)  # 导师被提名时间，也是导师旅程开始时间，是用户isTeacher被设为True的时间
     teacherExaminedStatus = models.IntegerField(
-        choices = EnumTeacherExaminedStatus.choices,
-        default = EnumTeacherExaminedStatus.NotYet)  # 审核状态，默认值为“未审核”。使用Django枚举类型实现
+        choices=EnumTeacherExaminedStatus.choices,
+        default=EnumTeacherExaminedStatus.NotYet)  # 审核状态，默认值为“未审核”。使用Django枚举类型实现
     teacherExaminedDate = models.DateTimeField(null=True)  # 导师被hrbp审核通过时间
     teacherIsDuty = models.BooleanField(default=False)  # 导师是否上岗
     teacherDutyDate = models.DateTimeField(null=True)  # 导师上岗时间
