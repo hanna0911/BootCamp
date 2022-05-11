@@ -76,7 +76,7 @@ def login(request: HttpRequest):  # 登录
         if get_highest_role(username) == "newcomer":
             #导师评价通知
             if program_finished_and_student_not_commented == True:
-                autotime1 = TimeField.auto_add_now
+                autotime1 = cn_datetime_now()
                 studentNotice1 = ScheduledNotificationTable(title = '导师评价通知', content = '您已完成培训项目，请注意评价导师以完成毕业流程。此公告由系统发出。', scheduledReleaseTime = autotime1)
                 studentNotice1.save() 
                 studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
@@ -89,7 +89,7 @@ def login(request: HttpRequest):  # 登录
                     Welcomed = True
                     break
             if not Welcomed:
-                autotime2 = TimeField.auto_add_now
+                autotime2 = cn_datetime_now()
                 studentNotice2 = ScheduledNotificationTable(title = '欢迎加入新人旅程', content = '欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！此公告由系统发出。', scheduledReleaseTime = autotime2)
                 studentNotice2.save()
                 studentNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = studentNotice2)
@@ -98,16 +98,22 @@ def login(request: HttpRequest):  # 登录
         if get_highest_role(username) == "teacher":
             #新人评价通知
             if program_finished_and_teacher_not_commented == True:
-                autotime3 = TimeField.auto_add_now
+                autotime3 = cn_datetime_now()
                 teacherNotice1 = ScheduledNotificationTable(title = '新人评价通知', content = '您有新人已完成培训项目，请注意评价以完成其毕业流程。此公告由系统发出。', scheduledReleaseTime = autotime3)
                 teacherNotice1.save()
-                teacherNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
+                teacherNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = teacherNotice1)
                 teacherNoticeTable1.save()
             #TODO导师学习通知
-                
-            
-                
+                autotime4 = cn_datetime_now()
+                if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
+                    delta = (autotime4 - user.TeacherExaminedDate).day
+                    if delta >= 7 :
+                        teacherNotice2 = ScheduledNotificationTable(title = '导师学习通知', content = '您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。此公告由系统发出。', scheduledReleaseTime = autotime4)
+                        teacherNotice2.save()
+                        teacherNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = teacherNotice2)
+                        teacherNoticeTable2.save()
 
+            
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)

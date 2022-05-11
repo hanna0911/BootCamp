@@ -50,7 +50,7 @@ def accept_nominate(req: HttpRequest):
         return gen_response(400, "user not found")
     user = users.first()
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Pass
-    user.teacherExaminedDate = timezone.now()
+    user.teacherExaminedDate = cn_datetime_now()
     user.save()
     return gen_response(200)
 
@@ -76,7 +76,7 @@ def nominate_teachers(req: HttpRequest):
         hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
         for hrbp in hrbps:
             if hrbp.isadmin == False:
-                autotime = TimeField
+                autotime = cn_datetime_now()
                 HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = '导师提名审核列表已更新，请注意完成审批。此公告由系统发出。', scheduledReleaseTime = autotime)
                 HRBPNotice.save()
                 HRBPNoticeTable = UserScheduledTable(user = hrbp, scheduled_notification = HRBPNotice)
@@ -109,13 +109,13 @@ def assign_teacher(req: HttpRequest):
     teacher.currentMembers = teacher.currentMembers + 1
     teacher.save()
     #对新人自动通知分配导师
-    autotime1 = TimeField
+    autotime1 = cn_datetime_now()
     studentNotice = ScheduledNotificationTable(title = '导师分配通知', content = '您已被分配导师，请注意完成学习。此公告由系统发出。', scheduledReleaseTime = autotime1)
     studentNotice.save()
     studentNoticeTable = UserScheduledTable(user = newcomer, scheduled_notification = studentNotice)
     studentNoticeTable.save()
     #对导师自动通知分配新人
-    autotime2 = TimeField
+    autotime2 = cn_datetime_now()
     teacherNotice = ScheduledNotificationTable(title = '新人分配通知', content = '您已被分配新的学生，请注意个性化新人面板并指导。此公告由系统发出。', scheduledReleaseTime = autotime2)
     teacherNotice.save()
     teacherNoticeTable = UserScheduledTable(user = teacher, scheduled_notification = teacherNotice)
