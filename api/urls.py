@@ -62,6 +62,7 @@ urlpatterns = [
     path("newcomer_recode", status.newcomer_recode, name="newcomer_recode"),
     path("get_newcomer_recode", status.get_newcomer_recode, name="get_newcomer_recode"),
     path("get_commits_and_score", status.get_commits_and_score, name="get_commits_and_score"),
+    path("get_my_commit", status.get_my_commit, name="get_my_commit"),
     path('program_templates', lists.program_template_list, name="program_templates"),
     path('assign_program', status.assign_program, name="assign_program"),
     path('has_program', status.has_program, name="has_program"),
