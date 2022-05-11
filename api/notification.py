@@ -66,8 +66,27 @@ def my_notifications(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()
     if user is None:
         return unauthorized_action_response()
+    # release scheduled notifications as decoy notifications
+    scheduled_relations = UserScheduledTable.objects.filter(user__username=username)
+    for scheduled_relation in scheduled_relations:
+        scheduled_notification = scheduled_relation.scheduled_notification
+        if scheduled_notification.scheduledReleaseTime <= cn_datetime_now():
+            decoy_notification = NotificationTable(
+                author_name='通知系统',
+                author_role='Bootcamp',
+                title=scheduled_notification.title,
+                content=scheduled_notification.content,
+                releaseTime=scheduled_notification.scheduledReleaseTime
+            )
+            decoy_notification.save()
+            user_decoy_relation = UserNotificationTable(
+                user=user,
+                notification=decoy_notification,
+            )
+            user_decoy_relation.save()
+
     notification_list = []
-    #扫描一般公告
+    # 扫描一般公告
     relations = UserNotificationTable.objects.filter(user__username=username)
     for relation in relations:
         notification = relation.notification
@@ -80,7 +99,7 @@ def my_notifications(request: HttpRequest):
             'notificationID': notification.id,
             'finished': relation.finished
         })
-    #扫描定时公告
+    # 扫描定时公告
     '''
     scheduledRelations = UserScheduledTable.objects.filter(user__username=username)
     for scheduledRelation in scheduledRelations:
@@ -96,6 +115,7 @@ def my_notifications(request: HttpRequest):
             #'finished': relation.finished
             })
     '''
+
     return gen_standard_response(200, {
         'result': 'success',
         'message': 'notification list retrieved',

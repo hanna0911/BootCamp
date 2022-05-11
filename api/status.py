@@ -78,9 +78,12 @@ def nominate_teachers(req: HttpRequest):
         if hrbp.isAdmin == False:#isAdmin not isadmin
             #teachername = user.name
             releasetime = get_next_time(10,30)
-            HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = "导师提名列表已更新，请注意完成审核。此公告由系统发出。", scheduledReleaseTime = releasetime)
+            HRBPNotice = ScheduledNotificationTable(
+                title='导师审核通知',
+                content="导师提名列表已更新，请注意完成审核。",
+                scheduledReleaseTime=releasetime)
             HRBPNotice.save()
-            HRBPNoticeTable = UserScheduledTable(user = hrbp, scheduled_notification = HRBPNotice)
+            HRBPNoticeTable = UserScheduledTable(user=hrbp, scheduled_notification=HRBPNotice)
             HRBPNoticeTable.save()
     
     return gen_response(200, message="success")
@@ -112,15 +115,21 @@ def assign_teacher(req: HttpRequest):
 
     #对新人自动通知分配导师
     releasetime1 = get_next_time(12, 10)
-    studentNotice = ScheduledNotificationTable(title = '导师分配通知', content = "您已被分配导师{}，请注意完成学习。此公告由系统发出。".format(teacher.name), scheduledReleaseTime = releasetime1)
+    studentNotice = ScheduledNotificationTable(
+        title='导师分配通知',
+        content=f"您已被分配导师{teacher.name}，请注意完成学习。",
+        scheduledReleaseTime=releasetime1)
     studentNotice.save()
-    studentNoticeTable = UserScheduledTable(user = newcomer, scheduled_notification = studentNotice)
+    studentNoticeTable = UserScheduledTable(user=newcomer, scheduled_notification=studentNotice)
     studentNoticeTable.save()
     #对导师自动通知分配新人
     releasetime2 = get_next_time(12, 10)
-    teacherNotice = ScheduledNotificationTable(title = '新人分配通知', content = "您已被分配新的学生{}，请注意个性化新人面板并指导。此公告由系统发出。".format(newcomer.name), scheduledReleaseTime = releasetime2)
+    teacherNotice = ScheduledNotificationTable(
+        title='新人分配通知',
+        content=f"您已被分配新的学生{newcomer.name}，请注意个性化新人面板并指导。",
+        scheduledReleaseTime=releasetime2)
     teacherNotice.save()
-    teacherNoticeTable = UserScheduledTable(user = teacher, scheduled_notification = teacherNotice)
+    teacherNoticeTable = UserScheduledTable(user=teacher, scheduled_notification=teacherNotice)
     teacherNoticeTable.save()
 
     return gen_response(200)

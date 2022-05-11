@@ -70,18 +70,21 @@ def login(request: HttpRequest):  # 登录
         session_key = request.session.session_key
         role_list = get_role_list(username)
 
-    #TODO：分类自动生成公告
+    # TODO：分类自动生成公告
         user = PrivateInfo.objects.all().filter(username__exact=username).first()
-        #新人通知
+        # 新人通知
         if get_highest_role(username) == "newcomer":
-            #导师评价通知
+            # 导师评价通知
             if program_finished_and_student_not_commented(user):
                 releasetime1 = get_next_week_time(1,11,0)
-                studentNotice1 = ScheduledNotificationTable(title = '导师评价通知', content = '您已完成培训项目，请注意评价导师以完成毕业流程。此公告由系统发出。', scheduledReleaseTime = releasetime1)
+                studentNotice1 = ScheduledNotificationTable(
+                    title = '导师评价通知',
+                    content = '您已完成培训项目，请注意评价导师以完成毕业流程。',
+                    scheduledReleaseTime = releasetime1)
                 studentNotice1.save() 
                 studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
                 studentNoticeTable1.save()
-            #欢迎通知：
+            # 欢迎通知：
             scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
             Welcomed = False
             for scheduledNotice in scheduledNotices:
@@ -90,33 +93,39 @@ def login(request: HttpRequest):  # 登录
                     break
             if not Welcomed:
                 releasetime2 = get_next_time(12, 0)
-                studentNotice2 = ScheduledNotificationTable(title = '欢迎加入新人旅程', content = '欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！此公告由系统发出。', scheduledReleaseTime = releasetime2)
+                studentNotice2 = ScheduledNotificationTable(
+                    title='欢迎加入新人旅程',
+                    content='欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！',
+                    scheduledReleaseTime = releasetime2)
                 studentNotice2.save()
                 studentNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = studentNotice2)
                 studentNoticeTable2.save()
-        #导师通知
+        # 导师通知
         if get_highest_role(username) == "teacher":
-            #新人评价通知
+            # 新人评价通知
             studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
             for studentRelation in studentRelations:
                 if program_finished_and_teacher_not_commented(studentRelation.newcomer):
-                    releasetime3 = get_next_week_time(1,11,0)
-                    teacherNotice1 = ScheduledNotificationTable(title = '新人评价通知', content = '您有新人{}已完成培训项目，请注意评价以完成其毕业流程。此公告由系统发出。'.format(studentRelation.newcomer.name), scheduledReleaseTime = releasetime3)
+                    releasetime3 = get_next_week_time(1, 11, 0)
+                    teacherNotice1 = ScheduledNotificationTable(
+                        title='新人评价通知',
+                        content=f'您有新人{studentRelation.newcomer.name}已完成培训项目，请注意评价以完成其毕业流程。',
+                        scheduledReleaseTime=releasetime3)
                     teacherNotice1.save()
-                    teacherNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = teacherNotice1)
+                    teacherNoticeTable1 = UserScheduledTable(user=user, scheduled_notification=teacherNotice1)
                     teacherNoticeTable1.save()
-            #TODO导师学习通知
+            # TODO导师学习通知
                 if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
-                    delta = cn_datetime_now().day() - user.TeacherExaminedDate.day()
+                    delta = cn_datetime_now().day - user.TeacherExaminedDate.day
                     if delta >= 7 :
-                        releasetime4 = get_next_week_time(1,11,0)
-                        teacherNotice2 = ScheduledNotificationTable(title = '导师学习通知', content = '您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。此公告由系统发出。', scheduledReleaseTime = releasetime4)
+                        releasetime4 = get_next_week_time(1, 11, 0)
+                        teacherNotice2 = ScheduledNotificationTable(
+                            title='导师学习通知',
+                            content='您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。',
+                            scheduledReleaseTime = releasetime4)
                         teacherNotice2.save()
-                        teacherNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = teacherNotice2)
+                        teacherNoticeTable2 = UserScheduledTable(user=user, scheduled_notification=teacherNotice2)
                         teacherNoticeTable2.save()
-        
-
-
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)
