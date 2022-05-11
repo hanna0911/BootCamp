@@ -338,6 +338,9 @@ def my_test_list(request: HttpRequest):
             'author': test.author.name,
             'releaseTime': test.releaseTime,
             'contentID': test.id,
+            'isFinished': test_relation.finished,
+            'score': test_relation.score,
+            'examUsedTime': test_relation.examUsedTime,
         }
         # recommend_time_list.append(str(test.recommendedTime))
         # tag_list.append(test.tag)
@@ -452,7 +455,7 @@ def my_courses_list(request: HttpRequest):
             'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
-            'finished': course_relation.finished,
+            'isFinished': course_relation.finished,
             'finishedLessonCount': course_relation.finishedLessonCount,
             # 'programID': course.programId,
             'contentID': course.id
