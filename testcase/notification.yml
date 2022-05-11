@@ -54,7 +54,7 @@
   request:
     method: GET
     url: /my_notification_list
-
+    data:
   validate:
     - equals: { status_code: 200 }
 
@@ -106,7 +106,7 @@
   request:
     method: GET
     url: /my_group_list
-
+    data:
   validate:
     - equals: { status_code: 200 }
 
@@ -122,6 +122,5 @@
       content: test_content
       groups:
         - 1
-
   validate:
     - equals: { status_code: 200 }
