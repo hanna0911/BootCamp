@@ -587,7 +587,7 @@ def assign_program(request: HttpRequest):
     for content_relation in content_relations:
         content = content_relation.content
         new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=1))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=1))
         new_user_content_relation.save()
         if content.type == ContentTable.EnumType.Course:
             lessons = LessonTable.objects.filter(content=content)

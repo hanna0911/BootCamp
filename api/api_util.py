@@ -489,3 +489,8 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = Conten
         total_len = len(course)
         complete_len = len(course.filter(finished=True))
         return int(100 * complete_len / total_len)
+
+
+def cn_datetime_now() -> datetime.datetime:
+    timestamp = datetime.datetime.now().timestamp()
+    return cn_datetime_fromtimestamp(timestamp)

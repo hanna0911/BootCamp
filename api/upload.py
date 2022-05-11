@@ -194,7 +194,7 @@ def upload_answers(request: HttpRequest):
     score = correct / len(result) * 100
     # print(valid, result)
     relation.finished = True
-    relation.userEndTime = datetime.datetime.now()
+    relation.userEndTime = cn_datetime_now()
     relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds)
     relation.score = score
     relation.save()
@@ -242,7 +242,7 @@ def begin_test(request: HttpRequest):
     if test is None or test.type != ContentTable.EnumType.Exam:
         return item_not_found_error_response()
     # log begin time
-    relation.userBeginTime = datetime.datetime.now()
+    relation.userBeginTime = cn_datetime_now()
     relation.save()
     # load test paper
     try:
@@ -343,7 +343,7 @@ def finish_task(request: HttpRequest):
     if relation.finished is True:
         return item_not_found_error_response()
     # log task finished
-    relation.userEndTime = datetime.datetime.now()
+    relation.userEndTime = cn_datetime_now()
     relation.finished = True
     relation.save()
     check_graduated_newcomer(relation.user)
@@ -544,7 +544,7 @@ def create_content(request: HttpRequest):
             user=target_user.user,
             content=new_content,
             assigner=user,
-            deadline = datetime.datetime.now() + datetime.timedelta(days = 1)
+            deadline = cn_datetime_now() + datetime.timedelta(days = 1)
         )
         new_user_content_relation.save()
     program.contentCount += 1  # 父program的content数量累加
@@ -613,7 +613,7 @@ def save_courseware_files(coursewares: list, lesson_id: str, content_id: str, us
             raise Exception('unable to find corresponding content')
         cover = 'NOT_A_REAL_COVER'
         courseware = CoursewareTable(lesson=lesson, content=content, name=file.name.split('.')[0],
-                                     cover=cover, url=file_path, uploadTime=datetime.datetime.now())
+                                     cover=cover, url=file_path, uploadTime=cn_datetime_now())
         courseware.save()
         file_paths.append(file_path)
     return file_paths
@@ -682,7 +682,7 @@ def create_lesson(request: HttpRequest):
     target_user = UserProgramTable.objects.filter(program__id=programID).first()
     if target_user is not None:
         target_user = target_user.user
-        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=datetime.datetime.now())
+        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=cn_datetime_now())
         new_relation.save()
     return gen_standard_response(200, {
         "result": "success",
@@ -775,7 +775,7 @@ def assign_content_to_program(request: HttpRequest):
     user = UserProgramTable.objects.filter(program__id=program_id).first()
     if user is not None:
         new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=5))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
     return gen_standard_response(200, {
         'result': 'success',
