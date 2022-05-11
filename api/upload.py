@@ -547,6 +547,11 @@ def create_content(request: HttpRequest):  # TODO
             deadline = cn_datetime_now() + datetime.timedelta(days = 1)
         )
         new_user_content_relation.save()
+        if new_content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=new_content)
+            for lesson in lessons:
+                new_user_lesson_relation = UserLessonTable(user=target_user.user, lesson=lesson)
+                new_user_lesson_relation.save()
     program.contentCount += 1  # 父program的content数量累加
     program.save()
     return gen_standard_response(200, {
@@ -777,6 +782,11 @@ def assign_content_to_program(request: HttpRequest):
         new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
                                                      deadline=cn_datetime_now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
+        if content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=content)
+            for lesson in lessons:
+                new_user_lesson_relation = UserLessonTable(user=user.user, lesson=lesson)
+                new_user_lesson_relation.save()
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'content {content.name} with id {content_id} assigned to {program.name} with id {program_id}'
