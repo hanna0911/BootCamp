@@ -76,7 +76,7 @@ def login(request: HttpRequest):  # 登录
         if get_highest_role(username) == "newcomer":
             # 导师评价通知
             if program_finished_and_student_not_commented(user):
-                releasetime1 = get_next_week_time(1,11,0)
+                releasetime1 = get_next_week_time(0,11,0)
                 studentNotice1 = ScheduledNotificationTable(
                     title = '导师评价通知',
                     content = '您已完成培训项目，请注意评价导师以完成毕业流程。',
@@ -106,7 +106,7 @@ def login(request: HttpRequest):  # 登录
             studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
             for studentRelation in studentRelations:
                 if program_finished_and_teacher_not_commented(studentRelation.newcomer):
-                    releasetime3 = get_next_week_time(1, 11, 0)
+                    releasetime3 = get_next_week_time(0, 11, 0)
                     teacherNotice1 = ScheduledNotificationTable(
                         title='新人评价通知',
                         content=f'您有新人{studentRelation.newcomer.name}已完成培训项目，请注意评价以完成其毕业流程。',
@@ -118,7 +118,7 @@ def login(request: HttpRequest):  # 登录
                 if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
                     delta = cn_datetime_now().day - user.TeacherExaminedDate.day
                     if delta >= 7 :
-                        releasetime4 = get_next_week_time(1, 11, 0)
+                        releasetime4 = get_next_week_time(0, 11, 0)
                         teacherNotice2 = ScheduledNotificationTable(
                             title='导师学习通知',
                             content='您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。',
