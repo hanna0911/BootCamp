@@ -8,6 +8,7 @@ import logging
 import django
 import requests
 from django.http import HttpRequest, HttpResponse
+from django.forms import TimeField
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import *
@@ -53,6 +54,7 @@ def login(request: HttpRequest):  # 登录
     except Exception:
         return gen_response(400, 'Load json request faile')
 
+
     # TODO: 在数据库中搜索用户、密码字段是否正确
     username = data.get('username')
     password = data.get('password')
@@ -68,6 +70,44 @@ def login(request: HttpRequest):  # 登录
         request.session["role"] = get_highest_role(username)
         session_key = request.session.session_key
         role_list = get_role_list(username)
+        #TODO：分类自动生成公告
+        user = PrivateInfo.objects.all().filter(username__exact=username)
+        #新人通知
+        if get_highest_role(username) == "newcomer":
+            #导师评价通知
+            if program_finished_and_student_not_commented == True:
+                autotime1 = TimeField.auto_add_now
+                studentNotice1 = ScheduledNotificationTable(title = '导师评价通知', content = '您已完成培训项目，请注意评价导师以完成毕业流程。此公告由系统发出。', scheduledReleaseTime = autotime1)
+                studentNotice1.save() 
+                studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
+                studentNoticeTable1.save()
+            #欢迎通知：
+            scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
+            Welcomed = False
+            for scheduledNotice in scheduledNotices:
+                if scheduledNotice.title == "欢迎加入新人旅程":
+                    Welcomed = True
+                    break
+            if not Welcomed:
+                autotime2 = TimeField.auto_add_now
+                studentNotice2 = ScheduledNotificationTable(title = '欢迎加入新人旅程', content = '欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！此公告由系统发出。', scheduledReleaseTime = autotime2)
+                studentNotice2.save()
+                studentNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = studentNotice2)
+                studentNoticeTable2.save()
+        #导师通知
+        if get_highest_role(username) == "teacher":
+            #新人评价通知
+            if program_finished_and_teacher_not_commented == True:
+                autotime3 = TimeField.auto_add_now
+                teacherNotice1 = ScheduledNotificationTable(title = '新人评价通知', content = '您有新人已完成培训项目，请注意评价以完成其毕业流程。此公告由系统发出。', scheduledReleaseTime = autotime3)
+                teacherNotice1.save()
+                teacherNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
+                teacherNoticeTable1.save()
+            #TODO导师学习通知
+                
+            
+                
+
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)

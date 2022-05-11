@@ -2,11 +2,13 @@
 切换状态，切换关系相关的接口
 """
 import logging
+from django.forms import TimeField
 from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
 from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable, \
-    NewcomerRecode, ProgramTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
+    NewcomerRecode, ProgramTable, UserNotificationTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
+from .models import ScheduledNotificationTable, UserScheduledTable
 import json
 import datetime
 
@@ -48,6 +50,7 @@ def accept_nominate(req: HttpRequest):
         return gen_response(400, "user not found")
     user = users.first()
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Pass
+    user.teacherExaminedDate = timezone.now()
     user.save()
     return gen_response(200)
 
@@ -69,6 +72,16 @@ def nominate_teachers(req: HttpRequest):
         user.teacherNominationDate = timezone.now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
+        #对HRBP自动通知待审核导师
+        hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
+        for hrbp in hrbps:
+            if hrbp.isadmin == False:
+                autotime = TimeField
+                HRBPNotice = ScheduledNotificationTable(title = '导师审核通知', content = '导师提名审核列表已更新，请注意完成审批。此公告由系统发出。', scheduledReleaseTime = autotime)
+                HRBPNotice.save()
+                HRBPNoticeTable = UserScheduledTable(user = hrbp, scheduled_notification = HRBPNotice)
+                HRBPNoticeTable.save()
+    
     return gen_response(200, message="success")
 
 
@@ -95,6 +108,19 @@ def assign_teacher(req: HttpRequest):
     entry.save()
     teacher.currentMembers = teacher.currentMembers + 1
     teacher.save()
+    #对新人自动通知分配导师
+    autotime1 = TimeField
+    studentNotice = ScheduledNotificationTable(title = '导师分配通知', content = '您已被分配导师，请注意完成学习。此公告由系统发出。', scheduledReleaseTime = autotime1)
+    studentNotice.save()
+    studentNoticeTable = UserScheduledTable(user = newcomer, scheduled_notification = studentNotice)
+    studentNoticeTable.save()
+    #对导师自动通知分配新人
+    autotime2 = TimeField
+    teacherNotice = ScheduledNotificationTable(title = '新人分配通知', content = '您已被分配新的学生，请注意个性化新人面板并指导。此公告由系统发出。', scheduledReleaseTime = autotime2)
+    teacherNotice.save()
+    teacherNoticeTable = UserScheduledTable(user = teacher, scheduled_notification = teacherNotice)
+    teacherNoticeTable.save()
+
     return gen_response(200)
 
 
