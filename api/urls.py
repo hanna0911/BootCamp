@@ -82,5 +82,9 @@ urlpatterns = [
     path('create_group', notification.create_group, name="create_group"),
     path('add_group_member', notification.add_group_member, name="add_group_member"),
     path('my_group_list', notification.my_group_list, name="my_group_list"),
-    path('create_group_notification', notification.create_group_notification, name="create_group_notification")
+    path('create_group_notification', notification.create_group_notification, name="create_group_notification"),
+    path('delete_group', notification.delete_group, name="delete group"),
+    path('delete_member', notification.delete_member, name="delete member"),
+    path('delete_notification', notification.delete_notification, name="delete notification"),
+    path('authored_notification_list', notification.authored_notification_list, name="authored_notification_list")
 ]
