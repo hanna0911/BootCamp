@@ -476,7 +476,7 @@ def finish_all_lesson(req: HttpRequest):
 #                                        "message": res})
 
 
-def assign_content(request: HttpRequest):
+def assign_content(request: HttpRequest): #TODO
     """
     POST{
         "action": "assign content",
@@ -577,7 +577,7 @@ def has_program(request: HttpRequest):
                                            'programID': relation.program.id})
 
 
-def assign_program(request: HttpRequest):
+def assign_program(request: HttpRequest):  # TODO
     """
     POST
     {

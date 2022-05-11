@@ -436,7 +436,7 @@ def save_task_file(file, username, task_id):
     return path_converter(file_path)
 
 
-def create_content(request: HttpRequest):
+def create_content(request: HttpRequest):  # TODO
     """
     创建一个content(课程/考试/任务)
     """
