@@ -132,6 +132,7 @@ def write_db(req: HttpRequest):
             author=author,
             intro=info["intro"],
             tag=info["tag"],
+            isObligatory=info["isObligatory"],
             recommendedTime=info["recommendedTime"],
             audience=info["audience"],
             type=info["type"],
