@@ -515,8 +515,9 @@ def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetim
 
 
 def str2taglist(input: str) -> list:
-    return input.split(' ')
+    return input.split(',')
 
 
 def taglist2str(input: list) -> str:
-    return ' '.join(input)
+    #return ' '.join(input)
+    return input
