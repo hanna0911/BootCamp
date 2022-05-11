@@ -115,6 +115,14 @@ def duty_teacher_list(req: HttpRequest):
     return_list = []
     for teacher in teacher_list:
         tmp = load_private_info(teacher)
+        # 计算teacher score
+        relations = TeacherNewcomerTable.objects.filter(teacher=teacher)
+        total_scores = sum([relation.teacherScore for relation in relations])
+        if len(relations) <= 0:
+            teacher.teacherScore = 0
+        else:
+            teacher.teacherScore = total_scores/len(relations)
+        teacher.save()
         tmp["historicalMembers"] = teacher.historicalMembers
         tmp["currentMembers"] = teacher.currentMembers
         tmp["teacherDutyDate"] = teacher.teacherDutyDate
