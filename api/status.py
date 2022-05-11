@@ -455,7 +455,7 @@ def finish_all_lesson(req: HttpRequest):
 #                                        "message": res})
 
 
-def assign_content(request: HttpRequest):
+def assign_content(request: HttpRequest): #TODO
     """
     POST{
         "action": "assign content",
@@ -510,6 +510,11 @@ def assign_content(request: HttpRequest):
         str_type = "exam"
     else:
         str_type = "task"
+    if content.type == ContentTable.EnumType.Course:
+        lessons = LessonTable.objects.filter(content=content)
+        for lesson in lessons:
+            new_user_lesson_relation = UserLessonTable(user=assignee, lesson=lesson)
+            new_user_lesson_relation.save()
     res = f"content {content.name} of type {str_type} assigned to {assignee.username} with real name {assignee.name}"
     return gen_standard_response(200, {"result": "success",
                                        "message": res})
@@ -556,7 +561,7 @@ def has_program(request: HttpRequest):
                                            'programID': relation.program.id})
 
 
-def assign_program(request: HttpRequest):
+def assign_program(request: HttpRequest):  # TODO
     """
     POST
     {
