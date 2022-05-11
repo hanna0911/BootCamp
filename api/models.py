@@ -181,6 +181,7 @@ class ContentTable(models.Model):
     author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 事件作者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
     audience = models.IntegerField(choices=EnumAudience.choices)  # 受众
     cover = models.ImageField()  # 封面
@@ -267,7 +268,7 @@ class UserContentTable(models.Model):
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
 
     # course相关
-    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修  !!!!!!!!弃用该字段
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
 
     # exam相关
@@ -286,7 +287,7 @@ class UserLessonTable(models.Model):
     lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField(default=datetime.datetime.now())  # 结束时间
+    endTime = models.DateTimeField(default=datetime.datetime.fromisoformat("2000-01-01 00:00"))  # 结束时间
 
 
 class NotificationTable(models.Model):

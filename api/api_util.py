@@ -505,3 +505,11 @@ def get_next_time(hour: int, minute: int) -> datetime.datetime:
     if todaytime < datetimeNow:
         todaytime += datetime.timedelta(days=1)
     return todaytime
+
+
+def str2taglist(input: str) -> list:
+    return input.split(' ')
+
+
+def taglist2str(input: list) -> str:
+    return ' '.join(input)

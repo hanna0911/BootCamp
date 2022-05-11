@@ -40,7 +40,7 @@ def create_program(request: HttpRequest):
     action = data.get("action")
     name = data.get("name")
     intro = data.get("intro")
-    tag = data.get("tag")
+    tag = taglist2str(data.get("tag"))
     recommend_time = data.get("recommendTime")
     audience = data.get("audience")
     cover = data.get("cover")
@@ -447,7 +447,8 @@ def create_content(request: HttpRequest):  # TODO
         action = request.POST.get('action')
         name = request.POST.get("name")
         intro = request.POST.get("intro")
-        tag = request.POST.get("tag")
+        tag = taglist2str(request.POST.get("tag"))
+        isObligatory = request.POST.get("isObligatory")  # 新增的是否必修信息
         recommend_time = request.POST.get("recommendTime")
         audience = request.POST.get("audience")
         cover = request.POST.get("cover")
@@ -529,7 +530,7 @@ def create_content(request: HttpRequest):  # TODO
             print(e)
             return save_file_error_response()
     new_content = ContentTable(id=new_content_id, name=name, author=user,
-                               intro=intro, tag=tag, recommendedTime=recommend_time,
+                               intro=intro, tag=tag, recommendedTime=recommend_time, isObligatory=isObligatory,
                                audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template, programId=program, lessonCount=0,
                                questions=test_file_url, taskType=task_type,
