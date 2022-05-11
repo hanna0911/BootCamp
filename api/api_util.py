@@ -175,38 +175,6 @@ def check_graduated_newcomer(user: PrivateInfo):
 
             logging.warning("newcomer graduated")
 
-def program_finished_and_student_not_commented(student: PrivateInfo):
-    user_program = UserProgramTable.objects.filter(
-        user = student,
-        program__audience=ProgramTable.EnumAudience.Newcomer)
-    if user_program.count() <= 0:
-        print("no program when checking graduated")
-        return False
-    user_program = user_program.first()
-    if (user_program.finished):
-        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=student)
-        if teacher_relations.count() <= 0:  #无导师
-            return False
-        teacher_relation = teacher_relations.first()
-        # 检查新人是否已评价
-        if(not teacher_relation.newcomerCommitted):
-            return True
-    return False
-
-def program_finished_and_teacher_not_commented(student: PrivateInfo):
-    user_program = UserProgramTable.objects.filter(
-        user = student,
-        program__audience=ProgramTable.EnumAudience.Newcomer)
-    if user_program.count() <= 0:
-        print("no program when checking graduated")
-        return False
-    user_program = user_program.first()
-    if (user_program.finished):
-        teacher_relation = TeacherNewcomerTable.objects.filter(newcomer=student).first()
-        # 检查导师是否已评价
-        if(not teacher_relation.teacherCommitted):
-            return True
-    return False
 
 
 def find_people(username: str):
@@ -529,3 +497,11 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = Conten
 def cn_datetime_now() -> datetime.datetime:
     timestamp = datetime.datetime.now().timestamp()
     return cn_datetime_fromtimestamp(timestamp)
+
+
+def get_next_time(hour: int, minute: int) -> datetime.datetime:
+    datetimeNow = cn_datetime_now()
+    todaytime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if todaytime < datetimeNow:
+        todaytime += datetime.timedelta(days=1)
+    return todaytime
