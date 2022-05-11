@@ -536,20 +536,22 @@ def cn_datetime_now() -> datetime.datetime:
 
 def get_next_time(hour: int, minute: int) -> datetime.datetime:
     datetimeNow = cn_datetime_now()
-    targetTime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
-    if targetTime < datetimeNow:
-        targetTime += datetime.timedelta(days=1)
-    return targetTime
+    todaytime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if todaytime < datetimeNow:
+        todaytime += datetime.timedelta(days=1)
+    return todaytime
 
-def get_next_weekday_time(weekday: int, hour: int, minute: int):
-    datetimeNow = cn_datetime_now()
-    Today = datetimeNow.day()
-    deltaday = weekday - Today.isoweekday()
-    if deltaday == 0 :
-        targetTime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
-        if targetTime < datetimeNow:
-            targetTime += datetime.timedelta(days=7)
-    elif deltaday > 0:
-        targetTime += datetime.timedelta(days=deltaday)
-    else :
-        targetime += datetime.timedelta(days=7+deltaday)
+
+def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetime:
+    timeret = get_next_time(hour, minute)
+    while timeret.weekday != weekday:
+        timeret += datetime.timedelta(days=1)
+    return timeret
+
+
+def str2taglist(input: str) -> list:
+    return input.split(' ')
+
+
+def taglist2str(input: list) -> str:
+    return ' '.join(input)
