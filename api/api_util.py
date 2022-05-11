@@ -3,6 +3,7 @@ import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
+from django.forms import TimeField
 from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable, UserProgramTable, UserLessonTable, ProgramTable
 from .models import ContentTable
 import json
@@ -171,7 +172,41 @@ def check_graduated_newcomer(user: PrivateInfo):
             teacher.historicalMembers += 1
             teacher.save()
             print("newcomer graduated")
+
             logging.warning("newcomer graduated")
+
+def program_finished_and_student_not_commented(student: PrivateInfo):
+    user_program = UserProgramTable.objects.filter(
+        user = student,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        print("no program when checking graduated")
+        return False
+    user_program = user_program.first()
+    if (user_program.finished):
+        teacher_relations = TeacherNewcomerTable.objects.filter(newcomer=student)
+        if teacher_relations.count() <= 0:  #无导师
+            return False
+        teacher_relation = teacher_relations.first()
+        # 检查新人是否已评价
+        if(not teacher_relation.newcomerCommitted):
+            return True
+    return False
+
+def program_finished_and_teacher_not_commented(student: PrivateInfo):
+    user_program = UserProgramTable.objects.filter(
+        user = student,
+        program__audience=ProgramTable.EnumAudience.Newcomer)
+    if user_program.count() <= 0:
+        print("no program when checking graduated")
+        return False
+    user_program = user_program.first()
+    if (user_program.finished):
+        teacher_relation = TeacherNewcomerTable.objects.filter(newcomer=student).first()
+        # 检查导师是否已评价
+        if(not teacher_relation.teacherCommitted):
+            return True
+    return False
 
 
 def find_people(username: str):
