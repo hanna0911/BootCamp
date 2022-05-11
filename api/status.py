@@ -7,7 +7,8 @@ from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
 from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable, \
-    NewcomerRecode, ProgramTable, UserNotificationTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
+    NewcomerRecode, ProgramTable, UserNotificationTable, UserProgramTable, ProgramContentTable, LessonTable, \
+    UserLessonTable
 from .models import ScheduledNotificationTable, UserScheduledTable
 import json
 import datetime
@@ -72,7 +73,7 @@ def nominate_teachers(req: HttpRequest):
         user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
-    
+
     return gen_response(200, message="success")
 
 
@@ -311,6 +312,34 @@ def get_commits_and_score(req: HttpRequest):
     return gen_response(200, ret_data)
 
 
+def get_my_commit(req: HttpRequest):
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "role": ["teacher", "newcomer"],
+        "data_field": ["newcomer"],
+        "cur_role": ["teacher", "newcomer"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, newcomer = find_people(data["newcomer"])
+    if not found:
+        return newcomer
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        return gen_response(400, message="newcomer has no teacher")
+    relation = relations.first()
+    role = req.session.get("role")
+    if role == "teacher":
+        return gen_response(200, data={"commits": relation.teacherToNewcomer,
+                                       "score": relation.newcomerScore
+                                       })
+    else:
+        return gen_response(200, data={"commits": relation.newcomerToTeacher,
+                                       "score": relation.teacherScore
+                                       })
+
 def finish_lesson(req: HttpRequest):
     """
     完成lesson的接口
@@ -455,7 +484,7 @@ def finish_all_lesson(req: HttpRequest):
 #                                        "message": res})
 
 
-def assign_content(request: HttpRequest): #TODO
+def assign_content(request: HttpRequest):  # TODO
     """
     POST{
         "action": "assign content",
@@ -540,7 +569,7 @@ def has_program(request: HttpRequest):
     action = data.get('action')
     target_username = data.get('username')
     audience_select = {"teacher": 1, "newcomer": 0}
-    audience = audience_select.get(data["audience"], 0) # 如果这个字段为空则自动为0
+    audience = audience_select.get(data["audience"], 0)  # 如果这个字段为空则自动为0
     if action != 'has program' or target_username is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
     target_user = PrivateInfo.objects.filter(username=target_username).first()

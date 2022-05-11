@@ -176,7 +176,6 @@ def check_graduated_newcomer(user: PrivateInfo):
             logging.warning("newcomer graduated")
 
 
-
 def find_people(username: str):
     users = PrivateInfo.objects.filter(username=username)
     if len(users) <= 0:
@@ -515,8 +514,10 @@ def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetim
 
 
 def str2taglist(input: str) -> list:
-    return input.split(' ')
+    return input.split(',')
+    # return input
 
 
 def taglist2str(input: list) -> str:
-    return ' '.join(input)
+    #return ' '.join(input)
+    return input

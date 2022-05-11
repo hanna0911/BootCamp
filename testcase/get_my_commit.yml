@@ -1,0 +1,34 @@
+# 评论部分
+- name: 获取自己的评论
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /get_my_commit
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取自己的评论-方法错误
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /get_my_commit
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 老师获取自己的评论-方法错误
+  ident:
+    - teacher
+  request:
+    method: POST
+    url: /get_my_commit
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 200 }
+
