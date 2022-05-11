@@ -211,7 +211,6 @@ def program_finished_and_teacher_not_commented(student: PrivateInfo):
             return True
     return False
 
-
 def find_people(username: str):
     users = PrivateInfo.objects.filter(username=username)
     if len(users) <= 0:
@@ -550,8 +549,10 @@ def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetim
 
 
 def str2taglist(input: str) -> list:
-    return input.split(' ')
+    #return input.split(',')
+    return input
 
 
 def taglist2str(input: list) -> str:
-    return ' '.join(input)
+    #return ' '.join(input)
+    return input
