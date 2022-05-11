@@ -66,7 +66,7 @@ def nominate_teachers(req: HttpRequest):
         print(item["username"])
         user = PrivateInfo.objects.get(username=item["username"])
         user.isTeacher = True
-        user.teacherNominationDate = timezone.now()
+        user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
     return gen_response(200, message="success")
@@ -235,7 +235,7 @@ def newcomer_recode(req: HttpRequest):
         teacher=teacher,
         newcomer=newcomer,
         content=data["content"],
-        commitTime=timezone.now()
+        commitTime=cn_datetime_now()
     )
     recode.save()
     return gen_response(200)

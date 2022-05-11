@@ -128,7 +128,7 @@ def check_graduated_teacher(user: PrivateInfo):
         user.teacherIsDuty = True
         print("teacher graduated")
         logging.warning("teacher graduated")
-        user.teacherDutyDate = timezone.now()
+        user.teacherDutyDate = cn_datetime_now()
         user.save()
 
 
@@ -164,7 +164,7 @@ def check_graduated_newcomer(user: PrivateInfo):
         if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted \
                 and user.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             user.newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate
-            user.newcomerGraduateDate = timezone.now()
+            user.newcomerGraduateDate = cn_datetime_now()
             user.save()
             teacher = teacher_relation.teacher
             teacher.currentMembers -= 1
