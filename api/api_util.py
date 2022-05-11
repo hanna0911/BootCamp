@@ -506,9 +506,17 @@ def get_next_time(hour: int, minute: int) -> datetime.datetime:
     return todaytime
 
 
+def get_next_week_time(weekday: int, hour: int, minute: int) -> datetime.datetime:
+    timeret = get_next_time(hour, minute)
+    while timeret.weekday != weekday:
+        timeret += datetime.timedelta(days=1)
+    return timeret
+
+
 def str2taglist(input: str) -> list:
-    return input.split(' ')
+    return input.split(',')
 
 
 def taglist2str(input: list) -> str:
-    return ' '.join(input)
+    #return ' '.join(input)
+    return input

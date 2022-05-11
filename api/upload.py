@@ -449,6 +449,8 @@ def create_content(request: HttpRequest):  # TODO
         intro = request.POST.get("intro")
         tag = taglist2str(request.POST.get("tag"))
         isObligatory = str_to_boolean(request.POST.get("isObligatory"))  # 新增的是否必修信息
+        print("!!!!!!!!!!!!!!!!!!!!!", request.POST.get("tag"))
+        print("!!!!!!!!!!!!!!!!!!!!!", tag)
         recommend_time = request.POST.get("recommendTime")
         audience = request.POST.get("audience")
         cover = request.POST.get("cover")
