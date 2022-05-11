@@ -585,7 +585,7 @@ def assign_program(request: HttpRequest):
     for content_relation in content_relations:
         content = content_relation.content
         new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=1))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=1))
         new_user_content_relation.save()
     std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including ' \
                   + f'{len(content_relations)} contents'
