@@ -494,3 +494,11 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = Conten
 def cn_datetime_now() -> datetime.datetime:
     timestamp = datetime.datetime.now().timestamp()
     return cn_datetime_fromtimestamp(timestamp)
+
+
+def get_next_time(hour: int, minute: int) -> datetime.datetime:
+    datetimeNow = cn_datetime_now()
+    todaytime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if todaytime < datetimeNow:
+        todaytime += datetime.timedelta(days=1)
+    return todaytime
