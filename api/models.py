@@ -286,7 +286,7 @@ class UserLessonTable(models.Model):
     lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField()  # 结束时间
+    endTime = models.DateTimeField(null=True)  # 结束时间
 
 
 class NotificationTable(models.Model):

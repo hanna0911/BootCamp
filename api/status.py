@@ -69,7 +69,7 @@ def nominate_teachers(req: HttpRequest):
         print(item["username"])
         user = PrivateInfo.objects.get(username=item["username"])
         user.isTeacher = True
-        user.teacherNominationDate = timezone.now()
+        user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
         #对HRBP自动通知待审核导师
@@ -261,7 +261,7 @@ def newcomer_recode(req: HttpRequest):
         teacher=teacher,
         newcomer=newcomer,
         content=data["content"],
-        commitTime=timezone.now()
+        commitTime=cn_datetime_now()
     )
     recode.save()
     return gen_response(200)
@@ -361,6 +361,7 @@ def finish_lesson(req: HttpRequest):
     if relation.finished:
         return gen_response(200, message="already finished")
     relation.finished = True
+    relation.endTime = timezone.now()
     relation.save()
     # 更新content
     course = lesson.content
@@ -371,6 +372,7 @@ def finish_lesson(req: HttpRequest):
     course_relation.finishedLessonCount += 1
     if course_relation.finishedLessonCount == course.lessonCount:
         course_relation.finished = True
+        course_relation.userEndTime = timezone.now()
         logging.info("lesson 结束，课程紧跟着结束")
     course_relation.save()
     # 更新整个培训内容是否完成
@@ -611,8 +613,16 @@ def assign_program(request: HttpRequest):
     for content_relation in content_relations:
         content = content_relation.content
         new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=1))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=1))
         new_user_content_relation.save()
+        if content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=content)
+            for lesson in lessons:
+                user_lesson_relation = UserLessonTable(
+                    lesson=lesson,
+                    user=target_user
+                )
+                user_lesson_relation.save()
     std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including ' \
                   + f'{len(content_relations)} contents'
     return gen_standard_response(200, {'result': 'success',
