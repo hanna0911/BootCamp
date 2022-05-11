@@ -416,6 +416,10 @@ def delete_member(request: HttpRequest):
     user = PrivateInfo.objects.filter(username=username).first()
     group = GroupTable.objects.filter(id=group_id).first()
     target_relation = UserGroupTable.objects.filter(user=target_user, group=group).first()
+    print('tu', target_user)
+    print('cu', user)
+    print('tg', group)
+    print('tr', target_relation)
     if user is None or group is None or target_user is None or target_relation is None:
         return item_not_found_error_response()
     if user != group.creator:
