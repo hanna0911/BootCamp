@@ -1,0 +1,126 @@
+- name: Notification单播
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /create_notification
+    data:
+      action: create notification
+      title: 测试公告
+      content: 这是一条测试公告
+      assignees:
+        - newcomer
+  validate:
+    - equals: { status_code: 200 }
+
+
+- name: Notification单播失败 身份错误
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /create_notification
+    data:
+      action: create notification
+      title: 测试公告
+      content: 这是一条测试公告
+      assignees:
+        - student1
+        - student2
+        - newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: Notification单播失败 找不到公告对象
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /create_notification
+    data:
+      action: create notification
+      title: 测试公告
+      content: 这是一条测试公告
+      assignees:
+        - student1
+        - NOT_A_NEWCOMER
+        - newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 获取my_notification_list
+  ident:
+    - newcomer
+  request:
+    method: GET
+    url: /my_notification_list
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 完成阅读公告
+  ident:
+    - newcomer
+  request:
+    method: POST
+    url: /finish_notification
+    data:
+      action: finish notification
+      notificationID: 1
+
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 创建群组
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /create_group
+    data:
+      action: create group
+      groupName: 测试群组
+      members:
+        - newcomer
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 添加组员
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /add_group_member
+    data:
+      action: add group member
+      groupID: 1
+      username:
+        - s1
+        - s2
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 获取my_group_list
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /my_group_list
+    data:
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 群发通知
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /create_group_notification
+    data:
+      action: create group notification
+      title: test_title
+      content: test_content
+      groups:
+        - 1
+  validate:
+    - equals: { status_code: 200 }

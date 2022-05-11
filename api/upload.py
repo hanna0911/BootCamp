@@ -40,7 +40,7 @@ def create_program(request: HttpRequest):
     action = data.get("action")
     name = data.get("name")
     intro = data.get("intro")
-    tag = data.get("tag")
+    tag = taglist2str(data.get("tag"))
     recommend_time = data.get("recommendTime")
     audience = data.get("audience")
     cover = data.get("cover")
@@ -194,7 +194,7 @@ def upload_answers(request: HttpRequest):
     score = correct / len(result) * 100
     # print(valid, result)
     relation.finished = True
-    relation.userEndTime = datetime.datetime.now()
+    relation.userEndTime = cn_datetime_now()
     relation.examUsedTime = int((relation.userEndTime - relation.userBeginTime).seconds)
     relation.score = score
     relation.save()
@@ -242,7 +242,7 @@ def begin_test(request: HttpRequest):
     if test is None or test.type != ContentTable.EnumType.Exam:
         return item_not_found_error_response()
     # log begin time
-    relation.userBeginTime = datetime.datetime.now()
+    relation.userBeginTime = cn_datetime_now()
     relation.save()
     # load test paper
     try:
@@ -343,7 +343,7 @@ def finish_task(request: HttpRequest):
     if relation.finished is True:
         return item_not_found_error_response()
     # log task finished
-    relation.userEndTime = datetime.datetime.now()
+    relation.userEndTime = cn_datetime_now()
     relation.finished = True
     relation.save()
     check_graduated_newcomer(relation.user)
@@ -436,7 +436,7 @@ def save_task_file(file, username, task_id):
     return path_converter(file_path)
 
 
-def create_content(request: HttpRequest):
+def create_content(request: HttpRequest):  # TODO
     """
     创建一个content(课程/考试/任务)
     """
@@ -447,7 +447,10 @@ def create_content(request: HttpRequest):
         action = request.POST.get('action')
         name = request.POST.get("name")
         intro = request.POST.get("intro")
-        tag = request.POST.get("tag")
+        tag = taglist2str(request.POST.get("tag"))
+        isObligatory = str_to_boolean(request.POST.get("isObligatory"))  # 新增的是否必修信息
+        print("!!!!!!!!!!!!!!!!!!!!!", request.POST.get("tag"))
+        print("!!!!!!!!!!!!!!!!!!!!!", tag)
         recommend_time = request.POST.get("recommendTime")
         audience = request.POST.get("audience")
         cover = request.POST.get("cover")
@@ -529,7 +532,7 @@ def create_content(request: HttpRequest):
             print(e)
             return save_file_error_response()
     new_content = ContentTable(id=new_content_id, name=name, author=user,
-                               intro=intro, tag=tag, recommendedTime=recommend_time,
+                               intro=intro, tag=tag, recommendedTime=recommend_time, isObligatory=isObligatory,
                                audience=audience_id, cover=cover, type=content_type_id,
                                isTemplate=is_template, programId=program, lessonCount=0,
                                questions=test_file_url, taskType=task_type,
@@ -540,8 +543,18 @@ def create_content(request: HttpRequest):
     new_program_content_relation.save()
     target_user = UserProgramTable.objects.filter(program__id=program_id).first()
     if target_user is not None:
-        new_user_content_relation = UserContentTable(user=target_user.user, content=new_content, assigner=user, deadline = datetime.datetime.now() + datetime.timedelta(days = 1))
+        new_user_content_relation = UserContentTable(
+            user=target_user.user,
+            content=new_content,
+            assigner=user,
+            deadline = cn_datetime_now() + datetime.timedelta(days = 1)
+        )
         new_user_content_relation.save()
+        if new_content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=new_content)
+            for lesson in lessons:
+                new_user_lesson_relation = UserLessonTable(user=target_user.user, lesson=lesson)
+                new_user_lesson_relation.save()
     program.contentCount += 1  # 父program的content数量累加
     program.save()
     return gen_standard_response(200, {
@@ -608,7 +621,7 @@ def save_courseware_files(coursewares: list, lesson_id: str, content_id: str, us
             raise Exception('unable to find corresponding content')
         cover = 'NOT_A_REAL_COVER'
         courseware = CoursewareTable(lesson=lesson, content=content, name=file.name.split('.')[0],
-                                     cover=cover, url=file_path, uploadTime=datetime.datetime.now())
+                                     cover=cover, url=file_path, uploadTime=cn_datetime_now())
         courseware.save()
         file_paths.append(file_path)
     return file_paths
@@ -677,7 +690,7 @@ def create_lesson(request: HttpRequest):
     target_user = UserProgramTable.objects.filter(program__id=programID).first()
     if target_user is not None:
         target_user = target_user.user
-        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=datetime.datetime.now())
+        new_relation = UserLessonTable(user=target_user, lesson=new_lesson, endTime=cn_datetime_now())
         new_relation.save()
     return gen_standard_response(200, {
         "result": "success",
@@ -770,8 +783,13 @@ def assign_content_to_program(request: HttpRequest):
     user = UserProgramTable.objects.filter(program__id=program_id).first()
     if user is not None:
         new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=5))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=5))
         new_user_content_relation.save()
+        if content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=content)
+            for lesson in lessons:
+                new_user_lesson_relation = UserLessonTable(user=user.user, lesson=lesson)
+                new_user_lesson_relation.save()
     return gen_standard_response(200, {
         'result': 'success',
         'message': f'content {content.name} with id {content_id} assigned to {program.name} with id {program_id}'

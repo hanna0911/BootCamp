@@ -132,6 +132,7 @@ def write_db(req: HttpRequest):
             author=author,
             intro=info["intro"],
             tag=info["tag"],
+            isObligatory=info["isObligatory"],
             recommendedTime=info["recommendedTime"],
             audience=info["audience"],
             type=info["type"],
@@ -239,4 +240,44 @@ def write_db(req: HttpRequest):
             finished=info["finished"]
         ).save()
     # logging.info("{} user lesson info loaded".format(len(UserLessonTable.objects.all())))
+    df: pd.DataFrame = open_xlsx(str(root) + path, "notificationtable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        NotificationTable(
+            id=info["id"],
+            author_name=info["author_name"],
+            author_role=info["author_role"],
+            title=info["title"],
+            content=info["content"],
+            releaseTime=info["releaseTime"]
+        ).save()
+
+    df: pd.DataFrame = open_xlsx(str(root) + path, "grouptable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        cr = PrivateInfo.objects.get(username=info["creator"])
+        GroupTable(
+            id=info["id"],
+            name=info["name"],
+            creator=cr
+        ).save()
+    df: pd.DataFrame = open_xlsx(str(root) + path, "usernotificationtable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        user = PrivateInfo.objects.get(username=info["user"])
+        noti = NotificationTable.objects.get(id=info["notification"])
+        UserNotificationTable(
+            user=user,
+            notification=noti,
+            finished=info["finished"]
+        ).save()
+    df: pd.DataFrame = open_xlsx(str(root) + path,"usergrouptable")
+    for i in range(len(df)):
+        info = df.iloc[i]
+        group = GroupTable.objects.get(id=info["group"])
+        user = PrivateInfo.objects.get(username=info["user"])
+        UserGroupTable(
+            user=user,
+            group=group
+        ).save()
     return gen_response(200, message="succefully write in")

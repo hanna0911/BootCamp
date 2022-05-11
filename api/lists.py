@@ -115,6 +115,14 @@ def duty_teacher_list(req: HttpRequest):
     return_list = []
     for teacher in teacher_list:
         tmp = load_private_info(teacher)
+        # 计算teacher score
+        relations = TeacherNewcomerTable.objects.filter(teacher=teacher)
+        total_scores = sum([relation.teacherScore for relation in relations])
+        if len(relations) <= 0:
+            teacher.teacherScore = 0
+        else:
+            teacher.teacherScore = total_scores/len(relations)
+        teacher.save()
         tmp["historicalMembers"] = teacher.historicalMembers
         tmp["currentMembers"] = teacher.currentMembers
         tmp["teacherDutyDate"] = teacher.teacherDutyDate
@@ -127,7 +135,7 @@ def duty_teacher_list(req: HttpRequest):
 
 def nominated_list(req: HttpRequest):
     """
-    已经被提名,可以进行审核的教室列表
+    已经被提名,可以进行审核的教师列表
     :param req:
     :return:
     """
@@ -139,7 +147,9 @@ def nominated_list(req: HttpRequest):
             400, message="no username in session, probly not login")
     if not role_list_check(username, ["HRBP", "admin"]):  # 暂时做修改适应前端
         return gen_response(400, message="permission denied")
-    teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
+    teacher_list = PrivateInfo.objects.filter(
+        isTeacher=True, teacherIsDuty=False,
+        teacherExaminedStatus=PrivateInfo.EnumTeacherExaminedStatus.NotYet)
     # TODO:获取培训状态
     return_list = []
     for teacher in teacher_list:
@@ -174,13 +184,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -222,13 +233,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -268,13 +280,14 @@ def assignable_test_list(request: HttpRequest):
                 'name': test.name,
                 'intro': test.intro,
                 'recommendTime': str(test.recommendedTime),
-                'tag': test.tag,
+                'tag': str2taglist(test.tag),
                 'author': test.author.name,
                 'releaseTime': test.releaseTime,
                 'contentID': test.id,
+                'isObligatory': test.isObligatory,
             }
             recommend_time_list.append(str(test.recommendedTime))
-            tag_list.append(test.tag)
+            tag_list.extend(str2taglist(test.tag))
             try:
                 # if test.questions == '' or test.questions is None:
                 #     csv_dir = './files/test/SampleTestPaper.csv'
@@ -332,10 +345,14 @@ def my_test_list(request: HttpRequest):
             'name': test.name,
             'intro': test.intro,
             'recommendTime': str(test.recommendedTime),
-            'tag': test.tag,
+            'tag': str2taglist(test.tag),
+            'isObligatory': test.isObligatory,
             'author': test.author.name,
             'releaseTime': test.releaseTime,
             'contentID': test.id,
+            'isFinished': test_relation.finished,
+            'score': test_relation.score,
+            'examUsedTime': test_relation.examUsedTime,
         }
         # recommend_time_list.append(str(test.recommendedTime))
         # tag_list.append(test.tag)
@@ -402,7 +419,8 @@ def assignable_course_list(request: HttpRequest):
             'name': course.name,
             'intro': course.intro,
             'recommendTime': course.recommendedTime,
-            'tag': course.tag,
+            'tag': str2taglist(course.tag),
+            'isObligatory': course.isObligatory,
             'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
@@ -446,11 +464,12 @@ def my_courses_list(request: HttpRequest):
             'name': course.name,
             'intro': course.intro,
             'recommendTime': course.recommendedTime,
-            'tag': course.tag,
+            'tag': str2taglist(course.tag),
+            'isObligatory': course.isObligatory,
             'author': course.author.name,
             'releaseTime': course.releaseTime,
             'lessonCount': course.lessonCount,
-            'finished': course_relation.finished,
+            'isFinished': course_relation.finished,
             'finishedLessonCount': course_relation.finishedLessonCount,
             # 'programID': course.programId,
             'contentID': course.id
@@ -557,7 +576,8 @@ def assignable_task_list(request: HttpRequest):
             'name': task.name,
             'intro': task.intro,
             'recommendTime': str(task.recommendedTime),
-            'tag': task.tag,
+            'tag': str2taglist(task.tag),
+            'isObligatory': task.isObligatory,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
             'taskType': task_type,
@@ -566,7 +586,7 @@ def assignable_task_list(request: HttpRequest):
             'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
-        tag_list.append(task.tag)
+        tag_list.extend(str2taglist(task.tag))
     recommend_time_list = list(set(recommend_time_list))
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
@@ -610,17 +630,18 @@ def my_task_list(request: HttpRequest):
             'name': task.name,
             'intro': task.intro,
             'recommendTime': str(task.recommendedTime),
-            'tag': task.tag,
+            'tag': str2taglist(task.tag),
+            'isObligatory': task.isObligatory,
             'author': task.author.name,
             'releaseTime': task.releaseTime,
             'taskType': task_type,
             'taskText': task.text,
             'taskLink': task.link,
             'isFinished': task_relation.finished,
-            'taskID': task.id
+            'contentID': task.id
         })
         recommend_time_list.append(str(task.recommendedTime))
-        tag_list.append(task.tag)
+        tag_list.extend(str2taglist(task.tag))
     recommend_time_list = list(set(recommend_time_list))
     tag_list = list(set(tag_list))
     return gen_standard_response(200, {'result': 'success',
@@ -819,7 +840,8 @@ def program_content_list(request: HttpRequest):
             'name': content.name,
             'author': content.author.username,
             'intro': content.intro,
-            'tag': content.tag,
+            'tag': str2taglist(content.tag),
+            'isObligatory': content.isObligatory,
             'recommendTime': content.recommendedTime,
             'audience': audience,
             'contentType': content_type,
@@ -830,8 +852,8 @@ def program_content_list(request: HttpRequest):
             'beginTime': content.beginTime,
             'endTime': content.endTime,
             'taskType': task_type,
-            'text': content.text,
-            'link': content.link,
+            'taskText': content.text,
+            'taskLink': content.link,
             'contentID': content.id
         }
         if user_program_relation is not None:

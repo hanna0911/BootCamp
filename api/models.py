@@ -116,8 +116,8 @@ class TeacherNewcomerTable(models.Model):
     newcomerToTeacher = models.CharField(max_length=COMMENT_LEN)  # 该新人对该导师的评语
     newcomerScore = models.FloatField(default=-1.)  # 该新人被该老师评价的分数
     teacherToNewcomer = models.CharField(max_length=COMMENT_LEN)  # 该导师对该新人的评语
-    teacherCommitted = models.BooleanField(default=False)
-    newcomerCommitted = models.BooleanField(default=False)
+    teacherCommitted = models.BooleanField(default=False)   # 导师是否已评价
+    newcomerCommitted = models.BooleanField(default=False) # 新人是否已评价
 
 
 class NewcomerRecode(models.Model):
@@ -170,9 +170,10 @@ class ContentTable(models.Model):
         Text = 0    # text
         Link = 1    # link
         File = 2    # file
+
     class EnumAudience(models.IntegerChoices):
-        teacher = 1  # 导师培训内容
-        newcomer = 0 # 新人培训内容
+        teacher = 1     # 导师培训内容
+        newcomer = 0    # 新人培训内容
     # --------------------------------------------------------
 
     id = models.CharField(primary_key=True, max_length=NAME_LEN)  # 事件id
@@ -180,6 +181,7 @@ class ContentTable(models.Model):
     author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, blank=True)  # 事件作者
     intro = models.CharField(max_length=LONG_INFO_LEN)  # 事件简介
     tag = models.CharField(max_length=LONG_INFO_LEN)  # 事件标签
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
     recommendedTime = models.IntegerField()  # 建议用时，若为考试则为考试限时
     audience = models.IntegerField(choices=EnumAudience.choices)  # 受众
     cover = models.ImageField()  # 封面
@@ -266,7 +268,7 @@ class UserContentTable(models.Model):
     assigner = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE, related_name="ContentAsAssigner")  # 该content的指派人
 
     # course相关
-    isObligatory = models.BooleanField(default=True)  # 课程是否是必修
+    isObligatory = models.BooleanField(default=True)  # 课程是否是必修  !!!!!!!!弃用该字段
     finishedLessonCount = models.IntegerField(default=0)  # 结束的lesson数量
 
     # exam相关
@@ -285,7 +287,7 @@ class UserLessonTable(models.Model):
     lesson = models.ForeignKey(LessonTable, on_delete=models.CASCADE)  # 课程
     finished = models.BooleanField(default=False)  # 是否结束
     beginTime = models.DateTimeField(auto_now_add=True)  # 开始时间
-    endTime = models.DateTimeField()  # 结束时间
+    endTime = models.DateTimeField(default=datetime.datetime.fromisoformat("2000-01-01 00:00"))  # 结束时间
 
 
 class NotificationTable(models.Model):
@@ -293,7 +295,7 @@ class NotificationTable(models.Model):
     公告
     """
     id = models.AutoField(primary_key=True)
-    author = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    author_name = models.CharField(max_length=100)
     author_role = models.CharField(max_length=10)
     title = models.CharField(max_length=50)
     content = models.CharField(max_length=1000)
@@ -308,3 +310,33 @@ class UserNotificationTable(models.Model):
     user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
     notification = models.ForeignKey(NotificationTable, on_delete=models.CASCADE)
     finished = models.BooleanField(default=False)
+
+
+class GroupTable(models.Model):
+    """
+    公告群组表
+    """
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=100)
+    creator = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    user_count = models.IntegerField(default=0)
+
+
+class UserGroupTable(models.Model):
+    relationID = models.AutoField(primary_key=True)
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    group = models.ForeignKey(GroupTable, on_delete=models.CASCADE)
+
+
+class ScheduledNotificationTable(models.Model):
+    id = models.AutoField(primary_key=True)
+    title = models.CharField(max_length=50)
+    content = models.CharField(max_length=1000)
+    scheduledReleaseTime = models.DateTimeField()
+
+
+class UserScheduledTable(models.Model):
+    relationID = models.AutoField(primary_key=True)
+    user = models.ForeignKey(PrivateInfo, on_delete=models.CASCADE)
+    scheduled_notification = models.ForeignKey(ScheduledNotificationTable, on_delete=models.CASCADE)
+

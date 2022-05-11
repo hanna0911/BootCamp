@@ -2,6 +2,7 @@
 用于测试
 """
 import pytest
+import time
 from django.test import TestCase, Client
 from django.http import JsonResponse
 from utils.reader import *
@@ -243,6 +244,39 @@ class Tests(TestCase):
 
     def test_content_progress(self):
         self.process("/testcase/content_progress.yml")
+
+    def test_notification(self):
+        self.process("/testcase/notification.yml")
+
+    def test_get_my_commit(self):
+        self.process("/testcase/get_my_commit.yml")
+
+    def latency(self):
+        large = 30000
+        write_time = time.time()
+        for i in range(large):
+            res = self.client.post(
+                "/api/join", content_type="application/json",
+                data={
+                    "username": f"user{i}",
+                    "password": "Test@123",
+                    "personal_info": {
+                        "city": "北京",
+                        "dept": "管理部门",
+                        "name": "test",
+                    }
+                }
+            )
+        start = time.time()
+        logging.info(f"average write time: {(start-write_time)/large} s")
+        self.client.post("/api/login", content_type="application/json",
+                         data={
+                             "username": f"user{large - 1}",
+                             "password": "Test@123",
+                         })
+        end = time.time()
+        logging.info(f"login latency in {large} data {end-start} s")
+
 
     # def test_upload_program(self):  # TODO:测试有问题
     #     self.process("/testcase/upload_program.yml")
