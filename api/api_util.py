@@ -176,7 +176,6 @@ def check_graduated_newcomer(user: PrivateInfo):
             logging.warning("newcomer graduated")
 
 
-
 def find_people(username: str):
     users = PrivateInfo.objects.filter(username=username)
     if len(users) <= 0:
