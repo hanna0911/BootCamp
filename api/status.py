@@ -2,11 +2,13 @@
 切换状态，切换关系相关的接口
 """
 import logging
+from django.forms import TimeField
 from django.http import HttpRequest
 from django.utils import timezone
 from .api_util import *
 from .models import TeacherNewcomerTable, ContentTable, PrivateInfo, UserContentTable, \
-    NewcomerRecode, ProgramTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
+    NewcomerRecode, ProgramTable, UserNotificationTable, UserProgramTable, ProgramContentTable, LessonTable, UserLessonTable
+from .models import ScheduledNotificationTable, UserScheduledTable
 import json
 import datetime
 
@@ -27,6 +29,7 @@ def reject_nominate(req: HttpRequest):
         return gen_response(400, "user not found")
     user = users.first()
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Fail
+    user.isTeacher = False  # 直接打回新人原型，提名进度列表中不会有拒绝状态
     user.save()
     return gen_response(200)
 
@@ -47,6 +50,7 @@ def accept_nominate(req: HttpRequest):
         return gen_response(400, "user not found")
     user = users.first()
     user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.Pass
+    user.teacherExaminedDate = cn_datetime_now()
     user.save()
     return gen_response(200)
 
@@ -65,8 +69,10 @@ def nominate_teachers(req: HttpRequest):
         print(item["username"])
         user = PrivateInfo.objects.get(username=item["username"])
         user.isTeacher = True
-        user.teacherNominationDate = timezone.now()
+        user.teacherNominationDate = cn_datetime_now()
+        user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
+    
     return gen_response(200, message="success")
 
 
@@ -93,6 +99,7 @@ def assign_teacher(req: HttpRequest):
     entry.save()
     teacher.currentMembers = teacher.currentMembers + 1
     teacher.save()
+
     return gen_response(200)
 
 
@@ -172,7 +179,7 @@ def newcomer_score_teacher(req: HttpRequest):
     relation = relations.first()
     try:
         score = float(data.get("score"))
-    except:
+    except Exception:
         return gen_response(400, message="score not a number")
     relation.teacherScore = score
     relation.save()
@@ -200,7 +207,7 @@ def teacher_score_newcomer(req: HttpRequest):
         return relation
     try:
         score = float(data.get("score"))
-    except:
+    except Exception:
         return gen_response(400, message="score not a number")
     relation.newcomerScore = score
     relation.save()
@@ -233,7 +240,7 @@ def newcomer_recode(req: HttpRequest):
         teacher=teacher,
         newcomer=newcomer,
         content=data["content"],
-        commitTime=timezone.now()
+        commitTime=cn_datetime_now()
     )
     recode.save()
     return gen_response(200)
@@ -333,6 +340,7 @@ def finish_lesson(req: HttpRequest):
     if relation.finished:
         return gen_response(200, message="already finished")
     relation.finished = True
+    relation.endTime = cn_datetime_now()
     relation.save()
     # 更新content
     course = lesson.content
@@ -343,6 +351,7 @@ def finish_lesson(req: HttpRequest):
     course_relation.finishedLessonCount += 1
     if course_relation.finishedLessonCount == course.lessonCount:
         course_relation.finished = True
+        course_relation.userEndTime = cn_datetime_now()
         logging.info("lesson 结束，课程紧跟着结束")
     course_relation.save()
     # 更新整个培训内容是否完成
@@ -446,7 +455,7 @@ def finish_all_lesson(req: HttpRequest):
 #                                        "message": res})
 
 
-def assign_content(request: HttpRequest):
+def assign_content(request: HttpRequest): #TODO
     """
     POST{
         "action": "assign content",
@@ -501,6 +510,11 @@ def assign_content(request: HttpRequest):
         str_type = "exam"
     else:
         str_type = "task"
+    if content.type == ContentTable.EnumType.Course:
+        lessons = LessonTable.objects.filter(content=content)
+        for lesson in lessons:
+            new_user_lesson_relation = UserLessonTable(user=assignee, lesson=lesson)
+            new_user_lesson_relation.save()
     res = f"content {content.name} of type {str_type} assigned to {assignee.username} with real name {assignee.name}"
     return gen_standard_response(200, {"result": "success",
                                        "message": res})
@@ -516,7 +530,7 @@ def has_program(request: HttpRequest):
     """
     ok, res = quick_check(request, {
         "method": "POST",
-        "data_field": [],
+        "data_field": ["audience"],
         "username": "",
         "cur_role": ["teacher", "admin", "HRBP"]
     })
@@ -525,12 +539,16 @@ def has_program(request: HttpRequest):
     data = json.loads(request.body)
     action = data.get('action')
     target_username = data.get('username')
+    audience_select = {"teacher": 1, "newcomer": 0}
+    audience = audience_select.get(data["audience"], 0) # 如果这个字段为空则自动为0
     if action != 'has program' or target_username is None:
         return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
     target_user = PrivateInfo.objects.filter(username=target_username).first()
     if target_user is None:
         return item_not_found_error_response()
-    relation = UserProgramTable.objects.filter(user__username=target_username).first()
+    relation = UserProgramTable.objects.filter(user__username=target_username,
+                                               program__audience=audience
+                                               ).first()
     if relation is None:
         return gen_standard_response(200, {'result': 'success',
                                            'message': f'user {target_username} has not been assigned a program',
@@ -543,7 +561,7 @@ def has_program(request: HttpRequest):
                                            'programID': relation.program.id})
 
 
-def assign_program(request: HttpRequest):
+def assign_program(request: HttpRequest):  # TODO
     """
     POST
     {
@@ -579,8 +597,16 @@ def assign_program(request: HttpRequest):
     for content_relation in content_relations:
         content = content_relation.content
         new_user_content_relation = UserContentTable(user=target_user, content=content, assigner=assigner,
-                                                     deadline=datetime.datetime.now() + datetime.timedelta(days=1))
+                                                     deadline=cn_datetime_now() + datetime.timedelta(days=1))
         new_user_content_relation.save()
+        if content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=content)
+            for lesson in lessons:
+                user_lesson_relation = UserLessonTable(
+                    lesson=lesson,
+                    user=target_user
+                )
+                user_lesson_relation.save()
     std_message = f'added program {target_program_id} to user {target_username}\'s list of programs, including ' \
                   + f'{len(content_relations)} contents'
     return gen_standard_response(200, {'result': 'success',

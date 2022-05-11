@@ -8,6 +8,7 @@ import logging
 import django
 import requests
 from django.http import HttpRequest, HttpResponse
+from django.forms import TimeField
 from django.views.decorators.csrf import ensure_csrf_cookie
 
 from .models import *
@@ -37,7 +38,7 @@ def get_cur_role(request: HttpRequest):
         return session_timeout_response()
     else:
         return gen_standard_response(
-            200, {'result': 'success', 'role': role, "message":"success"})
+            200, {'result': 'success', 'role': role, "message": "success"})
 
 
 def login(request: HttpRequest):  # 登录
@@ -68,6 +69,7 @@ def login(request: HttpRequest):  # 登录
         request.session["role"] = get_highest_role(username)
         session_key = request.session.session_key
         role_list = get_role_list(username)
+
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)
@@ -330,7 +332,7 @@ def teacher_summary_info(req: HttpRequest):
         "current": user.currentMembers,
         "historical": user.historicalMembers,
         "dutyDate": user.teacherDutyDate,
-        "teacherIsDuty":user.teacherIsDuty,
+        "teacherIsDuty": user.teacherIsDuty,
         "total": user.currentMembers + user.historicalMembers,
     }
     return gen_response(200, data=data)
@@ -421,7 +423,7 @@ def newcomer_summary_info(req: HttpRequest):
         "graduateDate": graduate_date,
         "isGraduate": is_graduate,
         "courseProgress": course_progress,
-        "examProgress": exam_progress,#69 f
+        "examProgress": exam_progress,  # 69 f
         "taskProgress": task_progress,
         "evaluateProgress": evaluate_progress,
         "certificate": 'https://gimg2.baidu.com/image_search/s'

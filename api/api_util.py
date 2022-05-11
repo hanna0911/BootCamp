@@ -3,6 +3,7 @@ import logging
 import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
+from django.forms import TimeField
 from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable, UserProgramTable, UserLessonTable, ProgramTable
 from .models import ContentTable
 import json
@@ -121,13 +122,14 @@ def check_graduated_teacher(user: PrivateInfo):
     finished = contents.filter(finished=True).count()
     print(f"teacher total{total}, finished{finished}")
     logging.warning(f"teacher total{total}, finished{finished}")
-    if total == finished:
+    # 未上岗，但结束了课程
+    if total == finished and user.teacherIsDuty is False:
         user_program.finished = True
         user_program.save()
         user.teacherIsDuty = True
         print("teacher graduated")
         logging.warning("teacher graduated")
-        user.teacherDutyDate = timezone.now()
+        user.teacherDutyDate = cn_datetime_now()
         user.save()
 
 
@@ -159,15 +161,20 @@ def check_graduated_newcomer(user: PrivateInfo):
         if teacher_relations.count() <= 0:  # 还没有导师，不能毕业
             return
         teacher_relation = teacher_relations.first()
-        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted:
+        # 相互评论并且未毕业
+        if teacher_relation.teacherCommitted and teacher_relation.newcomerCommitted \
+                and user.newcomerGraduateState == PrivateInfo.EnumNewcomerGraduateState.NotGraduate:
             user.newcomerGraduateState = PrivateInfo.EnumNewcomerGraduateState.NormalGraduate
-            user.newcomerGraduateDate = timezone.now()
+            user.newcomerGraduateDate = cn_datetime_now()
             user.save()
             teacher = teacher_relation.teacher
             teacher.currentMembers -= 1
             teacher.historicalMembers += 1
+            teacher.save()
             print("newcomer graduated")
+
             logging.warning("newcomer graduated")
+
 
 
 def find_people(username: str):
@@ -375,7 +382,7 @@ def load_private_info(pv: PrivateInfo) -> dict:
     info["bio"] = pv.bio
 
     info["joinDate"] = pv.joinDate
-    join_state_select = ["待入职", "在职","离职"]
+    join_state_select = ["待入职", "在职", "离职"]
     info["joinStatus"] = join_state_select[pv.joinStatus]
     info["employed"] = join_state_select[pv.joinStatus]
     info["detail"] = pv.detail
@@ -485,3 +492,16 @@ def get_progress(user: PrivateInfo, is_newcomer: bool = True, type: int = Conten
         total_len = len(course)
         complete_len = len(course.filter(finished=True))
         return int(100 * complete_len / total_len)
+
+
+def cn_datetime_now() -> datetime.datetime:
+    timestamp = datetime.datetime.now().timestamp()
+    return cn_datetime_fromtimestamp(timestamp)
+
+
+def get_next_time(hour: int, minute: int) -> datetime.datetime:
+    datetimeNow = cn_datetime_now()
+    todaytime = datetimeNow.replace(hour=hour, minute=minute, second=0, microsecond=0)
+    if todaytime < datetimeNow:
+        todaytime += datetime.timedelta(days=1)
+    return todaytime

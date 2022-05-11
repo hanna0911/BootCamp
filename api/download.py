@@ -209,8 +209,10 @@ def retrieve_task_file_by_id(request: HttpRequest):
     # response = StreamingHttpResponse(file_iterator(task.taskFile), status=200,
     #                                  content_type='application/octet-stream')
     response = FileResponse(file, filename=(task.name + '.' + task.taskFile.split('.')[-1]), as_attachment=True)
-    response["COntent-Disposition"] = 'attachment; filename={0}'.format(task.name + '.' + task.taskFile.split('.')[-1])
+    response["Content-Disposition"] = "attachment; filename={0}".format(
+        str(task.name.encode()) + '.' + task.taskFile.split('.')[-1]
+    ).encode()
+    print(response["Content-Disposition"])
     response['Content-Type'] = 'application/octet-stream'
     response["Access-Control-Expose-Headers"] = "Content-Disposition"
     return response
-
