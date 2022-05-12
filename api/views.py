@@ -85,10 +85,15 @@ def login(request: HttpRequest):  # 登录
                 studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
                 studentNoticeTable1.save()
             # 欢迎通知：
-            scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
             Welcomed = False
+            scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
             for scheduledNotice in scheduledNotices:
                 if scheduledNotice.scheduled_notification.title == "[系统通知]欢迎加入新人旅程":
+                    Welcomed = True
+                    break
+            notices = UserNotificationTable.objects.filter(user__username = username)
+            for notice in notices:
+                if notice.notification.title == "[系统通知]欢迎加入新人旅程":
                     Welcomed = True
                     break
             if not Welcomed:
