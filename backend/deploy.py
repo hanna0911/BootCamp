@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-y5ajh9&xag899uxg#wlzbwz(!ra*9s+ugbstb%b!2zzstd!8g9
 DEBUG = True  # TODO, remeber to switch it
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://frontend-wewritebugs.app.secoder.net"
+    "https://frontend-wewritebugs.app.secoder.net",
+    "https://frontendtest-wewritebugs.app.secoder.net",
 ]
 
 ALLOWED_HOSTS = ["*"]
