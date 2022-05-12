@@ -605,7 +605,7 @@ def save_courseware_files(coursewares: list, lesson_id: str, content_id: str, us
     for file in coursewares:
         if not os.path.exists(head_path):
             os.makedirs(head_path)
-        file_suffix = file.name.split(".")[1]  # 获取文件后缀
+        file_suffix = file.name.split(".")[-1]  # 获取文件后缀
         file_name = file.name.split(".")[0] + f"_{username}_tsk_{time.time()}"  # 获取文件名字
         file_path = head_path + "/{}".format(file_name + "." + file_suffix)
         file_path = file_path.replace(" ", "")
