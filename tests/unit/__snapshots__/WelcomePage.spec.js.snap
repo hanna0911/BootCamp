@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`WelcomePage.vue renders welcomepage html 1`] = `
+<v-parallax dark="" src="../assets/welcomePage.png" height="800" speed="0.2">
+  <v-row align="center" justify="center">
+    <v-col cols="12" class="text-center">
+      <h2 class="text-h2 font-weight-thin mb-4">
+        BootCamp
+      </h2>
+      <h6 class="text-h6 font-weight-thin mb-4">
+        an optimal training platform for newcomers <br> grasping new workflow and procedures in a blink
+      </h6>
+      <v-dialog persistent="" max-width="600px">
+        <v-card>
+          <v-card-title><span class="text-h5">注册</span></v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12" sm="6" md="4">
+                  <v-text-field label="姓名*" required="" rules="value => !!value || &quot;必填项&quot;"></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field label="用户名*" hint="仅允许包含英文字母、数字，长度不超过20个字符" rules="value => !!value &amp;&amp; /^[a-zA-Z0-9]{0,20}$/.test(value) || '必填项，只能包含字母、数字，长度不超过20位'" required=""></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field label="密码*" type="password" hint="需要包含大小写英文字母、数字、特殊字符，长度8~20个字符" rules="value => /^(?![A-z0-9]+$)(?=.[^%&amp;',;=?$\\x22])(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9]).{8,20}$/.test(value) || &quot;必填项，至少包含大小写字母、数字、特殊字符，长度8~20位&quot;" required=""></v-text-field>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-autocomplete items="管理部门,项目部门,策划部门,技术部门,财务部门" label="部门"></v-autocomplete>
+                </v-col>
+                <v-col cols="12" sm="6">
+                  <v-autocomplete items="北京,上海,广州,深圳,天津,南京" label="城市"></v-autocomplete>
+                </v-col>
+              </v-row>
+            </v-container> <small>*必填</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text="">
+              取消
+            </v-btn>
+            <v-btn color="blue darken-1" text="">
+              注册
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog persistent="" max-width="600px">
+        <v-card>
+          <v-card-title><span class="text-h5">登录</span></v-card-title>
+          <v-card-text>
+            <v-container>
+              <v-row>
+                <v-col cols="12">
+                  <v-text-field label="用户名*" rules="value => !!value || &quot;必填项&quot;" required=""></v-text-field>
+                </v-col>
+                <v-col cols="12">
+                  <v-text-field label="密码*" type="password" rules="value => !!value || &quot;必填项&quot;" required=""></v-text-field>
+                </v-col>
+              </v-row>
+            </v-container> <small>*必填</small>
+          </v-card-text>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="blue darken-1" text="">
+              Cancel
+            </v-btn>
+            <v-btn color="blue darken-1" text="">
+              Login
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+      <v-dialog max-width="500px">
+        <v-card>
+          <v-card-title><span>Invalid Username or Password!</span>
+            <v-spacer></v-spacer>
+          </v-card-title>
+          <v-card-actions>
+            <v-btn color="primary" text="">
+              Close
+            </v-btn>
+          </v-card-actions>
+        </v-card>
+      </v-dialog>
+    </v-col>
+  </v-row>
+</v-parallax>
+`;
