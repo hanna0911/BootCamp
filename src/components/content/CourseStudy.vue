@@ -21,7 +21,7 @@
                 </v-list-item-group>
               </v-list>
             </v-list-item-content>
-            <a :href="'https://view.officeapps.live.com/op/view.aspx?src='+ docLink">点击查看</a>
+            <!-- <a :href="'https://view.officeapps.live.com/op/view.aspx?src='+ docLink">点击查看</a> -->
             <v-btn v-if="GLOBAL.contentDisplayUser && !GLOBAL.contentDisplayAddif" absolute top right @click="finishLesson(lesson_item.lessonID)">{{lesson_item.isFinished ? '已学完该讲': '学完该讲'}}</v-btn>
           </v-list-item>
         </template>
@@ -36,8 +36,10 @@
     </video-player>
     <div v-else-if="'msdoc'">
       <!-- <iframe id="iframe1" width="960" height="720" frameborder='no' border='0' marginwidth='0' marginheight='0' scrolling='no' allowtransparency='yes' -->
+      <!-- <iframe id="iframe"
+      :src="'https://view.officeapps.live.com/op/view.aspx?src=' + docLink"></iframe> -->
       <iframe id="iframe"
-      :src="'https://view.officeapps.live.com/op/view.aspx?src=' + docLink"></iframe>
+      :src="'https://view.xdocin.com/view?src=' + docLink"></iframe>
     </div>
   </v-col>
 </v-row>
