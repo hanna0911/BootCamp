@@ -41,7 +41,13 @@ def create_notification(request: HttpRequest):
     author = PrivateInfo.objects.filter(username=username).first()
     if author is None:
         return item_not_found_error_response()
-    new_notification = NotificationTable(title=title, content=content, author_name=author.name, author_role=role)
+    new_notification = NotificationTable(
+        title=title,
+        content=content,
+        author_name=author.name,
+        author_role=role,
+        author_username=username
+    )
     new_notification.save()
     for assignee in assignees:
         new_user_notification_relation = UserNotificationTable(user=assignee, notification=new_notification)
@@ -74,6 +80,7 @@ def my_notifications(request: HttpRequest):
             decoy_notification = NotificationTable(
                 author_name='通知系统',
                 author_role='Bootcamp',
+                author_username='Bootcamp',
                 title='[系统通知]' + scheduled_notification.title,
                 content=scheduled_notification.content,
                 # releaseTime=scheduled_notification.scheduledReleaseTime
@@ -332,7 +339,13 @@ def create_group_notification(request: HttpRequest):
     author = PrivateInfo.objects.filter(username=username).first()
     if author is None:
         return item_not_found_error_response()
-    new_notification = NotificationTable(title=title, content=content, author_name=author.name, author_role=role)
+    new_notification = NotificationTable(
+        title=title,
+        content=content,
+        author_name=author.name,
+        author_role=role,
+        author_username=username
+    )
     new_notification.save()
     for group_id in group_ids:
         user_group_relations = UserGroupTable.objects.filter(group__id=group_id)
@@ -485,7 +498,7 @@ def authored_notification_list(request: HttpRequest):
         return unauthorized_action_response()
     notification_list = []
     # 扫描一般公告
-    notifications = NotificationTable.objects.filter(author_name=user.name)
+    notifications = NotificationTable.objects.filter(author_username=username)
     for notification in notifications:
         notification_list.append({
             'title': notification.title,
