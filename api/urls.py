@@ -89,6 +89,6 @@ urlpatterns = [
     path('delete_member', notification.delete_member, name="delete member"),
     path('delete_notification', notification.delete_notification, name="delete notification"),
     path('authored_notification_list', notification.authored_notification_list, name="authored_notification_list"),
-    path('admin_all_user_list', lists.admin_all_user_list, name="admin_all_user_list")
+    path('admin_all_user_list', lists.admin_all_user_list, name="admin_all_user_list"),
     path('delete_content_from_program', upload.delete_content_from_program, name="delete_content_from_program"),
 ]
