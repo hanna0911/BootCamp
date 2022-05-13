@@ -59,7 +59,7 @@ def login(request: HttpRequest):  # 登录
     password = data.get('password')
     # if "username" in request.session.keys():
     #     return gen_response(400, {}, "dup login")
-    if len(PrivateInfo.objects.all().filter(username__exact=username)) == 0:
+    if len(PrivateInfo.objects.filter(username__exact=username)) == 0:
         return gen_response(400, {}, "user not found")
     elif PrivateInfo.objects.get(username__exact=username).password != encrypt(password):
         return gen_response(400, {}, "wrong password")
@@ -85,14 +85,11 @@ def login(request: HttpRequest):  # 登录
                 studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
                 studentNoticeTable1.save()
             # 欢迎通知：
-            scheduledNotices = UserScheduledTable.objects.all().filter(user__username = username)
-            Welcomed = False
-            for scheduledNotice in scheduledNotices:
-                if scheduledNotice.scheduled_notification.title == "[系统通知]欢迎加入新人旅程":
-                    Welcomed = True
-                    break
-            if not Welcomed:
+            if not user.hasLoggedIn:
+                user.hasLoggedIn = True
+                user.save()
                 releasetime2 = get_next_time(12, 0)
+                print(f'added welcome for {user.name} at {str(releasetime2)}')
                 studentNotice2 = ScheduledNotificationTable(
                     title='欢迎加入新人旅程',
                     content='欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！',

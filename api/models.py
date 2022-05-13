@@ -57,11 +57,11 @@ class PrivateInfo(models.Model):
     bio = models.CharField(max_length=LONG_INFO_LEN)  # 签名
 
     joinDate = models.DateTimeField(null=True)  # 用户入职时间
-    joinStatus = models.IntegerField(choices = EnumJoinStatus.choices, default = EnumJoinStatus.NotJoin)  # 入职情况,0代表待入职,1代表在职,2代表离职
+    joinStatus = models.IntegerField(choices=EnumJoinStatus.choices, default=EnumJoinStatus.NotJoin)  # 入职情况,0代表待入职,1代表在职,2代表离职
     detail = models.CharField(max_length=1000)  # 详细信息
     leader = models.CharField(max_length=NAME_LEN)  # 直属上级
     registrationDate = models.DateTimeField(auto_now_add=True)  # 注册时间
-    employeeType = models.IntegerField(choices = EnumEmployeeType.choices, default = EnumEmployeeType.Other)  # 员工类型，例如长期工、实习工等
+    employeeType = models.IntegerField(choices=EnumEmployeeType.choices, default=EnumEmployeeType.Other)  # 员工类型，例如长期工、实习工等
 
     # 用户身份相关
     isAdmin = models.BooleanField(default=False)  # 是否是管理员
@@ -71,8 +71,9 @@ class PrivateInfo(models.Model):
 
     # 新人相关
     newcomerStartDate = models.DateTimeField(null=True)  # 新人旅程开始时间，是用户isNew被设为True的时间
-    newcomerGraduateState = models.IntegerField(choices = EnumNewcomerGraduateState.choices, default = EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
+    newcomerGraduateState = models.IntegerField(choices=EnumNewcomerGraduateState.choices, default=EnumNewcomerGraduateState.NotGraduate)  # 新人是否已经毕业
     newcomerGraduateDate = models.DateTimeField(null=True)  # 新人毕业时间
+    hasLoggedIn = models.BooleanField(default=False)  # 用于判断要不要发欢迎通知
 
     # 导师相关
     historicalMembers = models.IntegerField(default=0)  # 历史带新人数
@@ -297,6 +298,7 @@ class NotificationTable(models.Model):
     id = models.AutoField(primary_key=True)
     author_name = models.CharField(max_length=100)
     author_role = models.CharField(max_length=10)
+    author_username = models.CharField(max_length=100)
     title = models.CharField(max_length=50)
     content = models.CharField(max_length=1000)
     releaseTime = models.DateTimeField(auto_now_add=True)

@@ -73,11 +73,11 @@ def nominate_teachers(req: HttpRequest):
         user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
-    #对HRBP自动通知审核导师
+    # 对HRBP自动通知审核导师
     hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
     for hrbp in hrbps:
-        if hrbp.isAdmin == False:#isAdmin not isadmin
-            #teachername = user.name
+        if hrbp.isAdmin == False:# isAdmin not isadmin
+            # teachername = user.name
             releasetime = get_next_time(10,30)
             HRBPNotice = ScheduledNotificationTable(
                 title='导师审核通知',
