@@ -4,7 +4,7 @@ import re
 from django.http import JsonResponse, HttpRequest
 import hashlib
 from django.forms import TimeField
-from .models import PrivateInfo, TeacherNewcomerTable, UserContentTable, UserProgramTable, UserLessonTable, ProgramTable
+from .models import *
 from .models import ContentTable
 import json
 from django.utils import timezone
@@ -556,3 +556,18 @@ def str2taglist(input: str) -> list:
 def taglist2str(input: list) -> str:
     #return ' '.join(input)
     return input
+
+def not_schedule_notificated(user:PrivateInfo, title: str):
+    notices = UserNotificationTable.objects.filter(user=user)
+    for notice in notices:
+        if notice.notification.title == '[系统通知]'+title:
+            print('转为基础通知')
+            return False
+    schedulednotices = UserScheduledTable.objects.filter(user=user)
+    for schedulednotice in schedulednotices:
+        if schedulednotice.scheduled_notification.title == title:
+            print('已有通知')
+            return False
+        return True
+    
+
