@@ -88,7 +88,7 @@ def login(request: HttpRequest):  # 登录
             if not user.hasLoggedIn:
                 user.hasLoggedIn = True
                 user.save()
-                releasetime2 = get_next_time(12, 0)
+                releasetime2 = get_next_time(12, 00)
                 studentNotice2 = ScheduledNotificationTable(
                     title='欢迎加入新人旅程',
                     content='欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！',
