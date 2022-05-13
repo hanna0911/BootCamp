@@ -82,7 +82,7 @@ def nominate_teachers(req: HttpRequest):
             releasetime = cn_datetime_now()
             HRBPNotice = ScheduledNotificationTable(
                 title='导师审核通知',
-                content=f"导师提名列表已更新，{user.name}已被提名为导师，请注意完成审核。",
+                content="导师提名列表已更新，请注意完成审核。",
                 scheduledReleaseTime=releasetime)
             HRBPNotice.save()
             HRBPNoticeTable = UserScheduledTable(user=hrbp, scheduled_notification=HRBPNotice)
