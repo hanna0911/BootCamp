@@ -73,19 +73,21 @@ def nominate_teachers(req: HttpRequest):
         user.teacherNominationDate = cn_datetime_now()
         user.teacherExaminedStatus = PrivateInfo.EnumTeacherExaminedStatus.NotYet  # 初始都是未审核
         user.save()
-    # 对HRBP自动通知审核导师
+         
+    #对HRBP自动通知审核导师
     hrbps = PrivateInfo.objects.all().filter(isHRBP = True)
     for hrbp in hrbps:
-        if hrbp.isAdmin == False:# isAdmin not isadmin
-            # teachername = user.name
-            releasetime = get_next_time(10,30)
+        if hrbp.isAdmin == False:#isAdmin not isadmin
+            #teachername = user.name
+            releasetime = cn_datetime_now()
             HRBPNotice = ScheduledNotificationTable(
                 title='导师审核通知',
-                content="导师提名列表已更新，请注意完成审核。",
+                content=f"导师提名列表已更新，{user.name}已被提名为导师，请注意完成审核。",
                 scheduledReleaseTime=releasetime)
             HRBPNotice.save()
             HRBPNoticeTable = UserScheduledTable(user=hrbp, scheduled_notification=HRBPNotice)
             HRBPNoticeTable.save()
+    
     return gen_response(200, message="success")
 
 
@@ -114,7 +116,7 @@ def assign_teacher(req: HttpRequest):
     teacher.save()
 
     #对新人自动通知分配导师
-    releasetime1 = get_next_time(12, 10)
+    releasetime1 = cn_datetime_now()
     studentNotice = ScheduledNotificationTable(
         title='导师分配通知',
         content=f"您已被分配导师{teacher.name}，请注意完成学习。",
@@ -123,7 +125,7 @@ def assign_teacher(req: HttpRequest):
     studentNoticeTable = UserScheduledTable(user=newcomer, scheduled_notification=studentNotice)
     studentNoticeTable.save()
     #对导师自动通知分配新人
-    releasetime2 = get_next_time(12, 10)
+    releasetime2 = cn_datetime_now()
     teacherNotice = ScheduledNotificationTable(
         title='新人分配通知',
         content=f"您已被分配新的学生{newcomer.name}，请注意个性化新人面板并指导。",

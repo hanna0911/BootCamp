@@ -5,6 +5,7 @@
 import datetime
 import json
 import logging
+from unicodedata import mirrored
 import django
 import requests
 from django.http import HttpRequest, HttpResponse
@@ -74,9 +75,9 @@ def login(request: HttpRequest):  # 登录
         user = PrivateInfo.objects.all().filter(username__exact=username).first()
         # 新人通知
         if get_highest_role(username) == "newcomer":
-            # 导师评价通知
-            if program_finished_and_student_not_commented(user):
-                releasetime1 = get_next_week_time(0,11,0)
+            # 导师评价通知 
+            if program_finished_and_student_not_commented(user) and not_schedule_notificated(user, '导师评价通知'):
+                releasetime1 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
                 studentNotice1 = ScheduledNotificationTable(
                     title = '导师评价通知',
                     content = '您已完成培训项目，请注意评价导师以完成毕业流程。',
@@ -86,10 +87,14 @@ def login(request: HttpRequest):  # 登录
                 studentNoticeTable1.save()
             # 欢迎通知：
             if not user.hasLoggedIn:
+                print('has not logged')
                 user.hasLoggedIn = True
                 user.save()
-                releasetime2 = get_next_time(12, 0)
-                print(f'added welcome for {user.name} at {str(releasetime2)}')
+            #else :
+                #print('has logged')
+            if not_schedule_notificated(user, '欢迎加入新人旅程'):
+                releasetime2 = cn_datetime_now().replace(hour = 12, minute = 0, second=0)
+                #releasetime2.replace(hour = 12, minute = 0, second = 0)
                 studentNotice2 = ScheduledNotificationTable(
                     title='欢迎加入新人旅程',
                     content='欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！',
@@ -97,13 +102,18 @@ def login(request: HttpRequest):  # 登录
                 studentNotice2.save()
                 studentNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = studentNotice2)
                 studentNoticeTable2.save()
+                print(f'added welcome for {user.name} at {str(releasetime2)}')
+                #print(f"{user.name}的欢迎通知已添加")
+            else:
+                print("Already welcomed")
         # 导师通知
         if get_highest_role(username) == "teacher":
-            # 新人评价通知
             studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
+            # 新人评价通知
             for studentRelation in studentRelations:
-                if program_finished_and_teacher_not_commented(studentRelation.newcomer):
-                    releasetime3 = get_next_week_time(0, 11, 0)
+                student = studentRelation.newcomer
+                if program_finished_and_teacher_not_commented(student) and not_schedule_notificated(student, '导师评价通知'):
+                    releasetime3 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
                     teacherNotice1 = ScheduledNotificationTable(
                         title='新人评价通知',
                         content=f'您有新人{studentRelation.newcomer.name}已完成培训项目，请注意评价以完成其毕业流程。',
@@ -111,11 +121,13 @@ def login(request: HttpRequest):  # 登录
                     teacherNotice1.save()
                     teacherNoticeTable1 = UserScheduledTable(user=user, scheduled_notification=teacherNotice1)
                     teacherNoticeTable1.save()
+            # 导师填写带新看板通知
+
             # TODO导师学习通知
                 if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
                     delta = cn_datetime_now().day - user.TeacherExaminedDate.day
-                    if delta >= 7 :
-                        releasetime4 = get_next_week_time(0, 11, 0)
+                    if delta >= 7 and not_schedule_notificated(user, '导师学习通知'):
+                        releasetime4 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
                         teacherNotice2 = ScheduledNotificationTable(
                             title='导师学习通知',
                             content='您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。',
@@ -123,6 +135,22 @@ def login(request: HttpRequest):  # 登录
                         teacherNotice2.save()
                         teacherNoticeTable2 = UserScheduledTable(user=user, scheduled_notification=teacherNotice2)
                         teacherNoticeTable2.save()
+        '''逻辑移到提名导师中
+        #HRBP通知
+        if get_highest_role(username) == "HRBP":
+            teacher_list = PrivateInfo.objects.filter(isTeacher=True, teacherIsDuty=False)
+            if not len(teacher_list) == 0:
+                nowtime = cn_datetime_now()
+                releasetime = nowtime.replace(hour = 10, minute= 30)
+                HRBPNotice = ScheduledNotificationTable(
+                title='导师审核通知',
+                content=f"您当前有未审核导师{}，请注意完成审核。",
+                scheduledReleaseTime=releasetime)
+            HRBPNotice.save()
+            HRBPNoticeTable = UserScheduledTable(user=user, scheduled_notification=HRBPNotice)
+            HRBPNoticeTable.save()
+        '''
+
         # 返回成功信息
         # res = HttpResponseRedirect("/newcomer-board")
         # res.set_cookie("SessionID", session_key)

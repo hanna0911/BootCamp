@@ -26,7 +26,8 @@ SECRET_KEY = 'django-insecure-y5ajh9&xag899uxg#wlzbwz(!ra*9s+ugbstb%b!2zzstd!8g9
 DEBUG = True
 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8080"
+    "http://localhost:8080",
+    "http://localhost:8000",
 ]
 
 # SESSIONS: sessions related settings
