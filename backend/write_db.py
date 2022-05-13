@@ -247,6 +247,7 @@ def write_db(req: HttpRequest):
             id=info["id"],
             author_name=info["author_name"],
             author_role=info["author_role"],
+            author_username=info["author_username"],
             title=info["title"],
             content=info["content"],
             releaseTime=info["releaseTime"]
