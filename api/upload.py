@@ -795,6 +795,62 @@ def assign_content_to_program(request: HttpRequest):
         'message': f'content {content.name} with id {content_id} assigned to {program.name} with id {program_id}'
     })
 
+
+def delete_content_from_program(request: HttpRequest):
+    """
+    POST
+    {
+        'action': 'delete content from program',
+        'programID': __PROGRAM_ID__,
+        'contentID': __CONTENT_ID__
+    }
+    """
+    if request.method != 'POST':
+        return illegal_request_type_error_response()
+    try:
+        data = json.loads(request.body)
+    except Exception as e:
+        print(e)
+        return unknown_error_response()
+    action = data.get('action')
+    program_id = data.get('programID')
+    content_id = data.get('contentID')
+    if action != 'delete content from program' or program_id is None or content_id is None:
+        return gen_standard_response(400, {'result': 'failed', 'message': 'Bad Arguments'})
+    session = request.session
+    username = session.get('username')
+    role = session.get('role')
+    if username is None or role is None:
+        return session_timeout_response()
+    if role != 'admin' and role != 'teacher' and role != 'HRBP':
+        return unauthorized_action_response()
+    program = ProgramTable.objects.filter(id=program_id).first()
+    content = ContentTable.objects.filter(id=content_id).first()
+    assigner = PrivateInfo.objects.filter(username=username).first()
+    if program is None or content is None or assigner is None:
+        return item_not_found_error_response()
+    program_content_relations = ProgramContentTable.objects.filter(program=program, content=content)
+    if len(program_content_relations) == 0:
+        return item_not_found_error_response()
+    program_content_relations.delete()
+    user = UserProgramTable.objects.filter(program__id=program_id).first()
+    if user is not None:
+        # new_user_content_relation = UserContentTable(user=user.user, content=content, assigner=assigner,
+        #                                              deadline=cn_datetime_now() + datetime.timedelta(days=5))
+        # new_user_content_relation.save()
+        UserContentTable.objects.filter(user=user.user, content=content).delete()
+        if content.type == ContentTable.EnumType.Course:
+            lessons = LessonTable.objects.filter(content=content)
+            for lesson in lessons:
+                # new_user_lesson_relation = UserLessonTable(user=user.user, lesson=lesson)
+                # new_user_lesson_relation.save()
+                UserLessonTable.objects.filter(user=user.user, lesson=lesson).delete()
+    return gen_standard_response(200, {
+        'result': 'success',
+        'message': f'content {content.name} with id {content_id} assigned to {program.name} with id {program_id}'
+    })
+
+
 # def save_courseware_file(lesson_id, order, creator_username, dir_prefix, file):
 #     file_ext = file.name.split(".")[-1].lower()
 #     file_path = f"{dir_prefix}/{lesson_id}/"

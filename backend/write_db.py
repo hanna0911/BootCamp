@@ -282,3 +282,46 @@ def write_db(req: HttpRequest):
             group=group
         ).save()
     return gen_response(200, message="succefully write in")
+
+
+
+
+def write_db2(req:HttpRequest):
+    root = get_root_path()
+    size = 100
+    for i in range(size):
+        pv = PrivateInfo(
+            password=encrypt("Test@123"),
+            username=f"user{i}",
+            name=f"user{i}",
+            city="北京",
+            dept="测试部门",
+            bio="用于测试的用户",
+            joinDate="2022-5-1 23:59:59",
+            joinStatus=PrivateInfo.EnumJoinStatus.OnJob,
+            detail="detail",
+            leader="admin",
+            registrationDate="2022-5-1 23:59:59",
+            employeeType=PrivateInfo.EnumEmployeeType.Social,
+            avatar=str(root) + "/static/头像.jpeg",
+
+            isAdmin=True,
+            isTeacher=True,
+            isHRBP=True,
+            isNew=True,
+
+            newcomerStartDate="2022-5-1 23:59:59",
+            newcomerGraduateState=PrivateInfo.EnumNewcomerGraduateState.NotGraduate,
+            newcomerGraduateDate="2022-5-1 23:59:59",
+
+            historicalMembers=0,
+            currentMembers=0,
+            teacherNominationDate='2022-5-1 23:59:59',
+            teacherExaminedStatus=PrivateInfo.EnumTeacherExaminedStatus.NotYet,
+            teacherExaminedDate="2022-5-1 23:59:59",
+            teacherIsDuty=False,
+            teacherDutyDate="2022-5-1 23:59:59",
+            teacherScore=0,
+        )
+        pv.save()
+    return gen_response(200,message=f"successful write in {size} data!")
