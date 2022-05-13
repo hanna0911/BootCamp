@@ -248,6 +248,9 @@ class Tests(TestCase):
     def test_notification(self):
         self.process("/testcase/notification.yml")
 
+    def test_get_my_commit(self):
+        self.process("/testcase/get_my_commit.yml")
+
     def latency(self):
         large = 30000
         write_time = time.time()
