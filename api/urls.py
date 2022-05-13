@@ -18,7 +18,7 @@ urlpatterns = [
     path("get_token", views.get_token, name="get_token"),
     path("newcomer_info", views.newcomer_info, name="newcomer_info"),
     path("nominated_list", lists.nominated_list, name="nominated_list"),
-    path("create_program", upload.create_program, name="create_program"),
+    path("create_program", upload.create_program, name="create_progrgit am"),
     path("admin_create_content_template", upload.create_content, name="create_content_template"),
     path("admin_create_lesson_template", upload.create_lesson, name="create_lesson_template"),
     path("video/", download.stream_video, name="video"),
@@ -90,5 +90,5 @@ urlpatterns = [
     path('delete_notification', notification.delete_notification, name="delete notification"),
     path('authored_notification_list', notification.authored_notification_list, name="authored_notification_list"),
     path('admin_all_user_list', lists.admin_all_user_list, name="admin_all_user_list"),
-    path('delete_content_from_program', upload.delete_content_from_program, name="delete_content_from_program"),
+    path('delete_content_from_program', upload.delete_content_from_program, name="delete_content_from_program")
 ]
