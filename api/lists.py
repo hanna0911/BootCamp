@@ -42,6 +42,27 @@ def admin_newcomer_list(request: HttpRequest):
     return gen_response(200, return_list, "tmp supported")
 
 
+def admin_all_user_list(request: HttpRequest):
+    ok, res = quick_check(request, {
+        "method": "GET",
+        "username": "",
+        "role": ["admin"],
+    })
+    if not ok:
+        return res
+    user_list = PrivateInfo.objects.all()
+    return_list = []
+    for user in user_list:
+        tmp = load_private_info(user)
+        tmp["joinBootcamp"] = True
+        state_select = [False, True, True]
+        tmp["graduated"] = state_select[user.newcomerGraduateState]
+        tmp["evaluate"] = "暂无"
+        tmp["avatar"] = "/api/avatar_by_name/?username={}".format(user.username)  # 直接后端指定路径，前端自动请求
+        return_list.append(tmp)
+    return gen_response(200, return_list, "tmp supported")
+
+
 def teacher_wait_list(req: HttpRequest):
     """
     权限确认(admin)
