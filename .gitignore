@@ -17,7 +17,7 @@ venv.bak/
 #coverage-reports/
 #xunit-reports/
 htmlcov/
-
+test.log
 **/.DS_Store
 .idea
 

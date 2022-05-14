@@ -146,6 +146,7 @@ def duty_teacher_list(req: HttpRequest):
         teacher.save()
         tmp["historicalMembers"] = teacher.historicalMembers
         tmp["currentMembers"] = teacher.currentMembers
+        tmp["totalMembers"] = teacher.currentMembers + teacher.historicalMembers
         tmp["teacherDutyDate"] = teacher.teacherDutyDate
         tmp["teacherScore"] = teacher.teacherScore
         tmp["OKR"] = "unknown"
