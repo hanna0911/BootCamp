@@ -251,6 +251,12 @@ class Tests(TestCase):
     def test_get_my_commit(self):
         self.process("/testcase/get_my_commit.yml")
 
+    def test_newcomer_summary_by_name(self):
+        self.process("/testcase/newcomer_summary_info_by_name.yml")
+
+    def test_teacher_board_summary_by_name(self):
+        self.process("/testcase/teacher_board_summary_by_name.yml")
+
     def latency(self):
         large = 30000
         write_time = time.time()
