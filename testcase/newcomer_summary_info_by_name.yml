@@ -1,0 +1,32 @@
+- name: 管理员查看新人的培训摘要
+  ident:
+    - admin
+  request:
+    method: POST
+    url: /newcomer_summary_info_by_name
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 200 }
+
+- name: 管理员查看新人的培训摘要-方法错误
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /newcomer_summary_info_by_name
+    data:
+      newcomer: newcomer
+  validate:
+    - equals: { status_code: 400 }
+
+- name: 管理员查看新人的培训摘要-查无此人
+  ident:
+    - admin
+  request:
+    method: GET
+    url: /newcomer_summary_info_by_name
+    data:
+      newcomer: 查无此人
+  validate:
+    - equals: { status_code: 400 }

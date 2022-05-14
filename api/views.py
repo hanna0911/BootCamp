@@ -71,49 +71,49 @@ def login(request: HttpRequest):  # 登录
         session_key = request.session.session_key
         role_list = get_role_list(username)
 
-    # TODO：分类自动生成公告
+        # TODO：分类自动生成公告
         user = PrivateInfo.objects.all().filter(username__exact=username).first()
         # 新人通知
         if get_highest_role(username) == "newcomer":
             # 导师评价通知 
             if program_finished_and_student_not_commented(user) and not_schedule_notificated(user, '导师评价通知'):
-                releasetime1 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
+                releasetime1 = cn_datetime_now().replace(hour=11, minute=0, microsecond=0)
                 studentNotice1 = ScheduledNotificationTable(
-                    title = '导师评价通知',
-                    content = '您已完成培训项目，请注意评价导师以完成毕业流程。',
-                    scheduledReleaseTime = releasetime1)
-                studentNotice1.save() 
-                studentNoticeTable1 = UserScheduledTable(user = user, scheduled_notification = studentNotice1)
+                    title='导师评价通知',
+                    content='您已完成培训项目，请注意评价导师以完成毕业流程。',
+                    scheduledReleaseTime=releasetime1)
+                studentNotice1.save()
+                studentNoticeTable1 = UserScheduledTable(user=user, scheduled_notification=studentNotice1)
                 studentNoticeTable1.save()
             # 欢迎通知：
             if not user.hasLoggedIn:
                 print('has not logged')
                 user.hasLoggedIn = True
                 user.save()
-            #else :
-                #print('has logged')
+            # else :
+            # print('has logged')
             if not_schedule_notificated(user, '欢迎加入新人旅程'):
-                releasetime2 = cn_datetime_now().replace(hour = 12, minute = 0, second=0)
-                #releasetime2.replace(hour = 12, minute = 0, second = 0)
+                releasetime2 = cn_datetime_now().replace(hour=12, minute=0, second=0)
+                # releasetime2.replace(hour = 12, minute = 0, second = 0)
                 studentNotice2 = ScheduledNotificationTable(
                     title='欢迎加入新人旅程',
                     content='欢迎新人加入培训，希望你能在学习中有所收获、有所进步、为日后工作打好基础！',
-                    scheduledReleaseTime = releasetime2)
+                    scheduledReleaseTime=releasetime2)
                 studentNotice2.save()
-                studentNoticeTable2 = UserScheduledTable(user = user, scheduled_notification = studentNotice2)
+                studentNoticeTable2 = UserScheduledTable(user=user, scheduled_notification=studentNotice2)
                 studentNoticeTable2.save()
                 print(f'added welcome for {user.name} at {str(releasetime2)}')
-                #print(f"{user.name}的欢迎通知已添加")
+                # print(f"{user.name}的欢迎通知已添加")
             else:
                 print("Already welcomed")
         # 导师通知
         if get_highest_role(username) == "teacher":
-            studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username = username)
+            studentRelations = TeacherNewcomerTable.objects.all().filter(teacher__username=username)
             # 新人评价通知
             for studentRelation in studentRelations:
                 student = studentRelation.newcomer
                 if program_finished_and_teacher_not_commented(student) and not_schedule_notificated(student, '导师评价通知'):
-                    releasetime3 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
+                    releasetime3 = cn_datetime_now().replace(hour=11, minute=0, microsecond=0)
                     teacherNotice1 = ScheduledNotificationTable(
                         title='新人评价通知',
                         content=f'您有新人{studentRelation.newcomer.name}已完成培训项目，请注意评价以完成其毕业流程。',
@@ -121,17 +121,17 @@ def login(request: HttpRequest):  # 登录
                     teacherNotice1.save()
                     teacherNoticeTable1 = UserScheduledTable(user=user, scheduled_notification=teacherNotice1)
                     teacherNoticeTable1.save()
-            # 导师填写带新看板通知
+                # 导师填写带新看板通知
 
-            # TODO导师学习通知
+                # TODO导师学习通知
                 if user.teacherExaminedStatus == 1 and user.teacherIsDuty == False:
                     delta = cn_datetime_now().day - user.TeacherExaminedDate.day
                     if delta >= 7 and not_schedule_notificated(user, '导师学习通知'):
-                        releasetime4 = cn_datetime_now().replace(hour = 11, minute = 0, microsecond=0)
+                        releasetime4 = cn_datetime_now().replace(hour=11, minute=0, microsecond=0)
                         teacherNotice2 = ScheduledNotificationTable(
                             title='导师学习通知',
                             content='您已审核通过并开始导师培训一周，请尽快完成学习成为上岗导师。',
-                            scheduledReleaseTime = releasetime4)
+                            scheduledReleaseTime=releasetime4)
                         teacherNotice2.save()
                         teacherNoticeTable2 = UserScheduledTable(user=user, scheduled_notification=teacherNotice2)
                         teacherNoticeTable2.save()
@@ -460,6 +460,53 @@ def teacher_board_summary_info(req: HttpRequest):
     return gen_response(200, data)
 
 
+def teacher_board_summary_by_name(req: HttpRequest):
+    """
+    导师培训查看个人各个任务的完成情况
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POSt",
+        "username": "",
+        "data_field": ["teacher"],
+        "role": ["admin"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, teacher = find_people(data["teacher"])
+    if not found:
+        return teacher
+    if teacher.teacherIsDuty:
+        is_graduate = "毕业"
+        graduate_date = teacher.teacherDutyDate
+    else:
+        is_graduate = "未毕业"
+        graduate_date = "未毕业"
+    course_progress = get_progress(teacher, False, ContentTable.EnumType.Course)
+    exam_progress = get_progress(teacher, False, ContentTable.EnumType.Exam)
+    task_progress = get_progress(teacher, False, ContentTable.EnumType.Task)
+    data = {
+        "startDate": teacher.teacherNominationDate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,
+        "taskProgress": task_progress,
+        "evaluateProgress": 50,
+        "graduateDate": graduate_date,
+        "idGraduate": is_graduate,
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+
+    }
+    return gen_response(200, data)
+
+
+
+
 def newcomer_summary_info(req: HttpRequest):
     """
     返回新人看板的概述
@@ -474,6 +521,66 @@ def newcomer_summary_info(req: HttpRequest):
     if not ok:
         return res
     newcomer = PrivateInfo.objects.get(username=req.session.get("username"))
+    relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
+    if len(relations) <= 0:
+        teacher_name = "无"
+        teacher_username = ""
+        evaluate_progress = 0
+    else:
+        relation = relations.first()
+        teacher_name = relation.teacher.name
+        teacher_username = relation.teacher.username
+        if relation.newcomerCommitted and relation.teacherCommitted:
+            evaluate_progress = 100
+        elif relation.newcomerCommitted or relation.teacherCommitted:
+            evaluate_progress = 50
+        else:
+            evaluate_progress = 0
+
+    is_graduate = GraduateStatusToTest[newcomer.newcomerGraduateState]
+    date_select = ["未毕业", newcomer.newcomerGraduateDate, newcomer.newcomerGraduateDate]
+    graduate_date = date_select[newcomer.newcomerGraduateState]
+
+    course_progress = get_progress(newcomer, True, ContentTable.EnumType.Course)
+    exam_progress = get_progress(newcomer, True, ContentTable.EnumType.Exam)
+    task_progress = get_progress(newcomer, True, ContentTable.EnumType.Task)
+    data = {
+        "startDate": newcomer.newcomerStartDate,
+        "tutor": teacher_name,
+        "teacherUsername": teacher_username,
+        "graduateDate": graduate_date,
+        "isGraduate": is_graduate,
+        "courseProgress": course_progress,
+        "examProgress": exam_progress,  # 69 f
+        "taskProgress": task_progress,
+        "evaluateProgress": evaluate_progress,
+        "certificate": 'https://gimg2.baidu.com/image_search/s'
+                       'rc=http%3A%2F%2Fbkimg.cdn.bcebos.com%2Fpic%2F3801213fb8'
+                       '0e7bec5c745b6f252eb9389a506b95&refer=http%3A%2F%2Fbkimg.'
+                       'cdn.bcebos.com&app=2002&size=f9999,10000&q=a80&n=0&g=0n&fm'
+                       't=auto?sec=1652891023&t=95787fffcddad7af9d8633748f291448',
+    }
+    return gen_response(200, data)
+
+
+def newcomer_summary_info_by_name(req: HttpRequest):
+    """
+    返回新人看板的概述
+    :param req:
+    :return:
+    """
+    ok, res = quick_check(req, {
+        "method": "POST",
+        "username": "",
+        "data_field": ["newcomer"],
+        "role": ["admin", "teacher"]
+    })
+    if not ok:
+        return res
+    data = json.loads(req.body)
+    found, newcomer = find_people(data["newcomer"])
+    if not found:
+        return newcomer
     relations = TeacherNewcomerTable.objects.filter(newcomer=newcomer)
     if len(relations) <= 0:
         teacher_name = "无"
