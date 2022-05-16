@@ -42,12 +42,14 @@
           <el-form-item style="margin-left: 1.5%; margin-right: 1%" size="small">
               <el-select v-model="formInline.classType" placeholder="必修/选修" style="width:110px">
                 <el-option label="全部" value="全部"></el-option>
-                <el-option
+                <el-option label="必修" value="必修"></el-option>
+                <el-option label="选修" value="选修"></el-option>                
+                <!-- <el-option
                   v-for="item in classTypeOptions"
                   :key="item"
                   :label="item"
                   :value="item">
-                </el-option>
+                </el-option> -->
               </el-select>
           </el-form-item>
       </el-form>
@@ -271,81 +273,81 @@
                       class="font-weight-black" 
                       v-text="test_item.name"/>
 
-                    <v-list-item-subtitle
-                      class="text--primary"
-                    >
-                      <v-row>
-                        <!-- 建议时间 -->
-                        <v-col>
-                          <!-- 管理员权限 -->
-                          <v-select
-                            v-if="false"
-                            v-model="test_item.recommendTime"
-                            :items="test_recommend_time_items"
-                            chips
-                            label="建议时间"
-                            placeholder="添加标签"
-                            single-line
-                            small-chips
-                            dense
-                          ></v-select>
-                          <!-- 新人、导师权限 -->
-                          <v-chip v-else style="margin-top: 5px; margin-bottom: 15px">{{ test_item.recommendTime + "分钟" }}</v-chip>
-                        </v-col>
+                    <v-row>
+                      <!-- 建议时间 -->
+                      <v-col>
+                        <!-- 管理员权限 -->
+                        <v-select
+                          v-if="false"
+                          v-model="test_item.recommendTime"
+                          :items="test_recommend_time_items"
+                          chips
+                          label="建议时间"
+                          placeholder="添加标签"
+                          single-line
+                          small-chips
+                          dense
+                        ></v-select>
+                        <!-- 新人、导师权限 -->
+                        <v-chip v-else style="margin-top: 5px; margin-bottom: 15px">{{ test_item.recommendTime + "分钟" }}</v-chip>
+                      </v-col>
 
-                        <!-- 标签tag：成列表展示 -->
-                        <v-col>
-                          <v-list-item-subtitle
-                              style="margin-top: 5px; margin-bottom: 15px"
-                              class="text--primary"
-                            >
-                              <span v-for="(tag, tag_id) in test_item.tag" :key="tag_id">
-                              <v-chip
-                              >{{tag}}</v-chip>&nbsp;</span>
-                          </v-list-item-subtitle>
-                        </v-col>
-
-                        <!-- 必修选修tag -->
-                        <v-col>
-                          <v-list-item-subtitle
-                              style="margin-top: 5px; margin-bottom: 15px"
-                              class="text--primary"
-                            >
-                              <v-chip>{{test_item.isObligatory ? '必修' : '选修'}}</v-chip>
-                          </v-list-item-subtitle>
-                        </v-col>
-                        <!-- 学习状态tag -->
-                        <v-col v-if="GLOBAL.contentDisplayUser">
-                          <v-combobox
-                            v-if="false"
-                            v-model="test_item.tag"
-                            :items="test_tag_items"
-                            chips
-                            label="添加标签"
-                            placeholder="添加标签"
-                            small-chips
-                            dense
-                            single-line
+                      <!-- 标签tag：成列表展示 -->
+                      <v-col>
+                        <v-list-item-subtitle
+                            style="margin-top: 5px; margin-bottom: 15px"
+                            class="text--primary"
                           >
-                            <template v-slot:selection="{ attrs, item, testTag_select, testTag_selected }">
-                              <v-chip
-                                v-bind="attrs"
-                                :input-value="testTag_selected"
-                                @click="testTag_select"
-                                small
-                              >{{ item }}
-                              </v-chip>
-                            </template>
-                          </v-combobox>
-                          <v-chip style="margin-top: 5px; margin-bottom: 15px" v-else>{{ test_item.isFinished ? '已完成':'未完成' }}</v-chip>
-                        </v-col>
+                            <span v-for="(tag, tag_id) in test_item.tag" :key="tag_id">
+                            <v-chip v-if="tag !== ''">{{tag}}</v-chip>&nbsp;</span>
+                        </v-list-item-subtitle>
+                      </v-col>
 
-                        <v-col>
-                          <v-chip v-if='GLOBAL.contentDisplayUser && test_item.isFinished' style="margin-top: 10px; margin-bottom: 5px">{{ test_item.score + '分 / 100 分' }}</v-chip>
-                        </v-col>
+                      <!-- 必修选修tag -->
+                      <v-col>
+                        <v-list-item-subtitle
+                            style="margin-top: 5px; margin-bottom: 15px"
+                            class="text--primary"
+                          >
+                            <v-chip>{{test_item.isObligatory ? '必修' : '选修'}}</v-chip>
+                        </v-list-item-subtitle>
+                      </v-col>
+                      <!-- 学习状态tag -->
+                      <v-col v-if="GLOBAL.contentDisplayUser">
+                        <v-combobox
+                          v-if="false"
+                          v-model="test_item.tag"
+                          :items="test_tag_items"
+                          chips
+                          label="添加标签"
+                          placeholder="添加标签"
+                          small-chips
+                          dense
+                          single-line
+                        >
+                          <template v-slot:selection="{ attrs, item, testTag_select, testTag_selected }">
+                            <v-chip
+                              v-bind="attrs"
+                              :input-value="testTag_selected"
+                              @click="testTag_select"
+                              small
+                            >{{ item }}
+                            </v-chip>
+                          </template>
+                        </v-combobox>
+                        <v-chip style="margin-top: 5px; margin-bottom: 15px" v-else>{{ test_item.isFinished ? '已完成':'未完成' }}</v-chip>
+                      </v-col>
 
-                      </v-row>
-                    </v-list-item-subtitle>
+                      <v-col>
+                        <v-chip v-if='GLOBAL.contentDisplayUser && test_item.isFinished' style="margin-top: 10px; margin-bottom: 5px">{{ test_item.score + '分 / 100 分' }}</v-chip>
+                      </v-col>
+
+                      <v-col v-if="GLOBAL.contentDisplayAddif">
+                        <v-btn @click="deleteTest(test_item.contentID)">
+                          删除本考试
+                        </v-btn>
+                      </v-col>
+                    </v-row>
 
                     <v-list-item-subtitle
                       class="font-weight-black" 
@@ -427,7 +429,7 @@ export default ({
             learnStatusOptions: [],
             recommendTimeOptions: [],
             tagOptions: [],
-            classTypeOptions: [],
+            // classTypeOptions: [],
 
 
             // 输入框规则
@@ -444,7 +446,8 @@ export default ({
                 ],
                 isObligatory: [
                   { required: true, message: '请选择课程性质', trigger: 'change' }
-                ],            },
+                ],            
+              },
 
             // 显示考试列表
             test_items: [],
@@ -568,18 +571,22 @@ export default ({
           var learnStatusOptions = [];
           var recommendTimeOptions = [];
           var tagOptions = [];
-          var classTypeOptions = [];
+          // var classTypeOptions = [];
           for(var i = 0; i < tableData.length; i++){
               learnStatusOptions.push(tableData[i].isFinished ? '已完成' : '未完成');
               recommendTimeOptions.push(tableData[i].recommendTime);
               // tagOptions.push(tableData[i].tag);
-              tagOptions = tagOptions.concat(tableData[i].tag);
-              classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
+              if(tableData[i].tag.length === 1 && tableData[i].tag[0] === ''){
+                console.log('skip', tableData[i].tag);
+              } else {
+                tagOptions = tagOptions.concat(tableData[i].tag);
+              }
+              // classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
           }
           this.learnStatusOptions = Array.from(new Set(learnStatusOptions));
           this.recommendTimeOptions = Array.from(new Set(recommendTimeOptions));
           this.tagOptions = Array.from(new Set(tagOptions));
-          this.classTypeOptions = Array.from(new Set(classTypeOptions));
+          // this.classTypeOptions = Array.from(new Set(classTypeOptions));
         },
         isManaging() {
           return this.programID !== ''
@@ -763,6 +770,10 @@ export default ({
           if(this.showAudience !== '') {
             this.addFromList = this.addFromList.filter(dct => dct.audience === this.showAudience)
           }
+        },
+        async deleteTest(contentID) {
+            await COMM.delete_content_from_program(this.programID, contentID)
+            await this.getTestList()
         },
     },
     created() {

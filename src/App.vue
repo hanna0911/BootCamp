@@ -42,6 +42,7 @@ export default {
       username:"",
       contentDisplayAddif: false,  // ContentDisplay是否显示添加按钮
       contentDisplayUser: false,  // ContentDisplay是否显示学习状态
+      selectedURL: ""
     },
     currentUsername: 'username', // 传给子组件NavigationBar
     roleList: [],  // 可选角色的列表
@@ -142,6 +143,11 @@ router.beforeEach(function(to, from, next){
   var user = sessionStorage.getItem('user');
   var jumpto = to.name;
   console.log(user, jumpto)
+  if (jumpto === "jumpBack"){
+    console.log("before each to jump back!")
+    next();
+    return
+  }
   switch(user){
     case 'newcomer':
       if(jumpto === 'NewcomerBoard' || jumpto === 'readNotification' || jumpto === 'PersonalProfile'){
@@ -152,7 +158,10 @@ router.beforeEach(function(to, from, next){
       }
       break;
     case 'admin':
-      if(jumpto === 'PersonalProfile' || jumpto === 'NewcomerManage' || jumpto === 'TutorManage' || jumpto === 'TrainTemplate' || jumpto === 'DimensionAnalysis' || jumpto === 'createNotification' || jumpto === 'readNotification'){
+      if(jumpto === 'PersonalProfile' || jumpto === 'NewcomerManage'
+          || jumpto === 'TutorManage' || jumpto === 'TrainTemplate'
+          || jumpto === 'DimensionAnalysis' || jumpto === 'createNotification'
+          || jumpto === 'readNotification'){
         next();
       }
       else{
@@ -160,7 +169,8 @@ router.beforeEach(function(to, from, next){
       }
       break;
     case 'hrbp':
-      if(jumpto === 'PersonalProfile' || jumpto === 'NewcomerManage' || jumpto === 'TutorManage' || jumpto === 'createNotification' || jumpto === 'readNotification'){
+      // if(jumpto === 'PersonalProfile' || jumpto === 'NewcomerManage' || jumpto === 'TutorManage' || jumpto === 'createNotification' || jumpto === 'readNotification'){
+      if(jumpto === 'PersonalProfile' || jumpto === 'TutorManage' || jumpto === 'createNotification' || jumpto === 'readNotification'){
         next();
       }
       else{

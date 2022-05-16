@@ -80,7 +80,7 @@
       v-model="contentDialog"
       width=1500
     >
-    <template v-slot:activator="{ on, attrs }">
+    <template v-slot:activator="{ }">
     <v-list two-line style="margin-top: -20px">
       <v-list-item-group>
       <template v-for="templat of templates">
@@ -89,8 +89,8 @@
             <v-list-item-content>
               <v-row style="margin-top: -5px; margin-bottom: -15px">
                 <v-col cols="8">
-                <v-list-item-title v-bind="attrs" v-on="on" class="font-weight-black" v-text="templat.name"></v-list-item-title>
-                <v-list-item-subtitle v-bind="attrs" v-on="on" v-text="'作者：' + templat.author"></v-list-item-subtitle>
+                <v-list-item-title class="font-weight-black" v-text="templat.name"></v-list-item-title>
+                <v-list-item-subtitle v-text="'作者：' + templat.author"></v-list-item-subtitle>
                 </v-col>
                 <v-col cols="2">
                 <v-btn v-if="displayType === 'assign'" style="margin-right: 5px" large @click="assignProgram(templat.programID)">
@@ -98,7 +98,7 @@
                 </v-btn>
                 </v-col>
                 <v-col cols="2">
-                <v-btn style="margin-right: 5px" large v-bind="attrs" v-on="on" @click="showContentDisplay(templat)">
+                <v-btn style="margin-right: 5px" large @click="showContentDisplay(templat)">
                   {{(displayType === 'adminEdit' || (displayType === 'teacherEdit' && templat.isTemplate === false)) ?
                   '查看/修改模板' : '查看模板'}}
                 </v-btn>
@@ -135,7 +135,7 @@
                   </v-list-item-subtitle>
                 </v-col>
               </v-row>
-              <v-list-item-subtitle v-bind="attrs" v-on="on" v-text="templat.intro"></v-list-item-subtitle>
+              <v-list-item-subtitle v-text="templat.intro"></v-list-item-subtitle>
             </v-list-item-content>
         </v-list-item>
       </template>

@@ -135,7 +135,7 @@ export default ({
                 {title: "导师分配",istrue: false}, // 5
                 {title: "是否毕业",istrue: true}, // 6
                 {title: "新人看板",istrue: true}, // 7
-                // {title: "带新记录",istrue: true}, // 8
+                {title: "带新记录",istrue: true}, // 8
                 {title: "新人评价",istrue: true}, // 9
                 {title: "部门", istrue: true}, // 10
             ],

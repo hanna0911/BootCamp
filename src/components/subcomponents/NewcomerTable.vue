@@ -4,7 +4,7 @@
   <div style="margin: 1.5%">
     <el-table
       ref="filterTable"
-      :data="tables"
+      :data="tables.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
       style="width: 100%"
     >
       <el-table-column
@@ -36,7 +36,7 @@
         </template>
       </el-table-column>
       <el-table-column
-          v-if="colData[9].istrue && columnShow.department"
+          v-if="colData[10].istrue && columnShow.department"
           key="department"
           property="department"
           label="部门"
@@ -147,17 +147,18 @@
         </template>
       </el-table-column>
       <el-table-column
-        v-if="columnShow.notes"
+        v-if="colData[8].istrue && columnShow.notes"
         label="带新记录"
         key="notes"
         width="120">
         <!-- <template slot-scope="scope">{{ (scope.row.notes == null ? '暂无' : scope.row.notes) }} -->
         <template slot-scope="scope">
-          <el-button @click="showNewcomerRecode(scope.row)" type="text">查看</el-button>
+          <el-button v-if="scope.row.tutor !== '无'" @click="showNewcomerRecode(scope.row)" type="text">查看</el-button>
+          <span v-else>无</span>
         </template>
       </el-table-column>
       <el-table-column
-        v-if="colData[8].istrue && columnShow.evaluate"
+        v-if="colData[9].istrue && columnShow.evaluate"
         label="新人评价"
         key="evaluate"
         width="120">
@@ -170,6 +171,12 @@
         </template>
       </el-table-column> 
     </el-table>
+    <!-- 分页器 -->
+    <div class="block" style="margin: 20px">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" background
+        :current-page="currentPage" :page-sizes="[5, 10, 20, 40]" :page-size="pageSize"
+        layout="->, total, sizes, prev, pager, next, jumper" :total="tables.length"></el-pagination>
+    </div>
   </div>
   <CommitDialog
       :dialogVisible="this.commitDialogVisible"
@@ -209,6 +216,11 @@ export default ({
     },
     data() {
         return {
+          // 翻页
+          currentPage: 1, // 默认第1页
+          pageSize: 5, // 默认显示5条
+          totalSize: 0, // 默认总条数为0 这个无所谓，前端分页可以计算数组的length
+
           commitsAndScore: {}, // admin查看相互评价时的存储变量
           recodes:[], //新人的带新记录,传给recodeDialog
           commitsAndScoreDialogVisible: false,
@@ -260,6 +272,18 @@ export default ({
         }
     },
     methods: {
+      // 翻页功能
+      // 每页显示条数
+      handleSizeChange(pageSize) {
+        this.pageSize = pageSize
+        console.log(this.pageSize) // 每页下拉显示数据
+      },
+      // 当前页
+      handleCurrentChange(currentPage) {
+        this.currentPage = currentPage
+        console.log(this.currentPage)
+      },
+
       showNewcomerBoard(data) {
         console.log('showNewcomerBoard:', data)
         this.checkNewcomerBoard(data)

@@ -1,6 +1,13 @@
 <template>
   <v-container>
-    <h2 class="px-4 pt-4 pb-3 font-weight-black">我的公告</h2>
+    <v-row>
+      <h2 class="px-4 pt-4 pb-3 font-weight-black">我的公告</h2>
+      <v-btn @click="getNotifications" style="margin-left: 30px; margin-top: 10px">
+        <v-icon>
+          mdi-refresh
+        </v-icon>
+      </v-btn>
+    </v-row>
       <v-dialog v-model="readNotificationDialog" >
         <v-card>
           <v-card-title>公告内容</v-card-title>
@@ -20,11 +27,6 @@
         </v-btn>
       </v-dialog>
     <v-spacer></v-spacer>
-    <v-btn @click="getNotifications">
-      <v-icon>
-        mdi-refresh
-      </v-icon>
-    </v-btn>
     <h3 class="px-4 pt-4 pb-3 font-weight-black">未读</h3>
     <v-list>
       <template v-for="(item, index) in unreadNotifications">
@@ -34,22 +36,24 @@
               <v-list-item-title v-text="item.title"></v-list-item-title>
               <v-list-item-subtitle
                 class="text--primary"
-                v-text="genSubtitle(item.author, item.authorRole, item.releaseTime)"
+                v-text="genSubtitle1(item.author, item.authorRole)"
+              ></v-list-item-subtitle>
+              <v-list-item-subtitle
+                class="text--primary"
+                v-text="genSubtitle2(item.releaseTime)"
               ></v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
-                <v-toolbar dark color="primary">
-                  <v-btn icon dark @click="readNotification(index, 'unread')" min-width="100">
-                    点击阅读
-                  </v-btn>
-                </v-toolbar>
+              <v-btn @click="readNotification(index, 'unread')" min-width="100">
+                点击阅读
+              </v-btn>
             </v-list-item-action>
           </template>
         </v-list-item>
       </template>
     </v-list>
     <h3 class="px-4 pt-4 pb-3 font-weight-black">已读</h3>
-    <v-list>
+    <v-list three-line>
       <template v-for="(item, index) in finishedNotifications">
         <v-list-item :key="item.notificationID">
           <template>
@@ -57,15 +61,17 @@
               <v-list-item-title v-text="item.title"></v-list-item-title>
               <v-list-item-subtitle
                 class="text--primary"
-                v-text="genSubtitle(item.author, item.authorRole, item.releaseTime)"
+                v-text="genSubtitle1(item.author, item.authorRole)"
+              ></v-list-item-subtitle>
+              <v-list-item-subtitle
+                class="text--primary"
+                v-text="genSubtitle2(item.releaseTime)"
               ></v-list-item-subtitle>
             </v-list-item-content>
             <v-list-item-action>
-                <v-toolbar dark color="primary">
-                  <v-btn icon dark @click="readNotification(index, 'finished')" min-width="100">
-                    点击阅读
-                  </v-btn>
-                </v-toolbar>
+              <v-btn @click="readNotification(index, 'read')" min-width="100">
+                点击阅读
+              </v-btn>
             </v-list-item-action>
           </template>
         </v-list-item>
@@ -79,17 +85,24 @@
             <template>
               <v-list-item-content>
                 <v-list-item-title v-text="item.title"></v-list-item-title>
-                <v-list-item-subtitle
-                  class="text--primary"
-                  v-text="genSubtitle(item.author, item.authorRole, item.releaseTime)"
-                ></v-list-item-subtitle>
+              <v-list-item-subtitle
+                class="text--primary"
+                v-text="genSubtitle1(item.author, item.authorRole)"
+              ></v-list-item-subtitle>
+              <v-list-item-subtitle
+                class="text--primary"
+                v-text="genSubtitle2(item.releaseTime)"
+              ></v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
-                  <v-toolbar dark color="primary">
-                    <v-btn icon dark @click="deleteNotification(index)" min-width="100">
-                      删除这条公告
-                    </v-btn>
-                  </v-toolbar>
+                <v-row>
+                  <v-btn @click="readNotification(index, 'manage')" min-width="100">
+                    查看
+                  </v-btn>
+                  <v-btn @click="deleteNotification(index)" min-width="100" style="margin-left: 30px">
+                    删除这条公告
+                  </v-btn>
+                </v-row>
               </v-list-item-action>
             </template>
           </v-list-item>
@@ -129,8 +142,11 @@ export default ({
     props: {
     },
     methods: {
-      genSubtitle(author, authorRole, releaseTime) {
-        return "发布者：" + this.renderAuthorRole(authorRole) + " " + author + "  发布时间：" + this.renderTimestamp(releaseTime)
+      genSubtitle1(author, authorRole) {
+        return "发布者：" + this.renderAuthorRole(authorRole) + " " + author;
+      },
+      genSubtitle2(timestamp) {
+        return "发布时间：" + this.renderTimestamp(timestamp)
       },
       readNotification(index, type) {
         var dataset = []
@@ -138,8 +154,12 @@ export default ({
           dataset = this.unreadNotifications
           this.readingUnread = true
         }
-        else {
+        else if (type == 'read'){
           dataset = this.finishedNotifications
+          this.readingUnread = false
+        }
+        else {
+          dataset = this.authoredNotifications
           this.readingUnread = false
         }
         console.log(dataset)

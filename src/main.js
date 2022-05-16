@@ -21,7 +21,7 @@ new Vue({
   router,
   metaInfo(){
     return {
-      title: '批量创建',
+      title: 'bootcamp',
       meta: [
         { "http-equiv":"Content-Security-Policy", content:"upgrade-insecure-requests"}
       ],

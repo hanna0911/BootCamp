@@ -18,6 +18,7 @@ import RecodeDialog from "@/components/subcomponents/RecodeDialog";
 import CreateNotification from "@/components/CreateNotification.vue"
 import ReadNotification from "@/components/ReadNotification.vue"
 import CommitAndScoreDialog from "@/components/subcomponents/commitAndScoreDialog";
+import jumpBack from "@/components/subcomponents/jumpBack";
 
 Vue.use(VueRouter)
 
@@ -130,6 +131,12 @@ const routes = [
 		name: 'CommitAndScoreDialog',
 		component: CommitAndScoreDialog,
 		meta: { requireAuth: true }
+	},
+	{
+		path: "/jumpBack",
+		name: "jumpBack",
+		component: jumpBack,
+		meta: {requireAuth:true}
 	},
 	// TODO
 	{

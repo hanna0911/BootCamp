@@ -9,6 +9,7 @@
 // import NewcomerManage from "./NewcomerManage.vue" // 非router显示
 export default ({
     name: "MainBoard",
+    inject: ["GLOBAL"],
     components: {
         // NewcomerManage, // 非router显示
     },
@@ -144,23 +145,28 @@ export default ({
         changeInterface(data){
             switch(data){
                 case "新人管理": {
-                    this.$router.push({ path: "/newcomer-manage"})
+                    // this.$router.push({ path: "/newcomer-manage"})
+                    this.GLOBAL.selectedURL = "/newcomer-manage"
                     break
                 }
                 case "导师管理": {
-                    this.$router.push({ path: "/tutor-manage" })
+                    // this.$router.push({ path: "/tutor-manage" })
+                    this.GLOBAL.selectedURL = "/tutor-manage"
                     break
                 }
                 case "培训模板": {
-                    this.$router.push({ path: "/train-template" })
+                    // this.$router.push({ path: "/train-template" })
+                    this.GLOBAL.selectedURL = "/train-template"
                     break
                 }
                 case "新人看板": {
-                    this.$router.push({ path: "/newcomer-board" })
+                    // this.$router.push({ path: "/newcomer-board" })
+                    this.GLOBAL.selectedURL = "/newcomer-board"
                     break
                 }
                 case "培训公告": {
-                    this.$router.push({ path: "/train-notice" })
+                    // this.$router.push({ path: "/train-notice" })
+                    this.GLOBAL.selectedURL = "/train-notice"
                     break
                 }
                 // case "帮助": {
@@ -168,35 +174,47 @@ export default ({
                 //     break
                 // }
                 case "维度分析": {
-                    this.$router.push({ path: "/dimension-analysis" })
+                    // this.$router.push({ path: "/dimension-analysis" })
+                    this.GLOBAL.selectedURL = "/dimension-analysis"
                     break
                 }
                 case "带新看板": {
-                    this.$router.push({ path: "/lead-newcomer" })
+                    // this.$router.push({ path: "/lead-newcomer" })
+                    this.GLOBAL.selectedURL = "/lead-newcomer"
                     break
                 }
                 case "导师培训": {
-                    this.$router.push({ path: "/tutor-train" })
+                    // this.$router.push({ path: "/tutor-train" })
+                    this.GLOBAL.selectedURL = "/tutor-train"
                     break
                 }
                 case "个人信息": {
-                    this.$router.push({ path: "/" })
+                    // this.$router.push({ path: "/" })
+                    this.GLOBAL.selectedURL = "/"
                     break
                 }
                 // TODO
                 case "发布公告": {
-                    this.$router.push({ path: "/create-notification"})
+                    // this.$router.push({ path: "/create-notification"})
+                    this.GLOBAL.selectedURL = "/create-notification"
                     break
                 }
                 case "查看公告": {
-                    this.$router.push({ path: "/read-notification"})
+                    // this.$router.push({ path: "/read-notification"})
+                    this.GLOBAL.selectedURL = "/read-notification"
                     break
                 }
                 default: {
                     console.log("interface -> default")
+                    this.GLOBAL.selectedURL = "/"
                     break
                 }
             }
+            console.log("to jump back actual to", this.GLOBAL.selectedURL)
+            this.$router.replace({
+              path:"/jumpBack",
+              name:"jumpBack"
+            })
         },
     }
 })

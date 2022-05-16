@@ -1,6 +1,6 @@
 <template>
   <div>
-    <video ref="videoPlayer" class="video-js" :options="options"></video>
+    <video ref="videoPlayer" class="video-js" :playsinline="true" :options="options"></video>
   </div>
 </template>
 

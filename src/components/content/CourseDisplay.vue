@@ -44,12 +44,14 @@
           <el-form-item style="margin-left: 1.5%; margin-right: 1%" size="small">
               <el-select v-model="formInline.classType" placeholder="必修/选修" style="width:110px">
                 <el-option label="全部" value="全部"></el-option>
-                <el-option
+                <el-option label="必修" value="必修"></el-option>
+                <el-option label="选修" value="选修"></el-option>                
+                <!-- <el-option
                   v-for="item in classTypeOptions"
                   :key="item"
                   :label="item"
                   :value="item">
-                </el-option>
+                </el-option> -->
               </el-select>
           </el-form-item>
       </el-form>
@@ -382,8 +384,8 @@
                   transition="dialog-bottom-transition"
                 >
                   <template v-slot:activator="{ on, attrs }">
-                    <v-list-item-content v-bind="attrs" v-on="on">
-                      <v-list-item-title class="font-weight-black" v-text="class_item.name"></v-list-item-title>
+                    <v-list-item-content>
+                      <v-list-item-title v-bind="attrs" v-on="on" class="font-weight-black" v-text="class_item.name"></v-list-item-title>
                       <!-- <v-select
                         v-model="class_tag_value"
                         :items="class_tag_items"
@@ -397,7 +399,7 @@
                       <!-- 管理员权限 -->
                       <v-row style="margin-top: -5px; margin-bottom: -15px">
                         <!-- 推荐学习时间 -->
-                        <v-col>
+                        <v-col v-bind="attrs" v-on="on">
                           <v-list-item-subtitle
                             v-if="true"
                             style="margin-top: 5px; margin-bottom: 15px"
@@ -420,17 +422,17 @@
                         </v-col>
 
                         <!-- 标签tag：成列表展示 -->
-                        <v-col>
+                        <v-col v-bind="attrs" v-on="on">
                           <v-list-item-subtitle
                               style="margin-top: 5px; margin-bottom: 15px"
                               class="text--primary"
                             >
                               <span v-for="(tag, tag_id) in class_item.tag" :key="tag_id">
-                              <v-chip>{{tag}}</v-chip>&nbsp;</span>
+                              <v-chip v-if="tag !== ''">{{tag}}</v-chip>&nbsp;</span>
                           </v-list-item-subtitle>
                         </v-col>
                         <!-- 必修选修tag -->
-                        <v-col>
+                        <v-col v-bind="attrs" v-on="on">
                           <v-list-item-subtitle
                               style="margin-top: 5px; margin-bottom: 15px"
                               class="text--primary"
@@ -439,7 +441,7 @@
                           </v-list-item-subtitle>
                         </v-col>
                         <!-- 学习状态tag -->
-                        <v-col v-if="GLOBAL.contentDisplayUser">
+                        <v-col v-bind="attrs" v-on="on" v-if="GLOBAL.contentDisplayUser">
                           <v-list-item-subtitle
                               style="margin-top: 5px; margin-bottom: 15px"
                               class="text--primary"
@@ -458,28 +460,27 @@
                             dense
                           ></v-select> -->
                         </v-col>
-                        <v-list-item-action style="margin-left: 100px">
-                          <v-toolbar dark color="primary" v-if="false">
-                            <v-toolbar-items>
-                              <v-btn icon dark @click="deleteCourse(index)">
-                                <v-icon medium>mdi-close</v-icon>
-                              </v-btn>
-                            </v-toolbar-items>
-                          </v-toolbar>
-                        </v-list-item-action>
+                        <v-col v-if="GLOBAL.contentDisplayAddif">
+                          <v-btn @click="deleteCourse(class_item.contentID)">
+                            删除本课
+                          </v-btn>
+                        </v-col>
                       </v-row>
 
                       <v-list-item-subtitle v-bind="attrs" v-on="on" v-text="class_item.intro"></v-list-item-subtitle>
                       
                       <!-- 进度条 -->
-                      <v-progress-linear v-if="GLOBAL.contentDisplayUser" style="margin-top: 10px" :value="class_item.finishedLessonCount/class_item.lessonCount*100"></v-progress-linear>
-                    
+                      <v-row v-bind="attrs" v-on="on">
+                        <v-col cols=10>
+                          <v-progress-linear v-if="GLOBAL.contentDisplayUser" style="margin-top: 10px" :value="class_item.finishedLessonCount/class_item.lessonCount*100"></v-progress-linear>
+                        </v-col>
+                        <v-col cosl=2>
+                          <v-list-item-action v-if="GLOBAL.contentDisplayUser" style="margin-top: 5px">
+                            <v-list-item-action-text>{{class_item.finishedLessonCount}}/{{class_item.lessonCount}} 讲</v-list-item-action-text>
+                          </v-list-item-action>
+                        </v-col>
+                      </v-row>
                     </v-list-item-content>
-
-                    <v-list-item-action v-if="GLOBAL.contentDisplayUser" v-bind="attrs" v-on="on">
-                      <v-list-item-action-text style="margin-top: 100px">{{class_item.finishedLessonCount}}/{{class_item.lessonCount}} 讲</v-list-item-action-text>
-                    </v-list-item-action>
-
                   </template>
 
                   <v-card>
@@ -555,7 +556,7 @@ export default ({
             learnStatusOptions: [],
             recommendTimeOptions: [],
             tagOptions: [],
-            classTypeOptions: [],
+            // classTypeOptions: [],
 
 
             // 显示课程清单
@@ -829,17 +830,21 @@ export default ({
           var learnStatusOptions = [];
           var recommendTimeOptions = [];
           var tagOptions = [];
-          var classTypeOptions = [];
+          // var classTypeOptions = [];
           for(var i = 0; i < tableData.length; i++){
               learnStatusOptions.push(tableData[i].isFinished ? '已完成' : '未完成');
               recommendTimeOptions.push(tableData[i].recommendTime);
-              tagOptions = tagOptions.concat(tableData[i].tag);
-              classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
+              if(tableData[i].tag.length === 1 && tableData[i].tag[0] === ''){
+                console.log('skip', tableData[i].tag);
+              } else {
+                tagOptions = tagOptions.concat(tableData[i].tag);
+              }
+              // classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
           }
           this.learnStatusOptions = Array.from(new Set(learnStatusOptions));
           this.recommendTimeOptions = Array.from(new Set(recommendTimeOptions));
           this.tagOptions = Array.from(new Set(tagOptions));
-          this.classTypeOptions = Array.from(new Set(classTypeOptions));
+          // this.classTypeOptions = Array.from(new Set(classTypeOptions));
         },
         finish_all(){
           alert("finish all!")
@@ -1095,15 +1100,17 @@ export default ({
             });
             this.lesson_items = tmp_lesson_list
         },
-        deleteCourse(index) {
-            var tmp_course_list = []
-            this.class_items.forEach((course, i, array) => {
-              console.log(array[i])
-              if (i != index)
-                tmp_course_list.push(course)
-            });
-            this.class_items = tmp_course_list
-            this.changeSelectOptions();
+        async deleteCourse(contentID) {
+            // var tmp_course_list = []
+            // this.class_items.forEach((course, i, array) => {
+            //   console.log(array[i])
+            //   if (i != index)
+            //     tmp_course_list.push(course)
+            // });
+            // this.class_items = tmp_course_list
+            // this.changeSelectOptions();
+            await COMM.delete_content_from_program(this.programID, contentID)
+            await this.getCourseList()
         },
         genName(name, index){
             return '第' + (index + 1) + '讲：' + name

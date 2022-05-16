@@ -42,12 +42,14 @@
           <el-form-item style="margin-left: 1.5%; margin-right: 1%" size="small">
               <el-select v-model="formInline.classType" placeholder="必修/选修" style="width:110px">
                 <el-option label="全部" value="全部"></el-option>
-                <el-option
+                <el-option label="必修" value="必修"></el-option>
+                <el-option label="选修" value="选修"></el-option>
+                <!-- <el-option
                   v-for="item in classTypeOptions"
                   :key="item"
                   :label="item"
                   :value="item">
-                </el-option>
+                </el-option> -->
               </el-select>
           </el-form-item>
       </el-form>
@@ -176,7 +178,7 @@
               <v-btn
                   color="blue darken-1"
                   text
-                  @click="resetTaskForm"
+                  @click="resetTaskForm('toAddTask')"
               >
                   取消
               </v-btn>
@@ -272,21 +274,18 @@
             multiple
           >
             <template v-for="(task_item, index) in task_items_modified">
-              <v-list-item :key="task_item.name" @click="handleTaskClick(task_item)">
+              <v-list-item :key="task_item.name">
                 <template v-slot:default="{  }">
-                  <v-list-item-action>
+                  <v-list-item-action @click="handleTaskClick(task_item)">
                       <v-checkbox v-if='GLOBAL.contentDisplayUser' disabled v-model="task_item.isFinished"></v-checkbox>
                   </v-list-item-action>
 
                   <v-list-item-content>
-                    <v-list-item-title v-text="task_item.name"></v-list-item-title>
+                    <v-list-item-title @click="handleTaskClick(task_item)" v-text="task_item.name"></v-list-item-title>
 
-                    <v-list-item-subtitle
-                      class="text--primary"
-                    >
                       <v-row>
                         <!-- 推荐学习时间 -->
-                        <v-col>
+                        <v-col @click="handleTaskClick(task_item)">
                           <!-- 管理员权限 -->
                           <v-select
                             v-if="false"
@@ -304,19 +303,19 @@
                         </v-col>
 
                         <!-- 标签tag：成列表展示 -->
-                        <v-col>
+                        <v-col @click="handleTaskClick(task_item)">
                           <v-list-item-subtitle
                               style="margin-top: 5px; margin-bottom: 15px"
                               class="text--primary"
                             >
                               <span v-for="(tag, tag_id) in task_item.tag" :key="tag_id">
-                                <v-chip>{{tag}}</v-chip>&nbsp;
+                                <v-chip v-if="tag !== ''">{{tag}}</v-chip>&nbsp;
                               </span>
                           </v-list-item-subtitle>
                         </v-col>
 
                         <!-- 必修选修tag -->
-                        <v-col>
+                        <v-col @click="handleTaskClick(task_item)">
                           <v-list-item-subtitle
                               style="margin-top: 5px; margin-bottom: 15px"
                               class="text--primary"
@@ -325,7 +324,7 @@
                           </v-list-item-subtitle>
                         </v-col>
                         
-                        <v-col v-if="GLOBAL.contentDisplayUser">
+                        <v-col @click="handleTaskClick(task_item)" v-if="GLOBAL.contentDisplayUser">
                           <v-combobox
                             v-if="false"
                             v-model="task_item.tag"
@@ -349,10 +348,14 @@
                           </v-combobox>
                           <v-chip style="margin-top: 5px; margin-bottom: 15px" v-else>{{ task_item.isFinished ? '已完成': '未完成' }}</v-chip>
                         </v-col>
+                        <v-col v-if="GLOBAL.contentDisplayAddif">
+                          <v-btn @click="deleteTask(task_item.contentID)">
+                            删除本任务
+                          </v-btn>
+                        </v-col>
                       </v-row>
-                    </v-list-item-subtitle>
 
-                    <v-list-item-subtitle v-text="task_item.intro"></v-list-item-subtitle>
+                    <v-list-item-subtitle @click="handleTaskClick(task_item)" v-text="task_item.intro"></v-list-item-subtitle>
                   </v-list-item-content>
                 </template>
               </v-list-item>
@@ -441,7 +444,7 @@ export default ({
             learnStatusOptions: [],
             recommendTimeOptions: [],
             tagOptions: [],
-            classTypeOptions: [],
+            // classTypeOptions: [],
 
             // tag标签新建
             inputVisible: false,
@@ -527,6 +530,9 @@ export default ({
                 taskFile: [
                   { required: true, message: '请选择任务文件', trigger: 'change' }
                 ],
+                isObligatory: [
+                  { required: true, message: '请选择课程性质', trigger: 'change' }
+                ],    
             },
         }
     },
@@ -623,18 +629,22 @@ export default ({
           var learnStatusOptions = [];
           var recommendTimeOptions = [];
           var tagOptions = [];
-          var classTypeOptions = [];
+          // var classTypeOptions = [];
           for(var i = 0; i < tableData.length; i++){
               learnStatusOptions.push(tableData[i].isFinished ? '已完成' : '未完成');
               recommendTimeOptions.push(tableData[i].recommendTime);
               // tagOptions.push(tableData[i].tag);
-              tagOptions = tagOptions.concat(tableData[i].tag);
-              classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
+              if(tableData[i].tag.length === 1 && tableData[i].tag[0] === ''){
+                console.log('skip', tableData[i].tag);
+              } else {
+                tagOptions = tagOptions.concat(tableData[i].tag);
+              }
+              // classTypeOptions.push(tableData[i].isObligatory ? '必修' : '选修');
           }
           this.learnStatusOptions = Array.from(new Set(learnStatusOptions));
           this.recommendTimeOptions = Array.from(new Set(recommendTimeOptions));
           this.tagOptions = Array.from(new Set(tagOptions));
-          this.classTypeOptions = Array.from(new Set(classTypeOptions));
+          // this.classTypeOptions = Array.from(new Set(classTypeOptions));
         },
         isManaging() {
           return this.programID !== ''
@@ -756,7 +766,8 @@ export default ({
             await COMM.upload_task(this.programID, uploadForm)
             this.getTaskList()
         },
-        resetTaskForm() {
+        resetTaskForm(formName) {
+            this.$refs[formName].resetFields();
             this.toAddTask = {
                 name: '',
                 intro: '',
@@ -783,7 +794,7 @@ export default ({
               } else {
                 this.uploadTask(null);
               }
-              this.resetTaskForm();
+              this.resetTaskForm('toAddTask');
             } else {
               console.log('error submit!!');
               return false;
@@ -927,6 +938,10 @@ export default ({
           if(this.showAudience !== '') {
             this.addFromList = this.addFromList.filter(dct => dct.audience === this.showAudience)
           }
+        },
+        async deleteTask(contentID) {
+            await COMM.delete_content_from_program(this.programID, contentID)
+            await this.getTaskList()
         },
     },
     created() {

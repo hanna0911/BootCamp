@@ -1,16 +1,28 @@
 <template>
   <v-container>
-    <div v-if='!showLearningBoard'>
+    <!-- <div v-if='!showLearningBoard'> -->
+    <div>
       <!-- 完整版表单（上岗导师列表） -->
+      <!-- 
+        第二步：指定一个key去确认标识这一行的数据，因为若要翻页保留，就需要确认保留的数据是哪一个，
+              所以我们就给每一行确定个独一无二的身份标识，这里我们在el-table标签上
+              使用row-key去得到每一行的身份标识
+      -->
       <el-table
+          :row-key="getRowKey"
           ref="multipleTable"
-          :data="tables"
+          :data="tables.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
           style="width: 100%"
           @selection-change="handleSelectionChange"
       >
+        <!-- 
+          第一步：开启选中翻页保留模式 即：:reserve-selection="true" 
+                默认是false。即 默认选中翻页不保留之前勾选的数据
+        -->
         <el-table-column
             type="selection"
             width="55"
+            :reserve-selection="true"
             >
         </el-table-column>
         <el-table-column
@@ -79,7 +91,7 @@
             label="入职时间"
             min-width="120"
             show-overflow-tooltip>
-          <template slot-scope="scope">{{ (scope.row.joinDate === null) ? '' : scope.row.joinDate.replace('T', ' ').split(' ')[0] }}</template>
+          <template slot-scope="scope">{{ (scope.row.joinDate === null) ? '' : scope.row.joinDate.split('T')[0] }}</template>
         </el-table-column>
 
         <!-- TODO -->
@@ -91,7 +103,7 @@
             min-width="120"
             show-overflow-tooltip
         >
-          <template slot-scope="scope">{{ (scope.row.teacherNominationDate === null) ? '' : scope.row.teacherNominationDate.replace('T', ' ').split(' ')[0] }}</template>
+          <template slot-scope="scope">{{ (scope.row.teacherNominationDate === null) ? '' : scope.row.teacherNominationDate.split('T')[0] }}</template>
         </el-table-column>
 
         <el-table-column
@@ -155,7 +167,7 @@
           label="上岗时间"
           width="120"
           show-overflow-tooltip>
-        <template slot-scope="scope">{{ scope.row.teacherDutyDate.replace('T', ' ').split(' ')[0] }}</template>
+        <template slot-scope="scope">{{ scope.row.teacherDutyDate.split('T')[0] }}</template>
       </el-table-column>
       
       <el-table-column
@@ -206,25 +218,37 @@
           </template>
         </el-table-column>
       </el-table>
+      <!-- 分页器 -->
+      <div class="block" style="margin: 20px">
+        <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" background
+          :current-page="currentPage" :page-sizes="[5, 10, 20, 40]" :page-size="pageSize"
+          layout="->, total, sizes, prev, pager, next, jumper" :total="tables.length"></el-pagination>
+      </div>
     </div>
-    <NewcomerBoardEdit v-else :closeNewcomerBoard='closeLearningBoard' :newcomerIdentity="infos" :showAudience="'teacher'"/>
+    <!-- <NewcomerBoardEdit v-else :closeNewcomerBoard='closeLearningBoard' :newcomerIdentity="infos" :showAudience="'teacher'"/> -->
   </v-container>
 </template>
 
 <script>
 // 表格的组件封装
 import COMM from "@/utils/Comm";
-import NewcomerBoardEdit from './NewcomerBoardEdit.vue'
+// import NewcomerBoardEdit from './NewcomerBoardEdit.vue'
 // import NewcomerTable from './NewcomerTable.vue'
 
 export default ({
   name: 'TutorTable',
   components: {
     // NewcomerTable,
-    NewcomerBoardEdit,
+    // NewcomerBoardEdit,
   },
   data() {
     return {
+      // 翻页
+      currentPage: 1, // 默认第1页
+      pageSize: 5, // 默认显示5条
+      totalSize: 0, // 默认总条数为0 这个无所谓，前端分页可以计算数组的length
+
+
       // showNewcomerTable: false,
       selected_teacher:[],
       // 发送给NewcomerTable的数据
@@ -269,8 +293,8 @@ export default ({
         checklist: false,
       },
 
-      showLearningBoard: false,
-      infos: {},
+      // showLearningBoard: false,
+      // infos: {},
     }
   },
   props: {
@@ -321,6 +345,14 @@ export default ({
         return () => {}
       }
     },
+    // 同上
+    checkLearningBoard: {
+      type: Function,
+      default: () => {
+        return () => {}
+      }
+    },
+
   },
   mounted() {
     console.log('test tutortable');
@@ -335,6 +367,30 @@ export default ({
     }
   },
   methods: {
+    // 翻页并保留多选
+    // 保存选中的数据id,row-key就是要指定一个key标识这一行的数据
+    getRowKey(row) { 
+    /*
+      第三步，一般我们都是用id作为每一行数据的特殊标识，所以这里返回的是row下面的id作为标识。当然
+             这里不return row下面的id也行，只要能够确保某个字段是独一无二的，不会重复的，就可return
+             return row下面的这个字段也是可以的
+    */
+      console.log("看看每一行的数据", row);
+      // return row.id;
+      return row.username;
+    },
+    // 每页显示条数
+    handleSizeChange(pageSize) {
+      this.pageSize = pageSize
+      console.log(this.pageSize) // 每页下拉显示数据
+    },
+    // 当前页
+    handleCurrentChange(currentPage) {
+      this.currentPage = currentPage
+      console.log(this.currentPage)
+    },
+
+
     accept(data) {
       COMM.accept_nominate(data.username).then(res=>{
         console.log("reject success ", res);
@@ -359,20 +415,22 @@ export default ({
       },err=>{console.log("reject fail", err)})
     },
     showNewcomerTable(data){
-      this.checkNewcomerTable(data)
+      this.checkNewcomerTable(data) // props函数
     },
-    closeLearningBoard() { 
-      // 提供给子组件NewcomerBoardEdit的回调函数
-      this.showLearningBoard = false;
-    },
+    // closeLearningBoard() { 
+    //   // 提供给子组件NewcomerBoardEdit的回调函数
+    //   this.showLearningBoard = false;
+    // },
     openLearningBoard(name, username) {
-      console.log("learning board info:", name, username)
-      this.infos = {
-        "username": username,
+      // console.log("learning board info:", name, username)
+      // this.infos = {
+      var infos = {
+      "username": username,
         "name": name,
       }
-      this.showLearningBoard = true
-    }
+      // this.showLearningBoard = true
+      this.checkLearningBoard(infos) // props函数
+    },
   }
 })
 </script>

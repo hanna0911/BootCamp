@@ -132,14 +132,17 @@ export default ({
           src: info.url,
           type: "video/mp4",
         }
+        console.log(this.playerOptions.sources)
       }
       else if(suffix === 'ppt' || suffix === 'pptx' || suffix === 'pdf') {
         console.log("this is a doc")
         this.showType = 'msdoc'
         this.docLink = info.url
+        console.log("doclink: ", this.docLink)
       }
       else {
-        this.showType = 'notSupport'
+        this.showType = 'msdoc'
+        this.docLink = 'https://backend-wewritebugs.app.secoder.net/files/lesson/7磁力-21_admin_tsk_1651310889_admin_tsk_1652316636.5617752.6725864'
       }
       this.showAnything = true
     },

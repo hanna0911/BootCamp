@@ -6,6 +6,16 @@
         <h2 v-if="assignedProgramID === ''" class="px-4 pt-4 pb-3 font-weight-black">为 {{ newcomerIdentity.name }} 分配学习模板</h2>
         <h2 v-else class="px-4 pt-4 pb-3 font-weight-black"> {{ newcomerIdentity.name }} 的培训界面</h2>
     </div>
+    <NewcomerSummary
+        v-if="assignedProgramID !== '' && showAudience === 'newcomer'"
+        :newcomerInfo="this.newcomerInfo"
+        :newcomer="this.newcomerIdentity.name"
+    ></NewcomerSummary>
+    <TutorSummary
+        v-if="assignedProgramID !== '' && showAudience === 'teacher'"
+        :tutorInfo="this.tutorInfo"
+        :tutor="this.newcomerIdentity.name"
+    ></TutorSummary>
     <!-- 如果未被分配program，那么显示program列表以供分配 -->
     <ProgramList v-if="assignedProgramID === ''" :displayType="'assign'" :assignProgram="assignProgram" :showAudience="showAudience"/>
     <!-- 如果已被分配，则显示这个program -->
@@ -18,6 +28,8 @@
 import COMM from "@/utils/Comm"
 import ContentDisplay from '../content/ContentDisplay.vue'
 import ProgramList from '../subcomponents/ProgramList.vue'
+import NewcomerSummary from "@/components/subcomponents/NewcomerSummary";
+import TutorSummary from "@/components/subcomponents/TutorSummary";
 
 export default ({
     name: "NewcomerBoardEdit",
@@ -25,10 +37,31 @@ export default ({
     components: {
         ContentDisplay, 
         ProgramList,
+        NewcomerSummary,
+        TutorSummary
     },
     data() {
         return {
             uploadDialog: false,
+            newcomerInfo: {  // 新人旅程相关数据，从后端获取！
+              startDate: '',
+              isGraduate: "",
+              tutor: '',
+              teacherUsername: "100",
+              courseProgress: '100',
+              examProgress: '100',
+              taskProgress: '',
+              evaluateProgress: '',
+              graduateDate: '',
+            },
+            tutorInfo:{
+              startDate: '',
+              courseProgress: '100',
+              examProgress: '100',
+              taskProgress: '100',
+              isGraduate: "",
+              graduateDate: '',
+            },
             ruleForm: {
                 name: '',
                 region: '',
@@ -92,7 +125,7 @@ export default ({
             COMM.copy_program_template(programID).then(
                 response => {
                     COMM.assign_program(this.newcomerIdentity.username, response.programID).then(
-                        response => {console.log(response), this.has_program()},
+                        response => {console.log(response); this.has_program()},
                         error => {console.log(error)}
                     )
                 },
@@ -101,6 +134,20 @@ export default ({
                 }
             )
         },
+        getSummary(newcomer){
+          if(this.showAudience === 'newcomer'){
+            COMM.newcomer_summary_info_by_name(newcomer).then(
+                response => {console.log(response); this.newcomerInfo = response.data},
+                error => {console.log(error)}
+            )
+          }else {
+            COMM.teacher_board_summary_by_name(newcomer).then(
+                response => {console.log(response); this.tutorInfo = response.data},
+                error => {console.log(error)}
+            )
+          }
+        },
+
         has_program() {
             COMM.has_program(this.newcomerIdentity.username, this.showAudience).then(
                 response => {
@@ -117,6 +164,7 @@ export default ({
     },
     created() {
         this.has_program()
+        this.getSummary(this.newcomerIdentity.username)
     },
 })
 </script>

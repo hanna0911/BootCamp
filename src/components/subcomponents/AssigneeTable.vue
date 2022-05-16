@@ -4,13 +4,15 @@
   <div style="margin: 1.5%">
     <!-- BUG WITH BUTTON TODO -->
     <el-table
+      :row-key="getRowKey"
       ref="filterTable"
-      :data="tables"
+      :data="tables.slice((currentPage - 1) * pageSize, currentPage * pageSize)"
       style="width: 100%"
       @selection-change="handleSelectionChange"
     >
       <el-table-column
         type="selection"
+        :reserve-selection="true"
         width="55">
       </el-table-column>
       <!-- <el-table-column
@@ -181,6 +183,14 @@
         </template>
       </el-table-column>  -->
     </el-table>
+    
+    <!-- 分页器 -->
+    <div class="block" style="margin: 20px">
+      <el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" background
+        :current-page="currentPage" :page-sizes="[5, 10, 20, 40]" :page-size="pageSize"
+        layout="->, total, sizes, prev, pager, next, jumper" :total="tables.length"></el-pagination>
+    </div>
+
   </div>
   <!-- <CommitDialog
       :dialogVisible="this.commitDialogVisible"
@@ -188,7 +198,7 @@
       :send="this.commit"
   ></CommitDialog> -->
   <v-row>
-    <v-btn @click="uploadNotification">
+    <v-btn @click="uploadNotification" width="100px" style="margin-top: 30px">
       发送
     </v-btn>
   </v-row>
@@ -208,6 +218,11 @@ export default ({
     },
     data() {
         return {
+          // 翻页
+          currentPage: 1, // 默认第1页
+          pageSize: 5, // 默认显示5条
+          totalSize: 0, // 默认总条数为0 这个无所谓，前端分页可以计算数组的length
+
           multipleSelection: [], // 多选获得的数据
           commitDialogVisible: false,
           selectedNewcomer: {},  // 点击该新人的分配按钮
@@ -259,6 +274,24 @@ export default ({
         }
     },
     methods: {
+      // 翻页功能
+      // 保存选中的数据id,row-key就是要指定一个key标识这一行的数据
+      getRowKey(row) { 
+        // console.log("看看每一行的数据", row);
+        // return row.id;
+        return row.username;
+      },
+      // 每页显示条数
+      handleSizeChange(pageSize) {
+        this.pageSize = pageSize
+        console.log(this.pageSize) // 每页下拉显示数据
+      },
+      // 当前页
+      handleCurrentChange(currentPage) {
+        this.currentPage = currentPage
+        console.log(this.currentPage)
+      },
+
       // 多选选中的内容在这里进行实时更新
       handleSelectionChange(val) {
         this.multipleSelection = val; // 存储在multipleSelection变量中
@@ -326,6 +359,15 @@ export default ({
         this.assignTutorDialog = false;
       },
       async uploadNotification() {
+        console.log(this.notification.title, this.notification.content)
+        if (this.notification.title === '' || this.notification.content === '') {
+          alert('标题和内容不能为空！')
+          return
+        }
+        if (this.multipleSelection.length == 0) {
+          alert('请选择用户！')
+          return
+        }
         var usernames = []
         this.multipleSelection.forEach(item => {
           usernames.push(item.username)

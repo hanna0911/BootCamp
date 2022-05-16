@@ -342,13 +342,14 @@ import COMM from '@/utils/Comm'
             {
               "id": 1,
               "subItem": [  
+                // {
+                //   "id": 1,
+                //   "title": "新人管理",
+                //   "icon": "mdi-account-group-outline",
+                // },
                 {
+                  // "id": 2,
                   "id": 1,
-                  "title": "新人管理",
-                  "icon": "mdi-account-group-outline",
-                },
-                {
-                  "id": 2,
                   "title": "导师管理",
                   "icon": "mdi-account-multiple",
                 }

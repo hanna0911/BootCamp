@@ -126,6 +126,17 @@ const COMM = {
             })
        });
     },
+    get_admin_all_user_list() {
+        return new Promise((resolve, reject) => {
+            axios.get('/api/admin_all_user_list')  // GET请求
+            .then(res => {
+                resolve(res.data);
+            })
+            .catch(err => {
+                reject(err)
+            })
+       });  
+    },
     get_duty_teacher_list(){
         return new Promise((resolve, reject) => {
             axios.get('/api/duty_teacher_list')  // GET请求
@@ -286,9 +297,25 @@ const COMM = {
         });
     },
 
+    newcomer_summary_info_by_name(newcomer){
+        return new Promise((resolve, reject) => {
+            axios.post('/api/newcomer_summary_info_by_name', {"newcomer": newcomer})
+                .then(res => {resolve(res.data);})
+                .catch(err => {reject(err.data)})
+        });
+    },
+
     teacher_board_summary_info(){
         return new Promise((resolve, reject) => {
             axios.get('/api/teacher_board_summary_info',)
+                .then(res => {resolve(res.data);})
+                .catch(err => {reject(err.data)})
+        });
+    },
+
+    teacher_board_summary_by_name(teacher){
+        return new Promise((resolve, reject) => {
+            axios.post('/api/teacher_board_summary_by_name',{"teacher":teacher})
                 .then(res => {resolve(res.data);})
                 .catch(err => {reject(err.data)})
         });
@@ -301,6 +328,7 @@ const COMM = {
                 .catch(err => {reject(err.data)})
         });
     },
+
     newcomer_commit_teacher(content){
         return new Promise((resolve, reject) => {
             axios.post('/api/newcomer_commit_teacher',{"content": content})
@@ -1133,7 +1161,22 @@ const COMM = {
                 reject(error.data)
             })
         })
-    }
+    },
+    delete_content_from_program(programID, contentID) {
+        return new Promise((resolve, reject) => {
+            axios.post('api/delete_content_from_program', {
+                "action": "delete content from program",
+                "programID": programID,
+                "contentID": contentID,
+            })
+            .then(response => {
+                resolve(response.data)
+            })
+            .catch(error => {
+                reject(error.data)
+            })
+        })
+    },
 }
 
 export default COMM

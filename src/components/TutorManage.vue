@@ -1,6 +1,6 @@
 <template>
     <v-container>
-        <div v-if="!showLeadNewcomer">
+        <div v-if="!showLeadNewcomer && !showTutorLearn">
         <h2 class="px-4 pt-4 font-weight-black">导师管理</h2>
 
         <!-- tab切换栏 -->
@@ -126,7 +126,14 @@
                     </el-form>
                     
                     <!-- table表格 -->
-                    <tutor-table :tables="tables" :colData="colData" :formInline="formInline" :columnShow="columnShow" :refreshNominatedList="getNominatedList"></tutor-table>
+                    <tutor-table 
+                        :tables="tables" 
+                        :colData="colData" 
+                        :formInline="formInline" 
+                        :columnShow="columnShow" 
+                        :refreshNominatedList="getNominatedList"
+                        :checkLearningBoard="checkLearningBoard"
+                    ></tutor-table>
                 
                 </v-card>
 
@@ -176,7 +183,14 @@
                     </el-form>
                     
                     <!-- table表格 -->
-                    <tutor-table :tables="tables" :colData="colData" :formInline="formInline" :columnShow="columnShow" :refreshNominatedList="getNominatedList"></tutor-table>
+                    <tutor-table 
+                        :tables="tables" 
+                        :colData="colData" 
+                        :formInline="formInline" 
+                        :columnShow="columnShow" 
+                        :refreshNominatedList="getNominatedList"
+                        :checkLearningBoard="checkLearningBoard"
+                    ></tutor-table>
 
                 </v-card>
 
@@ -237,6 +251,7 @@
                         :columnShow="columnShow" 
                         :refreshNominatedList="getNominatedList"
                         :checkNewcomerTable="checkNewcomerTable"
+                        :checkLearningBoard="checkLearningBoard"
                     ></TutorTable>
   
                 </v-card>
@@ -245,7 +260,7 @@
         </v-tabs-items>
         </div>
 
-        <div v-else>
+        <div v-else-if="showLeadNewcomer">
             <div style="margin-left: 20px; margin-top: 10px; margin-bottom: -20px">
                 <v-btn @click="showLeadNewcomer = false">返回</v-btn>
                 <h2 class="px-4 pt-4 pb-3 font-weight-black">导师 {{ tutorIdentity.name }} 的带新看板</h2>
@@ -253,6 +268,12 @@
             <!-- 带新看板 -->
             <lead-newcomer-sub :tutorIdentity="tutorIdentity"/>
         </div>
+
+        <div v-else-if="showTutorLearn">
+            <!-- 导师培训 -->
+            <NewcomerBoardEdit :newcomerIdentity="infos" :showAudience="'teacher'" :closeNewcomerBoard="closeNewcomerBoard"/>
+        </div>
+
     </v-container>
 </template>
 
@@ -260,22 +281,27 @@
 import COMM from "@/utils/Comm";
 import TutorTable from './subcomponents/TutorTable.vue'
 import LeadNewcomerSub from './subcomponents/LeadNewcomerSub.vue'
+import NewcomerBoardEdit from './subcomponents/NewcomerBoardEdit.vue'
 
 export default({
     name: "TutorManage",
     components: {
         TutorTable,
         LeadNewcomerSub,
+        NewcomerBoardEdit,
     },
     inject: ["GLOBAL"],
     data () {
         return {
+            infos: {},
+
             // 筛选栏修改
             superiorOptions: ["上级A", "上级B"],
             cityOptions: ["北京", "上海", "深圳"],
 
             tutorIdentity: {}, // 导师身份（点击【查看带新看板】时对应导师的所有信息）
             showLeadNewcomer: false, // 显示带新看板
+            showTutorLearn: false, // same
             tab: null,  // vuetify默认设置
             items: [  // tab栏+内容（内容暂时无用，考虑是否删掉）
                 { tab: '上岗导师', content: 'Tab 1 Content' },
@@ -481,6 +507,10 @@ export default({
         }
     },
     methods: {
+        closeNewcomerBoard(){
+            this.showTutorLearn = false;
+        },
+
         nominate() {
             console.log('nominate!');
             console.log(this.$refs.waitList)
@@ -526,6 +556,10 @@ export default({
             console.log('tutor data:', data)
             this.tutorIdentity = data
             this.showLeadNewcomer = true
+        },
+        checkLearningBoard(data){ // 同上
+            this.infos = data
+            this.showTutorLearn = true;
         },
         initializeSelectOptions(){
             /* 
