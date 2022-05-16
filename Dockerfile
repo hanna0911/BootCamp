@@ -27,7 +27,6 @@ COPY nginx/ nginx/
 RUN cat nginx/frontend.conf
 RUN echo $HOME
 RUN pwd
-RUN cat /etc/nginx/conf.d
 
 RUN rm -r /etc/nginx/conf.d \
  && ln -s $HOME/nginx /etc/nginx/conf.d
