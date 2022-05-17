@@ -140,7 +140,7 @@
                       </el-option>
                     </el-select>
                   </el-form-item>
-                  <el-form-item label="是否模板：" prop="info">
+                  <el-form-item label="是否模板：" prop="info" v-if="this.GLOBAL.ident==='admin'">
                       <el-checkbox v-model="toAddTest.is_template" @change="checkAddTestSetTemplateClearance()">*仅管理员可设置模板</el-checkbox>
                   </el-form-item>
                   <el-form-item prop="test">

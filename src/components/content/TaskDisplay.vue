@@ -131,7 +131,7 @@
                         </el-option>
                       </el-select>
                   </el-form-item>
-                  <el-form-item label="是否模板：">
+                  <el-form-item label="是否模板：" v-if="this.GLOBAL.ident==='admin'">
                       <el-checkbox v-model="toAddTask.is_template" @change="checkAddTaskSetTemplateClearance()">*仅管理员可设置模板</el-checkbox>
                   </el-form-item>
                   <v-divider dark>
